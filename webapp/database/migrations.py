@@ -23,7 +23,7 @@ def makeInitialTables():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS Page(
             id INTEGER PRIMARY KEY,
-            url TEXT NOT NULL
+            url TEXT UNIQUE NOT NULL 
         );
         """)
 
@@ -31,7 +31,7 @@ def makeInitialTables():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS Topic(
             id INTEGER PRIMARY KEY,
-            name TEXT NOT NULL
+            name TEXT UNIQUE NOT NULL
         );
         """)
 
@@ -39,7 +39,7 @@ def makeInitialTables():
     cur.execute("""
         CREATE TABLE IF NOT EXISTS Relationship(
             id INTEGER PRIMARY KEY,
-            name TEXT
+            name TEXT UNIQUE NOT NULL
         );
         """)
 
