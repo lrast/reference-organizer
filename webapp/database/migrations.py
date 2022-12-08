@@ -13,6 +13,17 @@ import sqlite3 as db
 dbURL = os.environ['FLASK_DATABASE_URL']
 
 
+
+def addPageName():
+    """Adds a page name field to the Pages Table"""
+    conn = db.connect(dbURL)
+    conn.execute("""ALTER TABLE Page ADD
+        name TEXT;
+        """)
+    conn.commit()
+    conn.close()
+
+
 def makeInitialTables():
     """Initial database design"""
     conn = db.Connection(dbURL)
