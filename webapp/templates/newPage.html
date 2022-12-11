@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block subtitle %} new page {% endblock %}
+
+{% block body %}
+
+<h1> Add a new page </h1>
+
+<form action="" method="post">
+  <div>
+    <label for="url">Page URL: </label>
+    <input type="text" name="url">
+  </div>
+  <div>
+    <label for="name">Page Name: </label>
+    <input type="text" name="name">
+  </div>
+  <div>
+    <label for="topics">Topics: </label>
+    <input type="text" name="topics" multiple>
+  </div>
+  <div>
+    <input type="submit" value="Add">
+  </div>
+</form>
+
+{% endblock %}

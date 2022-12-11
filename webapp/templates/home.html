@@ -4,21 +4,8 @@
 
 {% block body %}
 
-<table>
-    <thead>
-        <tr>
-            <th colspan="2">Test Entries</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for key in entries  %}
-            <tr>
-                <td class="first-column"> {{entries[key][1]}} </td>
-                <td class="second-column"> <a href={{"entry/"+key }} > {{entries[key][0]}}  </a> </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<h1> Welcome to organizer </h1>
 
+<h2> <a href="{{ url_for('newPage') }}"> Add Page </a> </h2>
 
 {% endblock %}

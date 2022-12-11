@@ -1,7 +1,15 @@
 # Basic visual file organizer
 
 ## To run it:
-1. source setup.sh
+1. set environment variables:
+```
+export FLASK_APP=run
+export FLASK_ENV=development
+export FLASK_DEBUG=True
+export FLASK_SECRET_KEY=[key]
+export FLASK_DATABASE_URL=[url]
+```
+
 2. flask run
 
 
