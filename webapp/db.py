@@ -14,13 +14,11 @@ def get_db():
 
     return g.db
 
-
 def close_db(_=None):
     db = g.pop('db', None)
 
     if db is not None:
         db.close()
-
 
 def database_setup(app):
     app.teardown_appcontext(close_db)
@@ -52,24 +50,9 @@ def packageRows(*args, **kwargs):
 
 
 
-
 ##### functions for adding data #####
-def insertElement(conn, name, elementType):
-    """Handles insertion of new elements to tables"""
-    if elementType == 'page' or elementType == 'Page':
-        tableName = "Page"
-    elif elementType == 'topic' or elementType == 'Topic':
-        tableName = "Topic"
-    elif elementType == 'relationship' or elementType == 'Relationship':
-        tableName = "Relationship"
-
-    query = "INSERT INTO " + tableName + " VALUES(?,?)"
-    cur.execute(query, (None, name))
-    conn.commit()
-
-
 def addPageTopic(conn, pageURL, topicName):
-    """page-topic relations"""
+    """page-topic relations by url and name"""
     conn.execute("""
         INSERT INTO PageTopic (pageid, topicid)
         SELECT Page.id, Topic.id FROM Page JOIN Topic WHERE (Page.url, Topic.name)=(?,?);

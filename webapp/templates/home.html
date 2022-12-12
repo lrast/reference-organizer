@@ -7,5 +7,7 @@
 <h1> Welcome to organizer </h1>
 
 <h2> <a href="{{ url_for('newPage') }}"> Add Page </a> </h2>
+<h2> <a href="{{ url_for('viewEntry', topic='all') }}"> All Topics </a> </h2>
+<h2> <a href="{{ url_for('viewEntry', page='all') }}"> All Pages </a> </h2>
 
 {% endblock %}

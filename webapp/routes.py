@@ -2,6 +2,7 @@
 
 import requests
 import sqlite3
+import json
 
 from flask import request, g
 from flask import render_template, send_file, redirect, Response, flash
@@ -11,25 +12,21 @@ from webapp import app
 from webapp.db import get_db, packageRows, addPageTopic
 
 
-#old 
-from webapp.CSVinterface import fetchEntry, addEntry
-
-
 
 ######################################## Webpages ########################################
 
 @app.route('/')
 def home():
-    entries = fetchEntry(None)
-    return render_template("home.html", entries=entries)
+    return render_template("home.html")
 
 
-@app.route('/newPage', methods=['GET', 'POST'])
+
+@app.route('/newpage', methods=['GET', 'POST'])
 def newPage():
     if request.method == 'GET':
         # fetch topics list
         topicsData = allTopics()
-        return render_template("newPage.html")
+        return render_template("entryform.html")
 
     elif request.method == 'POST':
         baseURL = request.base_url[:-8]
@@ -49,10 +46,11 @@ def newPage():
                     addPageTopic(db, request.form['url'], topic)
 
         flash("ok")
-        return render_template("newPage.html")
+        return render_template("entryform.html")
 
 
-@app.route('/open/<int:pageID>', methods=['GET'])
+
+@app.route('/openpage/<int:pageID>', methods=['GET'])
 def servePage(pageID):
     """Redirect to the URL of the requested page""" 
     db = get_db()
@@ -71,6 +69,36 @@ def servePage(pageID):
         return redirect('http://'+url)
 
 
+
+@app.route('/view', methods=['GET'])
+def viewEntry():
+    """Display an entry from the database"""
+    if 'topic' in request.args.keys():
+        if request.args['topic'] == 'all':
+            #show all topics
+            topicsData = json.loads( allTopics() )
+            return render_template('topiclist.html', entries=topicsData)
+
+        else:
+            topicid = int(request.args['topic'])
+            topicData = json.loads( topicInfo( topicid ) )
+            return render_template('viewtopic.html', name=topicData["topic"]["name"],
+                tableEntries=topicData["pages"])
+
+    elif 'page' in request.args.keys():
+        if request.args['page'] == 'all':
+            #show all topics
+            pagesData = json.loads( allPages() )
+            return render_template('pagelist.html', entries=pagesData)
+
+        else:
+            pageid = int(request.args['page'])
+            pageData = json.loads( pageInfo(pageid) )
+            return render_template('viewpage.html', 
+                page=pageData['page'], tableEntries=pageData['topics'])
+
+    else:
+        return render_template('home.html')
 
 
 
@@ -176,49 +204,6 @@ def topicInfo(topicID):
         db.execute("DELETE FROM Topic WHERE id=(?)", (topicID,))
         db.commit()
         return Response(status=200)
-
-
-
-
-
-
-
-
-
-
-###################### old functions ######################
-@app.route('/old')
-def oldNB():
-    entries = fetchEntry(None)
-
-    return render_template("oldNotebook.html", entries=entries)
-
-
-# interfaces to the database
-@app.route('/old/entry/<string:entryID>')
-def show_entry(entryID):
-    ''' Fetches specific entry from the entry table '''
-    toServe = fetchEntry(entryID)
-
-    if toServe is None:
-        return redirect(url_for('home'))
-
-    return send_from_directory(toServe[0], toServe[1])
-
-
-@app.route('/old/addEntry', methods=['GET', 'POST'])
-def adderForm():
-    print(request.method)
-    if request.method == 'POST':
-        addEntry(request.form['title'], request.form['date'], request.form['path'])
-        return render_template("addEntry.html")
-    else:
-        return render_template("addEntry.html")
-
-@app.route('/old/addFile', methods=['GET', 'POST'])
-def adderRedirect():
-    return redirect( url_for('adderForm') )
-
 
 
 

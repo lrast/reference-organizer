@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block subtitle %} Topic: {{name}} {% endblock %}
+
+{% block body %}
+
+
+<h1> {{name}} </h1>
+
+
+<table>
+    <thead>
+        <tr>
+            <th colspan="2">Pages:</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for page in tableEntries %}
+            <tr>
+                <td class="wide-column"> <a href={{ url_for('servePage', pageID=page["id"]) }} >  {{ page["name"] }}  </a> </td>
+                <td class="thin-column"> <a href={{ url_for('viewEntry', page=page["id"])}} > info  </a> </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block subtitle %} home {% endblock %}
+
+{% block body %}
+
+<table>
+    <thead>
+        <tr>
+            <th colspan="2"> Topics </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries  %}
+            <tr>
+                <td class="thin-column"> 
+                    <a href={{ url_for('viewEntry', topic=entry['id']) }} > {{entry['name']}}  </a> 
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

@@ -16,13 +16,13 @@ body {
   word-wrap: break-word;
 }
 
-.first-column {
+.thin-column {
   width: 250px;
   padding: 15px 10px;
   border: 1px solid #eee;
   font-weight: 500;
 }
-.second-column {
+.wide-column {
   flex-grow: 1;
   padding: 15px 10px;
   border: 1px solid #eee;
