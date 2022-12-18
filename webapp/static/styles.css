@@ -9,7 +9,6 @@ body {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
   color: #333333;
-  overflow: hidden;
   font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif;
   font-size: 16px;
   line-height: 1.6;
@@ -27,6 +26,16 @@ body {
   padding: 15px 10px;
   border: 1px solid #eee;
 }
+
+.navheader ol {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.navheader {
+    display: inline-block;
+}
+
 
 h1 {
   font-size: 2em;

@@ -1,12 +1,11 @@
 {% extends "layout.html" %}
 
-{% block subtitle %} Topic: {{name}} {% endblock %}
+{% block subtitle %} Topic: {{topic["name"]}} {% endblock %}
 
 {% block body %}
 
 
-<h1> {{name}} </h1>
-
+<h1> {{topic["name"]}} </h1>
 
 <table>
     <thead>
@@ -19,10 +18,16 @@
             <tr>
                 <td class="wide-column"> <a href={{ url_for('servePage', pageID=page["id"]) }} >  {{ page["name"] }}  </a> </td>
                 <td class="thin-column"> <a href={{ url_for('viewEntry', page=page["id"])}} > info  </a> </td>
+                <td class="thin-column"> <a href='{{ url_for("button_remove_pair", pageid=page["id"], topicid=topic["id"], base="topic") }}' > Remove from topic </a> </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
+
+
+<a href=''> Add page </a> <br>
+
+<a href='{{ url_for("button_delete", topicid=topic["id"]) }}'> Delete topic </a>
 
 
 {% endblock %}

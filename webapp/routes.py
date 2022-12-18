@@ -6,7 +6,7 @@ import json
 
 from flask import request, g
 from flask import render_template, send_file, redirect, Response, flash
-from flask import url_for
+from flask import url_for, redirect
 
 from webapp import app
 from webapp.db import get_db, packageRows, addPageTopic
@@ -18,7 +18,6 @@ from webapp.db import get_db, packageRows, addPageTopic
 @app.route('/')
 def home():
     return render_template("home.html")
-
 
 
 @app.route('/newpage', methods=['GET', 'POST'])
@@ -49,7 +48,6 @@ def newPage():
         return render_template("entryform.html")
 
 
-
 @app.route('/openpage/<int:pageID>', methods=['GET'])
 def servePage(pageID):
     """Redirect to the URL of the requested page""" 
@@ -69,46 +67,78 @@ def servePage(pageID):
         return redirect('http://'+url)
 
 
-
 @app.route('/view', methods=['GET'])
 def viewEntry():
     """Display an entry from the database"""
+
     if 'topic' in request.args.keys():
         if request.args['topic'] == 'all':
             #show all topics
             topicsData = json.loads( allTopics() )
             return render_template('topiclist.html', entries=topicsData)
-
         else:
             topicid = int(request.args['topic'])
             topicData = json.loads( topicInfo( topicid ) )
-            return render_template('viewtopic.html', name=topicData["topic"]["name"],
+
+            return render_template('viewtopic.html',
+                topic=topicData["topic"],
                 tableEntries=topicData["pages"])
 
     elif 'page' in request.args.keys():
         if request.args['page'] == 'all':
-            #show all topics
+            #show all pages
             pagesData = json.loads( allPages() )
             return render_template('pagelist.html', entries=pagesData)
 
         else:
             pageid = int(request.args['page'])
             pageData = json.loads( pageInfo(pageid) )
-            return render_template('viewpage.html', 
-                page=pageData['page'], tableEntries=pageData['topics'])
 
+            return render_template('viewpage.html', 
+                page=pageData['page'],
+                tableEntries=pageData['topics'])
     else:
         return render_template('home.html')
 
 
+################################### Front End Drivers ###################################
+
+# eventually, these will moved to the front end
+@app.route('/button_delete')
+def button_delete():
+    # delete button action
+    baseURL = request.base_url[:-12]
+
+    if 'topicid' in request.args.keys():
+        topicid = request.args['topicid']
+        requests.delete(baseURL + '/topic/'+topicid)
+        return redirect( url_for('viewEntry', topic='all') )
+
+    elif 'pageid' in request.args.keys():
+        pageid = request.args['pageid']
+        requests.delete(baseURL + '/page/' + pageid,)
+        return redirect( url_for('viewEntry', page='all') )
+
+
+@app.route('/button_remove_pair')
+def button_remove_pair():
+    # delete topic button action
+    baseURL = request.base_url[:-18]
+
+    topicid = request.args['topicid']
+    pageid = request.args['pageid']
+    base = request.args['base']
+
+    requests.delete(baseURL+url_for('associatePageTopic', topicid=topicid, pageid=pageid) )
+
+    if base == 'topic':
+        return redirect( url_for('viewEntry', topic=topicid) )
+    else:
+        return redirect( url_for('viewEntry', page=pageid) )
 
 
 
-
-
-
-
-################################### APIs. ###################################
+################################### API. ###################################
 
 @app.route('/page', methods=['GET', 'POST'])
 def allPages():
@@ -154,7 +184,8 @@ def pageInfo(pageID):
         return Response(status=200)
 
     if request.method == 'DELETE':
-        db.execute("DELETE FROM Page WHERE id=(?)", (pageID,))
+        db.execute("DELETE FROM Page WHERE id=(?);", (pageID,))
+        db.execute("DELETE FROM PageTopic WHERE pageid=(?);", (pageID,))
         db.commit()
         return Response(status=200)
 
@@ -202,6 +233,29 @@ def topicInfo(topicID):
 
     if request.method == 'DELETE':
         db.execute("DELETE FROM Topic WHERE id=(?)", (topicID,))
+        db.execute("DELETE FROM PageTopic WHERE topicid=(?);", (topicID,))
+        db.execute("DELETE FROM TopicTopicRelationship WHERE lefttopicid=(?) OR righttopicid=(?)", 
+            (topicID, topicID))
+
+        db.commit()
+        return Response(status=200)
+
+
+
+@app.route('/assoc_page_topic', methods=['POST', 'DELETE'])
+def associatePageTopic():
+    db = get_db()
+    pageid = request.args['pageid']
+    topicid = request.args['topicid']
+
+    if request.method == 'POST':
+        entryData = db.execute("INSERT INTO PageTopic(pageid, topid) VALUES (?,?) RETRUNING id;",
+            (pageid, topicid))
+        db.commit()
+        return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200)
+
+    elif request.method == 'DELETE':
+        db.execute("DELETE FROM PageTopic WHERE pageid=(?) AND topicid=(?);", (pageid, topicid))
         db.commit()
         return Response(status=200)
 
