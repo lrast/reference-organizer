@@ -75,7 +75,9 @@ def viewEntry():
         if request.args['topic'] == 'all':
             #show all topics
             topicsData = json.loads( allTopics() )
-            return render_template('topiclist.html', entries=topicsData)
+            for entry in topicsData:
+                entry['link'] = url_for('viewEntry', topic=entry['id'])
+            return render_template('topiclist.html', entries=topicsData, tableTitle='Topics')
         else:
             topicid = int(request.args['topic'])
             topicData = json.loads( topicInfo( topicid ) )
@@ -88,7 +90,9 @@ def viewEntry():
         if request.args['page'] == 'all':
             #show all pages
             pagesData = json.loads( allPages() )
-            return render_template('pagelist.html', entries=pagesData)
+            for entry in pagesData:
+                entry['link'] = url_for('viewEntry', page=entry['id'])
+            return render_template('pagelist.html', entries=pagesData, tableTitle='Pages')
 
         else:
             pageid = int(request.args['page'])
@@ -104,6 +108,7 @@ def viewEntry():
 ################################### Front End Drivers ###################################
 
 # eventually, these will moved to the front end
+# currently, they are all hacks
 @app.route('/button_delete')
 def button_delete():
     # delete button action
@@ -135,6 +140,47 @@ def button_remove_pair():
         return redirect( url_for('viewEntry', topic=topicid) )
     else:
         return redirect( url_for('viewEntry', page=pageid) )
+
+
+@app.route('/button_add_PTR')
+def button_add_PTR():
+    requestKeys = request.args.keys()
+
+    baseURL = request.base_url[:-15]
+
+    if 'pageid' in requestKeys and 'topicid' in requestKeys:
+        topicid = request.args['topicid']
+        pageid = request.args['pageid']
+        callback = request.args['callback']
+
+        requests.post(baseURL+url_for('associatePageTopic', topicid=topicid, pageid=pageid))
+        print('here', topicid, pageid, callback)
+        if callback == 'topic':
+            print( url_for('viewEntry', topic=topicid) )
+            return redirect( url_for('viewEntry', topic=topicid) )
+        if callback == 'page':
+            print( url_for('viewEntry', page=pageid) )
+            return redirect( url_for('viewEntry', page=pageid) )
+
+
+    elif 'pageid' in requestKeys:
+        # adding a topic to a specific page
+        topicsData = json.loads( allTopics() )
+        for entry in topicsData:
+            entry['link'] = url_for('button_add_PTR', topicid=entry['id'], pageid=request.args['pageid'], callback='page')
+        return render_template("addPageTopic.html", entries=topicsData, tableTitle='Topics')
+
+
+    elif 'topicid' in requestKeys:
+        # adding a page to a specific topic
+        pagesData = json.loads( allPages() )
+        for entry in pagesData:
+            entry['link'] = url_for('button_add_PTR', topicid=request.args['topicid'], pageid=entry['id'], callback='topic')
+        return render_template("addPageTopic.html", entries=pagesData, tableTitle='Pages')
+
+
+
+
 
 
 
@@ -249,8 +295,8 @@ def associatePageTopic():
     topicid = request.args['topicid']
 
     if request.method == 'POST':
-        entryData = db.execute("INSERT INTO PageTopic(pageid, topid) VALUES (?,?) RETRUNING id;",
-            (pageid, topicid))
+        entryData = db.execute("INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;",
+            (pageid, topicid)).fetchone()
         db.commit()
         return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200)
 

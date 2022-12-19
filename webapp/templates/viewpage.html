@@ -5,7 +5,7 @@
 {% block body %}
 
 
-<h1> <a href={{ url_for('servePage', pageID=page["id"]) }} >  {{ page["name"] }}  </a> </h1>
+<h1> <a href='{{ url_for("servePage", pageID=page["id"]) }}' >  {{ page["name"] }}  </a> </h1>
 
 
 <table>
@@ -17,16 +17,16 @@
     <tbody>
         {% for topic in tableEntries %}
             <tr>
-                <td class="wide-column"> <a href={{ url_for('viewEntry', topic=topic['id']) }} > {{topic['name']}} </a>  </td>
+                <td class="wide-column"> <a href='{{ url_for("viewEntry", topic=topic["id"]) }}' > {{topic['name']}} </a>  </td>
                 <td class="thin-column"> <a href='{{ url_for("button_remove_pair", pageid=page["id"], topicid=topic["id"], base="page") }}' > Remove topic  </a> </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<a href=''> Add topic </a>
+<a href='{{ url_for("button_add_PTR", pageid=page["id"]) }}'> Add topic </a>
 <br>
-<a href=''> Edit page </a>
+<a href=''> Edit page info </a>
 <br>
 <a href='{{ url_for("button_delete", pageid=page["id"]) }}'> Delete page </a>
 

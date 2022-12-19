@@ -13,6 +13,24 @@ import sqlite3 as db
 dbURL = os.environ['FLASK_DATABASE_URL']
 
 
+def remakePageTopic():
+    """recreates the Page Topic table to have unique (pageid, topicid) pairs"""
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS PageTopic(
+            id INTEGER PRIMARY KEY,
+            pageid INTEGER,
+            topicid INTEGER,
+            FOREIGN KEY( pageid ) REFERENCES Page(id),
+            FOREIGN KEY( topicid ) REFERENCES Topic(id),
+            UNIQUE(pageid, topicid)
+        );
+        """)
+    conn.commit()
+    conn.close()
+
+
 
 def addPageName():
     """Adds a page name field to the Pages Table"""

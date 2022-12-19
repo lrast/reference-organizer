@@ -1,0 +1,17 @@
+{# Base list of links #}
+<table>
+    <thead>
+        <tr>
+            <th colspan="2"> {{tableTitle}} </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries  %}
+            <tr>
+                <td class="thin-column"> 
+                    <a href="{{ entry['link'] }}" > {{entry['name']}}  </a> 
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -20,6 +20,6 @@ export FLASK_DATABASE_URL=[url]
 
 
 ## to do:
-1. Set up links on pages and API
-2. Safety prompts on add / delete
-3. Fix new page
+1. Safety prompts on remove / delete
+2. topic-topic relationships
+3. json vs strings

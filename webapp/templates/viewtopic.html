@@ -25,7 +25,7 @@
 </table>
 
 
-<a href=''> Add page </a> <br>
+<a href='{{ url_for("button_add_PTR", topicid=topic["id"]) }}'> Add page </a> <br>
 
 <a href='{{ url_for("button_delete", topicid=topic["id"]) }}'> Delete topic </a>
 
