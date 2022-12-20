@@ -3,7 +3,7 @@
 import sqlite3
 import json
 
-from flask import current_app, g
+from flask import current_app, g, jsonify
 
 
 ##### database connection management #####

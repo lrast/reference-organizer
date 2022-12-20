@@ -28,17 +28,15 @@ def newPage():
         return render_template("entryform.html")
 
     elif request.method == 'POST':
-        baseURL = request.base_url[:-8]
-
         pageAdded = False
         if request.form['url'] != '':
-            requests.post(baseURL + '/page', 
+            requests.post( url_for('allPages', _external=True), 
                 {'url': request.form['url'], 'name': request.form['name']})
             pageAdded = True
 
         if request.form['topics'] != '':
             for topic in request.form['topics'].split(','):
-                requests.post(baseURL + '/topic', {'name': topic})
+                requests.post( url_for('allTopics', _external=True), {'name': topic})
 
                 if pageAdded:
                     db = get_db()
@@ -48,11 +46,11 @@ def newPage():
         return render_template("entryform.html")
 
 
-@app.route('/openpage/<int:pageID>', methods=['GET'])
-def servePage(pageID):
+@app.route('/openpage/<int:pageid>', methods=['GET'])
+def servePage(pageid):
     """Redirect to the URL of the requested page""" 
     db = get_db()
-    url = db.execute("SELECT url FROM Page WHERE id=(?)", (pageID,)).fetchone()['url']
+    url = db.execute("SELECT url FROM Page WHERE id=(?)", (pageid,)).fetchone()['url']
 
     print(url)
     # check for local file vs webpage
@@ -112,30 +110,25 @@ def viewEntry():
 @app.route('/button_delete')
 def button_delete():
     # delete button action
-    baseURL = request.base_url[:-14]
-    print(baseURL)
-
     if 'topicid' in request.args.keys():
         topicid = request.args['topicid']
-        requests.delete(baseURL + '/topic/'+topicid)
+        requests.delete( url_for( 'topicInfo', topicid=topicid, _external=True))
         return redirect( url_for('viewEntry', topic='all') )
 
     elif 'pageid' in request.args.keys():
         pageid = request.args['pageid']
-        requests.delete(baseURL + '/page/' + pageid,)
+        requests.delete( url_for('pageInfo', pageid=pageid, _external=True) )
         return redirect( url_for('viewEntry', page='all') )
 
 
 @app.route('/button_remove_pair')
 def button_remove_pair():
     # delete topic button action
-    baseURL = request.base_url[:-18]
-
     topicid = request.args['topicid']
     pageid = request.args['pageid']
     base = request.args['base']
 
-    requests.delete(baseURL+url_for('associatePageTopic', topicid=topicid, pageid=pageid) )
+    requests.delete( url_for('associatePageTopic', topicid=topicid, pageid=pageid, _external=True) )
 
     if base == 'topic':
         return redirect( url_for('viewEntry', topic=topicid) )
@@ -147,14 +140,12 @@ def button_remove_pair():
 def button_add_PTR():
     requestKeys = request.args.keys()
 
-    baseURL = request.base_url[:-15]
-
     if 'pageid' in requestKeys and 'topicid' in requestKeys:
         topicid = request.args['topicid']
         pageid = request.args['pageid']
         callback = request.args['callback']
 
-        requests.post(baseURL+url_for('associatePageTopic', topicid=topicid, pageid=pageid))
+        requests.post(url_for('associatePageTopic', topicid=topicid, pageid=pageid, _external=True))
         print('here', topicid, pageid, callback)
         if callback == 'topic':
             print( url_for('viewEntry', topic=topicid) )
@@ -207,34 +198,35 @@ def allPages():
         return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200 )
 
 
-@app.route('/page/<int:pageID>', methods=['GET', 'PUT', 'DELETE'])
-def pageInfo(pageID):
+@app.route('/page/<int:pageid>', methods=['GET', 'PUT', 'DELETE'])
+def pageInfo(pageid):
     """Page API"""
     db = get_db()
     if request.method == 'GET':
         # info on a specific page
-        pageInfo = db.execute("SELECT * FROM Page WHERE id=(?)", (pageID,)).fetchone()
+        pageInfo = db.execute("SELECT * FROM Page WHERE id=(?)", (pageid,)).fetchone()
         pageTopics = db.execute(
             """SELECT Topic.id, Topic.name FROM 
             Topic INNER JOIN PageTopic ON Topic.id = PageTopic.topicid
             WHERE PageTopic.pageid =(?)
-            """, (pageID,)).fetchall()
+            """, (pageid,)).fetchall()
         return packageRows(page=pageInfo, topics=pageTopics)
 
     if request.method == 'PUT':
         # over write the contents of the entry
         if 'name' in request.form.keys():
-            db.execute("UPDATE Page SET name=(?) WHERE id=(?);", (request.form['name'], pageID) )
+            db.execute("UPDATE Page SET name=(?) WHERE id=(?);", (request.form['name'], pageid) )
         if 'url' in request.form.keys():
-            db.execute("UPDATE Page SET url=(?) WHERE id=(?);", (request.form['url'], pageID) )
+            db.execute("UPDATE Page SET url=(?) WHERE id=(?);", (request.form['url'], pageid) )
         db.commit()
         return Response(status=200)
 
     if request.method == 'DELETE':
-        db.execute("DELETE FROM Page WHERE id=(?);", (pageID,))
-        db.execute("DELETE FROM PageTopic WHERE pageid=(?);", (pageID,))
+        db.execute("DELETE FROM Page WHERE id=(?);", (pageid,))
+        db.execute("DELETE FROM PageTopic WHERE pageid=(?);", (pageid,))
         db.commit()
         return Response(status=200)
+
 
 
 
@@ -257,35 +249,36 @@ def allTopics():
         return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200 )
 
 
-@app.route('/topic/<int:topicID>', methods=['GET', 'PUT', 'DELETE'])
-def topicInfo(topicID):
+@app.route('/topic/<int:topicid>', methods=['GET', 'PUT', 'DELETE'])
+def topicInfo(topicid):
     """Topic API"""
     db = get_db()
     if request.method == 'GET':
         # info on a specific topic
-        topicInfo = db.execute("SELECT * FROM Topic WHERE id=(?)", (topicID,) ).fetchone()
+        topicInfo = db.execute("SELECT * FROM Topic WHERE id=(?)", (topicid,) ).fetchone()
         topicPages = db.execute(
             """SELECT Page.id, Page.name FROM 
             Page INNER JOIN PageTopic ON Page.id = PageTopic.pageid
             WHERE PageTopic.topicid =(?)
-            """, (topicID,)).fetchall()
+            """, (topicid,)).fetchall()
         return packageRows(topic=topicInfo, pages=topicPages)
 
     if request.method == 'PUT':
         # over write the contents of the entry
         if 'name' in request.form.keys():
-            db.execute("UPDATE Topic SET name=(?) WHERE id=(?);", (request.form['name'], topicID) )
+            db.execute("UPDATE Topic SET name=(?) WHERE id=(?);", (request.form['name'], topicid) )
         db.commit()
         return Response(status=200)
 
     if request.method == 'DELETE':
-        db.execute("DELETE FROM Topic WHERE id=(?)", (topicID,))
-        db.execute("DELETE FROM PageTopic WHERE topicid=(?);", (topicID,))
+        db.execute("DELETE FROM Topic WHERE id=(?)", (topicid,))
+        db.execute("DELETE FROM PageTopic WHERE topicid=(?);", (topicid,))
         db.execute("DELETE FROM TopicTopicRelationship WHERE lefttopicid=(?) OR righttopicid=(?)", 
-            (topicID, topicID))
+            (topicid, topicid))
 
         db.commit()
         return Response(status=200)
+
 
 
 
@@ -305,6 +298,54 @@ def associatePageTopic():
         db.execute("DELETE FROM PageTopic WHERE pageid=(?) AND topicid=(?);", (pageid, topicid))
         db.commit()
         return Response(status=200)
+
+
+
+
+@app.route('/relationship', methods=['GET', 'POST'])
+def allRelationships():
+    """Relationship API"""
+    db = get_db()
+    if request.method == 'GET':
+        # return info on all relationships
+        topicsData = db.execute("SELECT * FROM Relationship;").fetchall()
+        return packageRows(topicsData)
+
+    if request.method == 'POST':
+        # add a new relationship
+        name = request.form['name']
+
+        entryData = db.execute("INSERT INTO Relationship (name) VALUES (?) RETURNING id", 
+            (name,)).fetchone()
+        db.commit()
+        return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200 )
+
+@app.route('/relationship/<int:relationshipid>', methods=['GET', 'PUT', 'DELETE'])
+def relationshipInfo(relationshipid):
+    """Relationship API"""
+    db = get_db()
+    if request.method == 'GET':
+        # info on a specific topic
+        relationshipInfo = db.execute("SELECT * FROM Relationship WHERE id=(?)", (relationshipid,) ).fetchone()
+        topicPairs = db.execute(
+            """SELECT lefttopicid, righttopicid FROM 
+            TopicTopicRelationship WHERE relationshipid =(?)
+            """, (relationshipid,)).fetchall()
+        return packageRows(relationship=relationshipInfo, topics=topicPairs)
+
+    if request.method == 'PUT':
+        # over write the contents of the entry
+        if 'name' in request.form.keys():
+            db.execute("UPDATE Relationship SET name=(?) WHERE id=(?);", (request.form['name'], relationshipid) )
+        db.commit()
+        return Response(status=200)
+
+    if request.method == 'DELETE':
+        db.execute("DELETE FROM Relationship WHERE id=(?)", (relationshipid,))
+        db.execute("DELETE FROM TopicTopicRelationship WHERE relationshipid=(?)", (relationshipid,) )
+        db.commit()
+        return Response(status=200)
+
 
 
 
