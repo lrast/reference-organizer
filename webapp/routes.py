@@ -112,7 +112,8 @@ def viewEntry():
 @app.route('/button_delete')
 def button_delete():
     # delete button action
-    baseURL = request.base_url[:-12]
+    baseURL = request.base_url[:-14]
+    print(baseURL)
 
     if 'topicid' in request.args.keys():
         topicid = request.args['topicid']
