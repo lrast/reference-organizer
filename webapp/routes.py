@@ -68,6 +68,11 @@ def servePage(pageid):
 @app.route('/view', methods=['GET'])
 def viewEntry():
     """Display an entry from the database"""
+    showEditPanel = False
+
+    if 'showEditPanel' in request.args.keys():
+        showEditPanel = bool(request.args['showEditPanel'])
+
 
     if 'topic' in request.args.keys():
         if request.args['topic'] == 'all':
@@ -75,14 +80,17 @@ def viewEntry():
             topicsData = json.loads( allTopics() )
             for entry in topicsData:
                 entry['link'] = url_for('viewEntry', topic=entry['id'])
-            return render_template('topiclist.html', entries=topicsData, tableTitle='Topics')
+            return render_template('topiclist.html',
+                tableEntries=topicsData,
+                tableTitle='Topics')
         else:
             topicid = int(request.args['topic'])
             topicData = json.loads( topicInfo( topicid ) )
 
             return render_template('viewtopic.html',
                 topic=topicData["topic"],
-                tableEntries=topicData["pages"])
+                pages=topicData["pages"],
+                showEditPanel=showEditPanel)
 
     elif 'page' in request.args.keys():
         if request.args['page'] == 'all':
@@ -90,7 +98,9 @@ def viewEntry():
             pagesData = json.loads( allPages() )
             for entry in pagesData:
                 entry['link'] = url_for('viewEntry', page=entry['id'])
-            return render_template('pagelist.html', entries=pagesData, tableTitle='Pages')
+            return render_template('pagelist.html',
+                tableEntries=pagesData,
+                tableTitle='Pages')
 
         else:
             pageid = int(request.args['page'])
@@ -98,7 +108,8 @@ def viewEntry():
 
             return render_template('viewpage.html', 
                 page=pageData['page'],
-                tableEntries=pageData['topics'])
+                topics=pageData['topics'],
+                showEditPanel=showEditPanel)
     else:
         return render_template('home.html')
 
@@ -157,10 +168,12 @@ def button_add_PTR():
 
     elif 'pageid' in requestKeys:
         # adding a topic to a specific page
+        print('here')
         topicsData = json.loads( allTopics() )
         for entry in topicsData:
             entry['link'] = url_for('button_add_PTR', topicid=entry['id'], pageid=request.args['pageid'], callback='page')
-        return render_template("addPageTopic.html", entries=topicsData, tableTitle='Topics')
+        print(topicsData)
+        return render_template("addpagetopic.html", tableEntries=topicsData, tableTitle='Topics')
 
 
     elif 'topicid' in requestKeys:
@@ -168,7 +181,7 @@ def button_add_PTR():
         pagesData = json.loads( allPages() )
         for entry in pagesData:
             entry['link'] = url_for('button_add_PTR', topicid=request.args['topicid'], pageid=entry['id'], callback='topic')
-        return render_template("addPageTopic.html", entries=pagesData, tableTitle='Pages')
+        return render_template("addpagetopic.html", tableEntries=pagesData, tableTitle='Pages')
 
 
 
@@ -261,6 +274,7 @@ def topicInfo(topicid):
             Page INNER JOIN PageTopic ON Page.id = PageTopic.pageid
             WHERE PageTopic.topicid =(?)
             """, (topicid,)).fetchall()
+
         return packageRows(topic=topicInfo, pages=topicPages)
 
     if request.method == 'PUT':
