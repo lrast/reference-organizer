@@ -86,11 +86,23 @@ def viewEntry():
         else:
             topicid = int(request.args['topic'])
             topicData = json.loads( topicInfo( topicid ) )
+            if 'showRelationships' in request.args.keys():
+                showRelationships = bool(request.args['showRelationships'])
+                # hard coding with a single relationshiio type for now
+                relatedTopics = json.loads( requests.get(
+                    url_for('relationshipInfo', relationshipid=1, topic=topicid, _external=True)
+                    ).content )['topics']
+                print( relatedTopics)
+            else:
+                showRelationships = False
+                relatedTopics=[]
 
             return render_template('viewtopic.html',
                 topic=topicData["topic"],
                 pages=topicData["pages"],
-                showEditPanel=showEditPanel)
+                relatedTopics = relatedTopics,
+                showEditPanel=showEditPanel,
+                showRelationships=showRelationships)
 
     elif 'page' in request.args.keys():
         if request.args['page'] == 'all':
@@ -188,6 +200,49 @@ def button_add_PTR():
 
 
 
+@app.route('/button_add_TTR')
+def button_add_TTR():
+    requestKeys = request.args.keys()
+
+    # hard coded for now
+    relationshipid = 1
+
+    if 'lefttopicid' in requestKeys and 'righttopicid' in requestKeys:
+        topicid = request.args['topicid']
+        pageid = request.args['pageid']
+        callback = request.args['callback']
+
+        requests.post(url_for('associatePageTopic', topicid=topicid, pageid=pageid, _external=True))
+        print('here', topicid, pageid, callback)
+        if callback == 'topic':
+            print( url_for('viewEntry', topic=topicid) )
+            return redirect( url_for('viewEntry', topic=topicid) )
+        if callback == 'page':
+            print( url_for('viewEntry', page=pageid) )
+            return redirect( url_for('viewEntry', page=pageid) )
+
+
+    elif 'pageid' in requestKeys:
+        # adding a topic to a specific page
+        print('here')
+        topicsData = json.loads( allTopics() )
+        for entry in topicsData:
+            entry['link'] = url_for('button_add_PTR', topicid=entry['id'], pageid=request.args['pageid'], callback='page')
+        print(topicsData)
+        return render_template("addpagetopic.html", tableEntries=topicsData, tableTitle='Topics')
+
+
+    elif 'topicid' in requestKeys:
+        # adding a page to a specific topic
+        pagesData = json.loads( allPages() )
+        for entry in pagesData:
+            entry['link'] = url_for('button_add_PTR', topicid=request.args['topicid'], pageid=entry['id'], callback='topic')
+        return render_template("addpagetopic.html", tableEntries=pagesData, tableTitle='Pages')
+
+
+
+
+
 
 ################################### API. ###################################
 
@@ -275,6 +330,16 @@ def topicInfo(topicid):
             WHERE PageTopic.topicid =(?)
             """, (topicid,)).fetchall()
 
+        if 'fetchThrough' in request.args.keys():
+            relationshipid = request.args['fetchThrough']
+            subsetPages = db.execute(
+                """SELECT Page.id, Page.name FROM Page 
+                INNER JOIN PageTopic ON Page.id=PageTopic.pageid INNER JOIN
+                TopicTopicRelationship ON PageTopic.topicid =TopicTopicRelationship.lefttopicid WHERE
+                TopicTopicRelationship.righttopicid=(?) AND TopicTopicRelationship.relationshipid=(?);
+                """, (topicid, relationshipid)).fetchall()
+            topicPages.extend(subsetPages)
+
         return packageRows(topic=topicInfo, pages=topicPages)
 
     if request.method == 'PUT':
@@ -292,27 +357,6 @@ def topicInfo(topicid):
 
         db.commit()
         return Response(status=200)
-
-
-
-
-@app.route('/assoc_page_topic', methods=['POST', 'DELETE'])
-def associatePageTopic():
-    db = get_db()
-    pageid = request.args['pageid']
-    topicid = request.args['topicid']
-
-    if request.method == 'POST':
-        entryData = db.execute("INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;",
-            (pageid, topicid)).fetchone()
-        db.commit()
-        return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200)
-
-    elif request.method == 'DELETE':
-        db.execute("DELETE FROM PageTopic WHERE pageid=(?) AND topicid=(?);", (pageid, topicid))
-        db.commit()
-        return Response(status=200)
-
 
 
 
@@ -345,6 +389,30 @@ def relationshipInfo(relationshipid):
             """SELECT lefttopicid, righttopicid FROM 
             TopicTopicRelationship WHERE relationshipid =(?)
             """, (relationshipid,)).fetchall()
+
+        if 'topic' in request.args.keys():
+            topicid = request.args['topic']
+            myside = 'right'
+            if 'myside' in request.args.keys():
+                myside = request.args['myside']
+
+            if myside == 'left':
+                relatedTopics = db.execute(
+                    """SELECT Topic.id, Topic.name FROM Topic JOIN TopicTopicRelationship
+                    ON Topic.id=TopicTopicRelationship.righttopicid WHERE 
+                    TopicTopicRelationship.lefttopicid=(?) AND TopicTopicRelationship.relationshipid=(?);
+                    """, (topicid, relationshipid) ).fetchall()
+
+            if myside == 'right':
+                relatedTopics = db.execute(
+                    """SELECT Topic.id, Topic.name FROM Topic JOIN TopicTopicRelationship
+                    ON Topic.id=TopicTopicRelationship.lefttopicid WHERE 
+                    TopicTopicRelationship.righttopicid=(?) AND TopicTopicRelationship.relationshipid=(?);
+                    """, (topicid, relationshipid) ).fetchall()
+
+        return packageRows(relationship=relationshipInfo, topics=relatedTopics)
+
+    else:
         return packageRows(relationship=relationshipInfo, topics=topicPairs)
 
     if request.method == 'PUT':
@@ -361,6 +429,48 @@ def relationshipInfo(relationshipid):
         return Response(status=200)
 
 
+
+
+@app.route('/assoc_page_topic', methods=['POST', 'DELETE'])
+def associatePageTopic():
+    db = get_db()
+    pageid = request.args['pageid']
+    topicid = request.args['topicid']
+
+    if request.method == 'POST':
+        entryData = db.execute("INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;",
+            (pageid, topicid)).fetchone()
+        db.commit()
+        return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200)
+
+    elif request.method == 'DELETE':
+        db.execute("DELETE FROM PageTopic WHERE pageid=(?) AND topicid=(?);", (pageid, topicid))
+        db.commit()
+        return Response(status=200)
+
+
+@app.route('/assoc_topic_topic', methods=['POST', 'DELETE'])
+def associateTopicTopic():
+    db = get_db()
+    lefttopicid = request.args['lefttopicid']
+    righttopicid = request.args['righttopicid']
+    topicid = request.args['relationshipid']
+
+    if request.method == 'POST':
+        entryData = db.execute("""
+            INSERT INTO TopicTopicRelationship(relationshipid, lefttopicid, righttopicid)
+            VALUES (?,?,  ?) RETURNING id;""",
+            (relationshipid, lefttopicid, righttopicid) ).fetchone()
+        db.commit()
+        return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200)
+
+    elif request.method == 'DELETE':
+        db.execute(
+            """ DELETE FROM TopicTopicRelationship WHERE 
+            relationshipid=(?) AND lefttopicid=(?) AND righttopicid=(?);""",
+            (relationshipid, lefttopicid, righttopicid))
+        db.commit()
+        return Response(status=200)
 
 
 

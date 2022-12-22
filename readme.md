@@ -21,6 +21,7 @@ export FLASK_DATABASE_URL=[url]
 
 ## to do:
 1. Safety prompts on remove
-2. topic-topic relationships, I
+2. topic-topic relationships, II
 3. json vs strings
 4. fetch names for webpages, autofill
+5. clean up templates and page state handling

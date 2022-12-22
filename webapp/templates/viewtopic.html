@@ -16,8 +16,8 @@
     <tbody>
         {% for page in pages %}
             <tr>
-                <td class="wide-column"> <a href={{ url_for('servePage', pageid=page["id"]) }} >  {{ page["name"] }}  </a> </td>
-                <td class="thin-column"> <a href={{ url_for('viewEntry', page=page["id"])}} > info  </a> </td>
+                <td class="wide-column"> <a href='{{ url_for("servePage", pageid=page["id"])}}' >  {{ page["name"] }}  </a> </td>
+                <td class="thin-column"> <a href='{{ url_for("viewEntry", page=page["id"])}}' > info  </a> </td>
                 <td class="thin-column"> <a href='{{ url_for("button_remove_pair", pageid=page["id"], topicid=topic["id"], base="topic") }}' > Remove from topic </a> </td>
             </tr>
         {% endfor %}
@@ -28,28 +28,36 @@
 <a href='{{ url_for("button_add_PTR", topicid=topic["id"]) }}'> Add page </a> <br>
 
 
-<h3> <a href=''> Related Topics </a> </h3>
 
-{% if expandRelationships %}
+{% if showRelationships %}
+<h2> <a href='{{ url_for("viewEntry", topic=topic["id"]) }}'> Subtopics </a> </h2>
 <table>
     <thead>
         <tr>
-            <th colspan="2">Related Topics:</th>
+            <th colspan="2">Subtopics:</th>
         </tr>
     </thead>
     <tbody>
-
+        {% for relatedTopic in relatedTopics %}
+            <tr>
+                <td class="thin-column"> <a href='{{url_for("viewEntry", topic=relatedTopic["id"])}}' >  {{ relatedTopic["name"] }}  </a> </td>
+                <td class="thin-column"> <a href='' > Remove relationship </a> </td>
+            </tr>
+        {% endfor %}
     </tbody>
 </table>
 
-<a href=''> Add Topic </a> <br>
+<a href=''> Add subtopic </a> <br>
+{% else %}
+<h2> <a href='{{ url_for("viewEntry", topic=topic["id"], showRelationships=1) }}'> Subtopics </a> </h2>
+<a href=''>Show subtopic pages</a>
 {% endif %}
 
 {% if showEditPanel %}
-<h3> <a href='{{ url_for("viewEntry", topic=topic["id"]) }}'> Edit Topic </a> </h3>
+<h2> <a href='{{ url_for("viewEntry", topic=topic["id"]) }}'> Edit Topic </a> </h2>
 <a href='{{ url_for("button_delete", topicid=topic["id"]) }}'> Delete Topic </a>
 {% else %}
-<h3> <a href='{{ url_for("viewEntry", topic=topic["id"], showEditPanel=1) }}'> Edit Topic </a> </h3>
+<h2> <a href='{{ url_for("viewEntry", topic=topic["id"], showEditPanel=1) }}'> Edit Topic </a> </h2>
 {% endif %}
 
 
