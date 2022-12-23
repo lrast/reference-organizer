@@ -52,7 +52,6 @@ def servePage(pageid):
     db = get_db()
     url = db.execute("SELECT url FROM Page WHERE id=(?)", (pageid,)).fetchone()['url']
 
-    print(url)
     # check for local file vs webpage
     if url[:7] == 'http://' or url[:8]=='https://':
         # well formatted webpage
@@ -68,51 +67,62 @@ def servePage(pageid):
 @app.route('/view', methods=['GET'])
 def viewEntry():
     """Display an entry from the database"""
-    showEditPanel = False
 
-    if 'showEditPanel' in request.args.keys():
-        showEditPanel = bool(request.args['showEditPanel'])
+    # Handling page state
+    pageState = {}
+    pageState['editPanel'] = request.args.get('editPanel', '')
+    pageState['showRelationships'] = request.args.get('showRelationships', '')
+    pageState['selectRelated'] = request.args.get('showRelationships', '')
+
+    if 'toggle' in request.args and request.args['toggle'] in pageState.keys():
+        if bool(pageState[ request.args['toggle'] ]):
+            pageState[ request.args['toggle'] ] = ''
+        else:
+            pageState[ request.args['toggle'] ] = '1'
+
+        if 'topic' in request.args:
+            return redirect( url_for('viewEntry', topic=request.args['topic'], **pageState) )
+        elif 'page' in request.args:
+            return redirect( url_for('viewEntry', page=request.args['page'], **pageState) )
 
 
-    if 'topic' in request.args.keys():
+    if 'topic' in request.args:
         if request.args['topic'] == 'all':
             #show all topics
             topicsData = json.loads( allTopics() )
             for entry in topicsData:
                 entry['link'] = url_for('viewEntry', topic=entry['id'])
             return render_template('topiclist.html',
-                tableEntries=topicsData,
-                tableTitle='Topics')
+                tableTitle='Topics',
+                tableEntries=topicsData)
         else:
             topicid = int(request.args['topic'])
             topicData = json.loads( topicInfo( topicid ) )
-            if 'showRelationships' in request.args.keys():
-                showRelationships = bool(request.args['showRelationships'])
-                # hard coding with a single relationshiio type for now
+
+            if bool(pageState['showRelationships']):
+                # hard coding with a single relationship type for now
                 relatedTopics = json.loads( requests.get(
                     url_for('relationshipInfo', relationshipid=1, topic=topicid, _external=True)
                     ).content )['topics']
                 print( relatedTopics)
             else:
-                showRelationships = False
                 relatedTopics=[]
 
             return render_template('viewtopic.html',
                 topic=topicData["topic"],
                 pages=topicData["pages"],
-                relatedTopics = relatedTopics,
-                showEditPanel=showEditPanel,
-                showRelationships=showRelationships)
+                pageState=pageState,
+                relatedTopics=relatedTopics)
 
-    elif 'page' in request.args.keys():
+    elif 'page' in request.args:
         if request.args['page'] == 'all':
             #show all pages
             pagesData = json.loads( allPages() )
             for entry in pagesData:
                 entry['link'] = url_for('viewEntry', page=entry['id'])
             return render_template('pagelist.html',
-                tableEntries=pagesData,
-                tableTitle='Pages')
+                tableTitle='Pages',
+                tableEntries=pagesData)
 
         else:
             pageid = int(request.args['page'])
@@ -121,7 +131,7 @@ def viewEntry():
             return render_template('viewpage.html', 
                 page=pageData['page'],
                 topics=pageData['topics'],
-                showEditPanel=showEditPanel)
+                pageState=pageState)
     else:
         return render_template('home.html')
 
@@ -161,84 +171,78 @@ def button_remove_pair():
 
 @app.route('/button_add_PTR')
 def button_add_PTR():
-    requestKeys = request.args.keys()
-
-    if 'pageid' in requestKeys and 'topicid' in requestKeys:
+    if 'pageid' in request.args and 'topicid' in request.args:
         topicid = request.args['topicid']
         pageid = request.args['pageid']
         callback = request.args['callback']
 
         requests.post(url_for('associatePageTopic', topicid=topicid, pageid=pageid, _external=True))
-        print('here', topicid, pageid, callback)
         if callback == 'topic':
-            print( url_for('viewEntry', topic=topicid) )
             return redirect( url_for('viewEntry', topic=topicid) )
         if callback == 'page':
-            print( url_for('viewEntry', page=pageid) )
             return redirect( url_for('viewEntry', page=pageid) )
 
-
-    elif 'pageid' in requestKeys:
-        # adding a topic to a specific page
-        print('here')
+    elif 'pageid' in request.args: # adding a topic to a specific page
+        currentPage = request.args['pageid']
         topicsData = json.loads( allTopics() )
         for entry in topicsData:
-            entry['link'] = url_for('button_add_PTR', topicid=entry['id'], pageid=request.args['pageid'], callback='page')
-        print(topicsData)
-        return render_template("addpagetopic.html", tableEntries=topicsData, tableTitle='Topics')
+            entry['link'] = url_for('button_add_PTR', topicid=entry['id'], pageid=currentPage, callback='page')
 
+        return render_template("addpairdialog.html",
+            tableEntries=topicsData, tableTitle='Topics',
+            cancel=url_for('viewEntry', page=currentPage) )
 
-    elif 'topicid' in requestKeys:
-        # adding a page to a specific topic
+    elif 'topicid' in request.args: # adding a page to a specific topic
+        currentTopic = request.args['topicid']
+
         pagesData = json.loads( allPages() )
         for entry in pagesData:
-            entry['link'] = url_for('button_add_PTR', topicid=request.args['topicid'], pageid=entry['id'], callback='topic')
-        return render_template("addpagetopic.html", tableEntries=pagesData, tableTitle='Pages')
+            entry['link'] = url_for('button_add_PTR', topicid=currentTopic, pageid=entry['id'], callback='topic')
 
-
-
-
+        return render_template("addpairdialog.html",
+            tableEntries=pagesData, tableTitle='Pages',
+            cancel=url_for('viewEntry', topic=currentTopic))
 
 
 @app.route('/button_add_TTR')
 def button_add_TTR():
-    requestKeys = request.args.keys()
-
+    """Driver for topic-topic relationship addtion"""
     # hard coded for now
     relationshipid = 1
 
-    if 'lefttopicid' in requestKeys and 'righttopicid' in requestKeys:
-        topicid = request.args['topicid']
-        pageid = request.args['pageid']
-        callback = request.args['callback']
+    if 'lefttopicid' in request.args and 'righttopicid' in request.args:
+        lefttopicid = request.args['lefttopicid']
+        righttopicid = request.args['righttopicid']
 
-        requests.post(url_for('associatePageTopic', topicid=topicid, pageid=pageid, _external=True))
-        print('here', topicid, pageid, callback)
-        if callback == 'topic':
-            print( url_for('viewEntry', topic=topicid) )
-            return redirect( url_for('viewEntry', topic=topicid) )
-        if callback == 'page':
-            print( url_for('viewEntry', page=pageid) )
-            return redirect( url_for('viewEntry', page=pageid) )
+        requests.post(url_for('associateTopicTopic', 
+            lefttopicid=lefttopicid, righttopicid=righttopicid, relationshipid=relationshipid,
+            _external=True))
+
+        return redirect( url_for('viewEntry', topic=righttopicid, showRelationships='1') )
 
 
-    elif 'pageid' in requestKeys:
-        # adding a topic to a specific page
-        print('here')
+    elif 'righttopicid' in request.args:
+        currentTopic = request.args['righttopicid']
         topicsData = json.loads( allTopics() )
         for entry in topicsData:
-            entry['link'] = url_for('button_add_PTR', topicid=entry['id'], pageid=request.args['pageid'], callback='page')
-        print(topicsData)
-        return render_template("addpagetopic.html", tableEntries=topicsData, tableTitle='Topics')
+            entry['link'] = url_for('button_add_TTR', lefttopicid=entry['id'], righttopicid=currentTopic)
+
+        return render_template("addpairdialog.html", tableEntries=topicsData, tableTitle='Topics',
+            cancel=url_for('viewEntry', topic=currentTopic))
 
 
-    elif 'topicid' in requestKeys:
-        # adding a page to a specific topic
-        pagesData = json.loads( allPages() )
-        for entry in pagesData:
-            entry['link'] = url_for('button_add_PTR', topicid=request.args['topicid'], pageid=entry['id'], callback='topic')
-        return render_template("addpagetopic.html", tableEntries=pagesData, tableTitle='Pages')
+@app.route('/button_remove_TTR')
+def button_remove_TTR():
+    # delete topic button action
+    lefttopicid = request.args['lefttopicid']
+    righttopicid = request.args['righttopicid']
+    relationshipid = 1
 
+    requests.delete( url_for('associateTopicTopic', 
+        lefttopicid=lefttopicid, righttopicid=righttopicid, relationshipid=relationshipid,
+        _external=True) )
+
+    return redirect( url_for('viewEntry', topic=righttopicid, showRelationships=1 ) )
 
 
 
@@ -454,7 +458,7 @@ def associateTopicTopic():
     db = get_db()
     lefttopicid = request.args['lefttopicid']
     righttopicid = request.args['righttopicid']
-    topicid = request.args['relationshipid']
+    relationshipid = request.args['relationshipid']
 
     if request.method == 'POST':
         entryData = db.execute("""

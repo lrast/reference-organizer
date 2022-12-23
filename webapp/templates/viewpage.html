@@ -28,14 +28,11 @@
 <br>
 
 
-
-{% if showEditPanel %}
-<h3> <a href='{{ url_for("viewEntry", page=page["id"]) }}'> Edit Page </a> </h3>
+<h3> <a href='{{ url_for("viewEntry", page=page["id"], toggle="editPanel", **pageState) }}'> Edit Page </a></h3>
+{% if pageState['editPanel'] %}
 <a href=''> Edit page info </a>
 <br>
 <a href='{{ url_for("button_delete", pageid=page["id"]) }}'> Delete page </a>
-{% else %}
-<h3> <a href='{{ url_for("viewEntry", page=page["id"], showEditPanel=1) }}'> Edit Page </a> </h3>
 {% endif %}
 
 

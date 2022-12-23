@@ -28,9 +28,14 @@
 <a href='{{ url_for("button_add_PTR", topicid=topic["id"]) }}'> Add page </a> <br>
 
 
+<h3> <a href='{{ url_for("viewEntry", topic=topic["id"], toggle="editPanel", **pageState) }}'> Edit Topic </a> </h3>
+{% if pageState["editPanel"] %}
+<a href='{{ url_for("button_delete", topicid=topic["id"]) }}'> Delete Topic </a>
+{% endif %}
 
-{% if showRelationships %}
-<h2> <a href='{{ url_for("viewEntry", topic=topic["id"]) }}'> Subtopics </a> </h2>
+
+<h2> <a href='{{ url_for("viewEntry", topic=topic["id"], toggle="showRelationships", **pageState) }}'> Subtopics </a> </h2>
+{% if pageState["showRelationships"] %}
 <table>
     <thead>
         <tr>
@@ -41,24 +46,19 @@
         {% for relatedTopic in relatedTopics %}
             <tr>
                 <td class="thin-column"> <a href='{{url_for("viewEntry", topic=relatedTopic["id"])}}' >  {{ relatedTopic["name"] }}  </a> </td>
-                <td class="thin-column"> <a href='' > Remove relationship </a> </td>
+                <td class="thin-column"> <a href='{{url_for("button_remove_TTR", lefttopicid=relatedTopic["id"], righttopicid=topic["id"])}}' > Remove relationship </a> </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<a href=''> Add subtopic </a> <br>
+<a href='{{url_for("button_add_TTR", righttopicid=topic["id"])}}'> Add subtopic </a> <br>
 {% else %}
-<h2> <a href='{{ url_for("viewEntry", topic=topic["id"], showRelationships=1) }}'> Subtopics </a> </h2>
+I'm not sure where to put this button
+<br>
 <a href=''>Show subtopic pages</a>
 {% endif %}
 
-{% if showEditPanel %}
-<h2> <a href='{{ url_for("viewEntry", topic=topic["id"]) }}'> Edit Topic </a> </h2>
-<a href='{{ url_for("button_delete", topicid=topic["id"]) }}'> Delete Topic </a>
-{% else %}
-<h2> <a href='{{ url_for("viewEntry", topic=topic["id"], showEditPanel=1) }}'> Edit Topic </a> </h2>
-{% endif %}
 
 
 {% endblock %}

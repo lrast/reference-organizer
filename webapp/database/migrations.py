@@ -13,6 +13,26 @@ import sqlite3 as db
 dbURL = os.environ['FLASK_DATABASE_URL']
 
 
+def remakeTopicTopic():
+    """recreates the Page Topic table to have unique (rel, left, right) triples"""
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS TopicTopicRelationship(
+            id INTEGER PRIMARY KEY,
+            relationshipid INTEGER,
+            lefttopicid INTEGER,
+            righttopicid INTEGER,
+            FOREIGN KEY( lefttopicid ) REFERENCES Topic(id),
+            FOREIGN KEY( righttopicid ) REFERENCES Topic(id),
+            FOREIGN KEY( relationshipid ) REFERENCES reRelationship(id),
+            UNIQUE(relationshipid, lefttopicid, righttopicid )
+        );
+        """)
+    conn.commit()
+    conn.close()
+
+
 def remakePageTopic():
     """recreates the Page Topic table to have unique (pageid, topicid) pairs"""
     conn = db.connect(dbURL)
