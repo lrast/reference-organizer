@@ -18,7 +18,12 @@
             <tr>
                 <td class="wide-column"> <a href='{{ url_for("servePage", pageid=page["id"])}}' >  {{ page["name"] }}  </a> </td>
                 <td class="thin-column"> <a href='{{ url_for("viewEntry", page=page["id"])}}' > info  </a> </td>
-                <td class="thin-column"> <a href='{{ url_for("button_remove_pair", pageid=page["id"], topicid=topic["id"], base="topic") }}' > Remove from topic </a> </td>
+
+                {% if "topicid" in page and page["topicid"] != topic["id"] %}
+                     <td class="thin-column"> <a href='{{ url_for("viewEntry", topic=page["topicid"]) }}' > {{page["topicname"]}} </a> </td>
+                {% else %}
+                    <td class="thin-column"> <a href='{{ url_for("button_remove_pair", pageid=page["id"], topicid=topic["id"], base="topic") }}' > Remove from topic </a> </td>
+                {% endif %}
             </tr>
         {% endfor %}
     </tbody>
@@ -26,7 +31,7 @@
 
 
 <a href='{{ url_for("button_add_PTR", topicid=topic["id"]) }}'> Add page </a> <br>
-
+<a href='{{ url_for("viewEntry", topic=topic["id"], toggle="selectRelated", **pageState) }}'>Show subtopic pages</a>
 
 <h3> <a href='{{ url_for("viewEntry", topic=topic["id"], toggle="editPanel", **pageState) }}'> Edit Topic </a> </h3>
 {% if pageState["editPanel"] %}
@@ -53,10 +58,6 @@
 </table>
 
 <a href='{{url_for("button_add_TTR", righttopicid=topic["id"])}}'> Add subtopic </a> <br>
-{% else %}
-I'm not sure where to put this button
-<br>
-<a href=''>Show subtopic pages</a>
 {% endif %}
 
 

@@ -21,7 +21,11 @@ export FLASK_DATABASE_URL=[url]
 
 ## to do:
 1. Safety prompts on remove
-2. topic-topic relationships, III
+2. topic-topic relationships, IV
 3. json vs strings
 4. fetch names for webpages, autofill
-5. modularize routes
+5. API design:
+    - GET topic: can fetch pages for related topics (make relationship agnostic)
+    - GET page: can fetch related topics (todo)
+    - GET relationship: can fetch related topics (make fully recursive)
+    - add comments to this effect
