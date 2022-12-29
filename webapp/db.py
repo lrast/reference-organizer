@@ -72,7 +72,96 @@ def addTopicTopicRelation(conn, leftTopic, rightTopic, relationshipName):
     conn.commit()
 
 
+
 ##### functions for fetching data #####
+def getPagesInTopic(db, topicid, selectThrough=None, onThe='left' ):
+    """Fetch pages corresponding to a particular topic"""
+    if selectThrough is None: # only topic pages
+        return db.execute("""
+            SELECT Page.id, Page.name, Topic.id AS topicid, Topic.name as topicname
+            FROM Page INNER JOIN PageTopic ON Page.id=PageTopic.pageid
+            INNER JOIN Topic on PageTopic.topicid=Topic.id
+            WHERE PageTopic.topicid =(?)
+            """, (topicid,) ).fetchall()
+
+    relationshipid = selectThrough
+    if onThe == 'left':
+        childCol = 'lefttopicid'
+        parentCol = 'righttopicid'
+    if onThe == 'right':
+        childCol = 'righttopicid'
+        parentCol = 'lefttopicid'
+
+    return db.execute("""
+        WITH RECURSIVE AllRelated(topicid) AS (
+            SELECT (?)
+            UNION
+            SELECT DISTINCT TopicTopicRelationship.{childCol} FROM
+            TopicTopicRelationship INNER JOIN AllRelated ON
+            TopicTopicRelationship.{parentCol} = AllRelated.topicid
+            WHERE TopicTopicRelationship.relationshipid=(?)
+            LIMIT 10000
+        )
+        SELECT Page.id, Page.name, PageTopic.topicid, Topic.name AS topicname FROM Page INNER JOIN 
+        PageTopic ON Page.id=PageTopic.pageid INNER JOIN
+        AllRelated ON PageTopic.topicid=AllRelated.topicid INNER JOIN
+        Topic ON PageTopic.topicid=Topic.id;
+        """.format(childCol=childCol, parentCol=parentCol), (topicid, relationshipid)).fetchall()
+
+
+
+def getTopicGraph(db, relationshipid, rootedAt=None, onThe='right', depth=float('inf')):
+    """fetch a topic graph"""
+
+    if rootedAt is None: # return the whole graph
+        return db.execute(
+            """SELECT TopicTopicRelationship.lefttopicid, TopicTopicRelationship.righttopicid,
+            LeftTopic.name AS leftname, RightTopic.name AS rightname FROM TopicTopicRelationship
+            JOIN Topic AS LeftTopic ON TopicTopicRelationship.lefttopicid = LeftTopic.id
+            JOIN Topic AS RightTopic ON TopicTopicRelationship.righttopicid = RightTopic.id
+            WHERE TopicTopicRelationship.relationshipid =(?) 
+            """, (relationshipid,)).fetchall()
+
+    topicid = rootedAt
+    if onThe == 'left':
+        childCol = 'lefttopicid'
+        parentCol = 'righttopicid'
+    if onThe == 'right':
+        childCol = 'righttopicid'
+        parentCol = 'lefttopicid'
+
+    if depth == 1:
+        return db.execute("""
+            SELECT Current.id AS parentid, Topic.id AS childid, 
+            Current.name AS parentname, Topic.name AS childname 
+            FROM Topic JOIN 
+            TopicTopicRelationship ON Topic.id=TopicTopicRelationship.{childCol} 
+            JOIN Topic AS Current
+            WHERE TopicTopicRelationship.{parentCol}=(?) AND TopicTopicRelationship.relationshipid=(?)
+            AND Current.id=(?);
+            """.format(childCol=childCol, parentCol=parentCol),
+            (topicid, relationshipid, topicid) ).fetchall()
+
+    if depth == float('inf'):
+        return db.execute("""
+            WITH RECURSIVE AllRelated(parentid, childid) AS (
+                SELECT {parentCol}, {childCol} FROM TopicTopicRelationship 
+                WHERE {parentCol}=(?) AND relationshipid=(?)
+                UNION
+                SELECT DISTINCT TopicTopicRelationship.{parentCol}, TopicTopicRelationship.{childCol}
+                FROM TopicTopicRelationship INNER JOIN AllRelated ON
+                TopicTopicRelationship.{parentCol} = AllRelated.childid
+                WHERE TopicTopicRelationship.relationshipid=(?)
+                LIMIT 10000
+            )
+            SELECT AllRelated.parentid, AllRelated.childid, Parent.name AS parentname, 
+            Child.name AS childname
+            FROM AllRelated JOIN Topic AS Parent on AllRelated.parentid=Parent.id
+            JOIN Topic AS Child on AllRelated.childid=Child.id
+            """.format(childCol=childCol, parentCol=parentCol),
+            (topicid, relationshipid,relationshipid) ).fetchall()
+
+
 
 
 

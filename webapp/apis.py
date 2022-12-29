@@ -1,7 +1,7 @@
-from flask import request, Response
+from flask import request, Response,url_for
 
 from webapp import app
-from webapp.db import get_db, packageRows
+from webapp.db import get_db, getPagesInTopic, getTopicGraph, packageRows
 
 
 
@@ -9,7 +9,7 @@ from webapp.db import get_db, packageRows
 
 @app.route('/page', methods=['GET', 'POST'])
 def allPages():
-    """Page API"""
+    """Page API: data on all pages"""
     db = get_db()
     if request.method == 'GET':
         # return info on all pages
@@ -29,7 +29,7 @@ def allPages():
 
 @app.route('/page/<int:pageid>', methods=['GET', 'PUT', 'DELETE'])
 def pageInfo(pageid):
-    """Page API"""
+    """Page API: info on a specific page, including topics and topics related to them"""
     db = get_db()
     if request.method == 'GET':
         # info on a specific page
@@ -60,7 +60,7 @@ def pageInfo(pageid):
 
 @app.route('/topic', methods=['GET', 'POST'])
 def allTopics():
-    """Topic API"""
+    """Topic API: data on all topics"""
     db = get_db()
     if request.method == 'GET':
         # return info on all topics
@@ -79,53 +79,14 @@ def allTopics():
 
 @app.route('/topic/<int:topicid>', methods=['GET', 'PUT', 'DELETE'])
 def topicInfo(topicid):
-    """Topic API"""
+    """Topic API: info on a specific topic, including pages and pages affiliated with related topics"""
     db = get_db()
     if request.method == 'GET':
-        # info on a specific topic
         topicInfo = db.execute("SELECT * FROM Topic WHERE id=(?)", (topicid,) ).fetchone()
-        topicPages = db.execute(
-            """SELECT Page.id, Page.name FROM 
-            Page INNER JOIN PageTopic ON Page.id = PageTopic.pageid
-            WHERE PageTopic.topicid =(?)
-            """, (topicid,)).fetchall()
 
-        if 'fetchThrough' in request.args:
-            relationshipid = request.args['fetchThrough']
-            onThe = request.args.get('onThe', 'left')
-
-            if onThe == 'left':
-                allPages = db.execute("""
-                    WITH RECURSIVE AllRelated(topicid) AS (
-                        SELECT (?)
-                        UNION
-                        SELECT DISTINCT TopicTopicRelationship.lefttopicid FROM
-                        TopicTopicRelationship INNER JOIN AllRelated ON
-                        TopicTopicRelationship.righttopicid = AllRelated.topicid
-                        LIMIT 10000
-                    )
-                    SELECT Page.id, Page.name, PageTopic.topicid, Topic.name AS topicname FROM Page INNER JOIN 
-                    PageTopic ON Page.id=PageTopic.pageid INNER JOIN
-                    AllRelated ON PageTopic.topicid=AllRelated.topicid INNER JOIN
-                    Topic ON PageTopic.topicid=Topic.id;
-                    """, (topicid,)).fetchall()
-            elif onThe == 'right':
-                allPages = db.execute("""
-                    WITH RECURSIVE AllRelated(topicid) AS (
-                        SELECT (?)
-                        UNION
-                        SELECT DISTINCT TopicTopicRelationship.righttopicid FROM
-                        TopicTopicRelationship INNER JOIN AllRelated ON
-                        TopicTopicRelationship.lefttopicid = AllRelated.topicid
-                        LIMIT 10000
-                    )
-                    SELECT Page.id, Page.name, PageTopic.topicid, Topic.name AS topicname FROM Page INNER JOIN 
-                    PageTopic ON Page.id=PageTopic.pageid INNER JOIN
-                    AllRelated ON PageTopic.topicid=AllRelated.topicid INNER JOIN
-                    Topic ON PageTopic.topicid=Topic.id;
-                    """, (topicid,)).fetchall()
-
-            topicPages = allPages
+        topicPages = getPagesInTopic(db, topicid,
+            request.args.get('fetchThrough', None), request.args.get('onThe', 'left')
+            )
         return packageRows(topic=topicInfo, pages=topicPages)
 
     if request.method == 'PUT':
@@ -140,7 +101,6 @@ def topicInfo(topicid):
         db.execute("DELETE FROM PageTopic WHERE topicid=(?);", (topicid,))
         db.execute("DELETE FROM TopicTopicRelationship WHERE lefttopicid=(?) OR righttopicid=(?)", 
             (topicid, topicid))
-
         db.commit()
         return Response(status=200)
 
@@ -148,7 +108,7 @@ def topicInfo(topicid):
 
 @app.route('/relationship', methods=['GET', 'POST'])
 def allRelationships():
-    """Relationship API"""
+    """Relationship API: global relationship data"""
     db = get_db()
     if request.method == 'GET':
         # return info on all relationships
@@ -167,38 +127,23 @@ def allRelationships():
 
 @app.route('/relationship/<int:relationshipid>', methods=['GET', 'PUT', 'DELETE'])
 def relationshipInfo(relationshipid):
-    """Relationship API"""
+    """Relationship API: info on specific relationships, including topic pairs and trees"""
     db = get_db()
+    print(url_for('relationshipInfo', relationshipid=1, topic=1, _external=True))
+    print(request.args.keys())
     if request.method == 'GET':
         # info on a specific relationship
         relationshipInfo = db.execute("SELECT * FROM Relationship WHERE id=(?)", (relationshipid,) ).fetchone()
 
-        if 'topic' in request.args:
-            topicid = request.args['topic']
-            myside = request.args.get('myside', 'right')
-
-            if myside == 'left':
-                relatedTopics = db.execute(
-                    """SELECT Topic.id, Topic.name FROM Topic JOIN TopicTopicRelationship
-                    ON Topic.id=TopicTopicRelationship.righttopicid WHERE 
-                    TopicTopicRelationship.lefttopicid=(?) AND TopicTopicRelationship.relationshipid=(?);
-                    """, (topicid, relationshipid) ).fetchall()
-
-            if myside == 'right':
-                relatedTopics = db.execute(
-                    """SELECT Topic.id, Topic.name FROM Topic JOIN TopicTopicRelationship
-                    ON Topic.id=TopicTopicRelationship.lefttopicid WHERE 
-                    TopicTopicRelationship.righttopicid=(?) AND TopicTopicRelationship.relationshipid=(?);
-                    """, (topicid, relationshipid) ).fetchall()
-
-            return packageRows(relationship=relationshipInfo, topics=relatedTopics)
-
+        if 'fetchThrough' in request.args:
+            topicDepth = float('inf')
         else:
-            topicPairs = db.execute(
-                """SELECT lefttopicid, righttopicid FROM 
-                TopicTopicRelationship WHERE relationshipid =(?)
-                """, (relationshipid,)).fetchall()
-            return packageRows(relationship=relationshipInfo, topics=topicPairs)
+            topicDepth = 1
+
+        topicPairs = getTopicGraph(db, relationshipid, rootedAt=request.args.get('topic', None),
+            onThe=request.args.get('onThe', 'left'), depth=topicDepth)
+
+        return packageRows(relationship=relationshipInfo, topics=topicPairs)
 
     if request.method == 'PUT':
         # over write the contents of the entry
@@ -231,7 +176,6 @@ def associatePageTopic():
         db.execute("DELETE FROM PageTopic WHERE pageid=(?) AND topicid=(?);", (pageid, topicid))
         db.commit()
         return Response(status=200)
-
 
 
 @app.route('/assoc_topic_topic', methods=['POST', 'DELETE'])

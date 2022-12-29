@@ -98,15 +98,15 @@ def viewEntry():
                 topicData = json.loads( requests.get( 
                     url_for('topicInfo', topicid=topicid, fetchThrough=1, _external=True) 
                     ).content )
-                print(topicData)
             else:
                 topicData = json.loads( topicInfo( topicid ) )
 
             if bool(pageState['showRelationships']):
                 # hard coding with a single relationship type for now
                 relatedTopics = json.loads( requests.get(
-                    url_for('relationshipInfo', relationshipid=1, topic=topicid, _external=True)
+                    url_for('relationshipInfo', relationshipid=1, topic=topicid, fetchThrough=1, _external=True)
                     ).content )['topics']
+                print(relatedTopics)
             else:
                 relatedTopics=[]
 

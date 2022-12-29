@@ -40,7 +40,9 @@
 
 
 <h2> <a href='{{ url_for("viewEntry", topic=topic["id"], toggle="showRelationships", **pageState) }}'> Subtopics </a> </h2>
+
 {% if pageState["showRelationships"] %}
+
 <table>
     <thead>
         <tr>
@@ -50,16 +52,18 @@
     <tbody>
         {% for relatedTopic in relatedTopics %}
             <tr>
-                <td class="thin-column"> <a href='{{url_for("viewEntry", topic=relatedTopic["id"])}}' >  {{ relatedTopic["name"] }}  </a> </td>
-                <td class="thin-column"> <a href='{{url_for("button_remove_TTR", lefttopicid=relatedTopic["id"], righttopicid=topic["id"])}}' > Remove relationship </a> </td>
+                <td class="thin-column"> <a href='{{url_for("viewEntry", topic=relatedTopic["childid"])}}' >  {{ relatedTopic["childname"] }}  </a> </td>
+                <td class="thin-column"> <a href='{{url_for("button_remove_TTR", lefttopicid=relatedTopic["childid"], righttopicid=topic["id"])}}' > Remove relationship </a> </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<a href='{{url_for("button_add_TTR", righttopicid=topic["id"])}}'> Add subtopic </a> <br>
 {% endif %}
 
+{% include "topictree.html" %}
+
+<a href='{{url_for("button_add_TTR", righttopicid=topic["id"])}}'> Add subtopic </a> <br>
 
 
 {% endblock %}
