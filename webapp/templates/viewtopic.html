@@ -59,11 +59,10 @@
     </tbody>
 </table>
 
-{% endif %}
-
 {% include "topictree.html" %}
 
 <a href='{{url_for("button_add_TTR", righttopicid=topic["id"])}}'> Add subtopic </a> <br>
 
+{% endif %}
 
 {% endblock %}

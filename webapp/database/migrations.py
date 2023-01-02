@@ -13,6 +13,70 @@ import sqlite3 as db
 dbURL = os.environ['FLASK_DATABASE_URL']
 
 
+def makeTopicInfo():
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS TopicInfo(
+            id INTEGER PRIMARY KEY,
+            topicid INTEGER,
+            dateAdded TEXT,
+            commentdata BLOB,
+            FOREIGN KEY( topicid ) REFERENCES Topic(id),
+            UNIQUE( topicid )
+        );
+        """)
+    conn.commit()
+    conn.close()
+
+
+def makePageInfoTables():
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS PageInfo(
+            id INTEGER PRIMARY KEY,
+            pageid INTEGER,
+            dateAdded TEXT,
+            commentdata BLOB,
+            FOREIGN KEY( pageid ) REFERENCES Page(id),
+            UNIQUE( pageid )
+        );
+        """)
+    conn.commit()
+    conn.close()
+
+
+def makePagePageRelationshipTable():
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS PagePageRelationship(
+            id INTEGER PRIMARY KEY,
+            relationshipid INTEGER,
+            leftpageid INTEGER,
+            rightpageid INTEGER,
+            FOREIGN KEY( leftpageid ) REFERENCES Page(id),
+            FOREIGN KEY( rightpageid ) REFERENCES Page(id),
+            FOREIGN KEY( relationshipid ) REFERENCES Relationship(id),
+            UNIQUE(relationshipid, leftpageid, rightpageid )
+        );
+        """)
+    conn.commit()
+    conn.close()
+
+
+def addRelationshipNodeType():
+    """recreates the Page Topic table to have unique (rel, left, right) triples"""
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""
+        ALTER TABLE Relationship ADD nodetype TEXT;
+        """)
+    conn.commit()
+    conn.close()
+
+
 def remakeTopicTopic():
     """recreates the Page Topic table to have unique (rel, left, right) triples"""
     conn = db.connect(dbURL)
@@ -25,7 +89,7 @@ def remakeTopicTopic():
             righttopicid INTEGER,
             FOREIGN KEY( lefttopicid ) REFERENCES Topic(id),
             FOREIGN KEY( righttopicid ) REFERENCES Topic(id),
-            FOREIGN KEY( relationshipid ) REFERENCES reRelationship(id),
+            FOREIGN KEY( relationshipid ) REFERENCES Relationship(id),
             UNIQUE(relationshipid, lefttopicid, righttopicid )
         );
         """)

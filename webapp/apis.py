@@ -34,6 +34,7 @@ def pageInfo(pageid):
     if request.method == 'GET':
         # info on a specific page
         pageInfo = db.execute("SELECT * FROM Page WHERE id=(?)", (pageid,)).fetchone()
+
         pageTopics = db.execute(
             """SELECT Topic.id, Topic.name FROM 
             Topic INNER JOIN PageTopic ON Topic.id = PageTopic.topicid
@@ -160,6 +161,18 @@ def relationshipInfo(relationshipid):
 
 
 
+@app.route('/info', methods=['GET', 'POST', 'PUT'])
+def informationOnPages():
+    pass
+
+
+
+
+
+
+
+######################################### Association Tables #########################################
+
 @app.route('/assoc_page_topic', methods=['POST', 'DELETE'])
 def associatePageTopic():
     db = get_db()
@@ -185,6 +198,11 @@ def associateTopicTopic():
     righttopicid = request.args['righttopicid']
     relationshipid = request.args['relationshipid']
 
+    nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?)""",
+        (relationshipid,)).fetchone()[0]
+    if nodeType != 'topic':
+        return Response('Relationship is not betweeen Topics',status=422)
+
     if request.method == 'POST':
         entryData = db.execute("""
             INSERT INTO TopicTopicRelationship(relationshipid, lefttopicid, righttopicid)
@@ -198,6 +216,35 @@ def associateTopicTopic():
             """ DELETE FROM TopicTopicRelationship WHERE 
             relationshipid=(?) AND lefttopicid=(?) AND righttopicid=(?);""",
             (relationshipid, lefttopicid, righttopicid))
+        db.commit()
+        return Response(status=200)
+
+
+@app.route('/assoc_page_page', methods=['POST', 'DELETE'])
+def associatePagePage():
+    db = get_db()
+    leftpageid = request.args['leftpageid']
+    rightpageid = request.args['rightpageid']
+    relationshipid = request.args['relationshipid']
+
+    nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?)""",
+        (relationshipid,)).fetchone()[0]
+    if nodeType != 'page':
+        return Response('Relationship is not betweeen Page',status=422)
+
+    if request.method == 'POST':
+        entryData = db.execute("""
+            INSERT INTO PagePageRelationship(relationshipid, leftpageid, rightpageid)
+            VALUES (?,?,?) RETURNING id;""",
+            (relationshipid, leftpageid, rightpageid) ).fetchone()
+        db.commit()
+        return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200)
+
+    elif request.method == 'DELETE':
+        db.execute(
+            """ DELETE FROM PagePageRelationship WHERE 
+            relationshipid=(?) AND leftpageid=(?) AND rightpageid=(?);""",
+            (relationshipid, leftpageid, rightpageid))
         db.commit()
         return Response(status=200)
 

@@ -137,3 +137,14 @@ def viewEntry():
     else:
         return render_template('home.html')
 
+
+
+
+@app.route('/editInfo', methods=['GET', 'POST'])
+def editInfo():
+    pass
+
+
+
+
+

@@ -25,7 +25,6 @@ export FLASK_DATABASE_URL=[url]
 3. json vs strings
 4. fetch names for webpages, autofill
 5. API design:
-    - GET topic: can fetch pages for related topics (make relationship agnostic)
     - GET page: can fetch related topics (todo)
-    - GET relationship: can fetch related topics (make fully recursive)
+    - Endpoint for info
     - add comments to this effect
