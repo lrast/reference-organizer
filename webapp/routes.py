@@ -8,8 +8,6 @@ from flask import url_for
 
 from webapp import app
 from webapp.db import get_db, addPageTopic
-from webapp.apis import allTopics, topicInfo, allPages, pageInfo
-
 
 
 ######################################## Webpages ########################################
@@ -27,13 +25,13 @@ def newPage():
     elif request.method == 'POST':
         pageAdded = False
         if request.form['url'] != '':
-            requests.post( url_for('allPages', _external=True), 
+            requests.post( url_for('api.allPages', _external=True), 
                 {'url': request.form['url'], 'name': request.form['name']})
             pageAdded = True
 
         if request.form['topics'] != '':
             for topic in request.form['topics'].split(','):
-                requests.post( url_for('allTopics', _external=True), {'name': topic})
+                requests.post( url_for('api.allTopics', _external=True), {'name': topic})
 
                 if pageAdded:
                     db = get_db()
@@ -69,7 +67,7 @@ def viewEntry():
     pageState = {}
     pageState['editPanel'] = request.args.get('editPanel', '')
     pageState['showRelationships'] = request.args.get('showRelationships', '')
-    pageState['selectRelated'] = request.args.get('selectRelated', '')
+    pageState['selectRelated'] = request.args.get('selectRelated', None)
 
     if 'toggle' in request.args and request.args['toggle'] in pageState.keys():
         if bool(pageState[ request.args['toggle'] ]):
@@ -86,7 +84,7 @@ def viewEntry():
     if 'topic' in request.args:
         if request.args['topic'] == 'all':
             #show all topics
-            topicsData = json.loads( allTopics() )
+            topicsData = requests.get( url_for('api.allTopics', _external=True)).json()
             for entry in topicsData:
                 entry['link'] = url_for('viewEntry', topic=entry['id'])
             return render_template('topiclist.html',
@@ -94,18 +92,15 @@ def viewEntry():
                 tableEntries=topicsData)
         else:
             topicid = int(request.args['topic'])
-            if bool( pageState['selectRelated'] ):
-                topicData = json.loads( requests.get( 
-                    url_for('topicInfo', topicid=topicid, fetchThrough=1, _external=True) 
-                    ).content )
-            else:
-                topicData = json.loads( topicInfo( topicid ) )
+            topicData = requests.get( 
+                    url_for('api.topicInfo', topicid=topicid, fetchThrough=pageState['selectRelated'], _external=True) 
+                ).json()
 
             if bool(pageState['showRelationships']):
                 # hard coding with a single relationship type for now
-                relatedTopics = json.loads( requests.get(
-                    url_for('relationshipInfo', relationshipid=1, topic=topicid, fetchThrough=1, _external=True)
-                    ).content )['topics']
+                relatedTopics = requests.get(
+                    url_for('api.relationshipInfo', relationshipid=1, topic=topicid, fetchThrough=1, _external=True)
+                    ).json()['topics']
                 print(relatedTopics)
             else:
                 relatedTopics=[]
@@ -119,7 +114,7 @@ def viewEntry():
     elif 'page' in request.args:
         if request.args['page'] == 'all':
             #show all pages
-            pagesData = json.loads( allPages() )
+            pagesData = requests.get(url_for('api.allPages', _external=True)).json()
             for entry in pagesData:
                 entry['link'] = url_for('viewEntry', page=entry['id'])
             return render_template('pagelist.html',
@@ -128,7 +123,7 @@ def viewEntry():
 
         else:
             pageid = int(request.args['page'])
-            pageData = json.loads( pageInfo(pageid) )
+            pageData = requests.get( url_for('api.pageInfo', pageid=pageid, _external=True) ).json()
 
             return render_template('viewpage.html', 
                 page=pageData['page'],

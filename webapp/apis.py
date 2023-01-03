@@ -1,13 +1,12 @@
-from flask import request, Response,url_for
+from flask import request, Response, Blueprint, url_for
 
-from webapp import app
 from webapp.db import get_db, getPagesInTopic, getTopicGraph, packageRows
 
 
+api = Blueprint('api', __name__)
 
-########################################### APIs ###########################################
 
-@app.route('/page', methods=['GET', 'POST'])
+@api.route('/page', methods=['GET', 'POST'])
 def allPages():
     """Page API: data on all pages"""
     db = get_db()
@@ -27,7 +26,7 @@ def allPages():
         return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200 )
 
 
-@app.route('/page/<int:pageid>', methods=['GET', 'PUT', 'DELETE'])
+@api.route('/page/<int:pageid>', methods=['GET', 'PUT', 'DELETE'])
 def pageInfo(pageid):
     """Page API: info on a specific page, including topics and topics related to them"""
     db = get_db()
@@ -59,7 +58,7 @@ def pageInfo(pageid):
 
 
 
-@app.route('/topic', methods=['GET', 'POST'])
+@api.route('/topic', methods=['GET', 'POST'])
 def allTopics():
     """Topic API: data on all topics"""
     db = get_db()
@@ -78,7 +77,7 @@ def allTopics():
         return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200 )
 
 
-@app.route('/topic/<int:topicid>', methods=['GET', 'PUT', 'DELETE'])
+@api.route('/topic/<int:topicid>', methods=['GET', 'PUT', 'DELETE'])
 def topicInfo(topicid):
     """Topic API: info on a specific topic, including pages and pages affiliated with related topics"""
     db = get_db()
@@ -107,7 +106,7 @@ def topicInfo(topicid):
 
 
 
-@app.route('/relationship', methods=['GET', 'POST'])
+@api.route('/relationship', methods=['GET', 'POST'])
 def allRelationships():
     """Relationship API: global relationship data"""
     db = get_db()
@@ -126,12 +125,10 @@ def allRelationships():
         return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200 )
 
 
-@app.route('/relationship/<int:relationshipid>', methods=['GET', 'PUT', 'DELETE'])
+@api.route('/relationship/<int:relationshipid>', methods=['GET', 'PUT', 'DELETE'])
 def relationshipInfo(relationshipid):
     """Relationship API: info on specific relationships, including topic pairs and trees"""
     db = get_db()
-    print(url_for('relationshipInfo', relationshipid=1, topic=1, _external=True))
-    print(request.args.keys())
     if request.method == 'GET':
         # info on a specific relationship
         relationshipInfo = db.execute("SELECT * FROM Relationship WHERE id=(?)", (relationshipid,) ).fetchone()
@@ -161,7 +158,7 @@ def relationshipInfo(relationshipid):
 
 
 
-@app.route('/info', methods=['GET', 'POST', 'PUT'])
+@api.route('/info', methods=['GET', 'POST', 'PUT'])
 def informationOnPages():
     pass
 
@@ -173,7 +170,7 @@ def informationOnPages():
 
 ######################################### Association Tables #########################################
 
-@app.route('/assoc_page_topic', methods=['POST', 'DELETE'])
+@api.route('/assoc_page_topic', methods=['POST', 'DELETE'])
 def associatePageTopic():
     db = get_db()
     pageid = request.args['pageid']
@@ -191,7 +188,7 @@ def associatePageTopic():
         return Response(status=200)
 
 
-@app.route('/assoc_topic_topic', methods=['POST', 'DELETE'])
+@api.route('/assoc_topic_topic', methods=['POST', 'DELETE'])
 def associateTopicTopic():
     db = get_db()
     lefttopicid = request.args['lefttopicid']
@@ -220,7 +217,7 @@ def associateTopicTopic():
         return Response(status=200)
 
 
-@app.route('/assoc_page_page', methods=['POST', 'DELETE'])
+@api.route('/assoc_page_page', methods=['POST', 'DELETE'])
 def associatePagePage():
     db = get_db()
     leftpageid = request.args['leftpageid']

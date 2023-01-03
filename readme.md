@@ -22,9 +22,12 @@ export FLASK_DATABASE_URL=[url]
 ## to do:
 1. Safety prompts on remove
 2. topic-topic relationships, IV
-3. json vs strings
-4. fetch names for webpages, autofill
-5. API design:
+3. fetch names for webpages, autofill
+4. API design:
     - GET page: can fetch related topics (todo)
     - Endpoint for info
     - add comments to this effect
+5. dockerize
+6. local file adding dialog
+7. importing from mendeley and session buddy records
+8. Far future: shareability, searchability of libraries

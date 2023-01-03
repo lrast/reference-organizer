@@ -16,12 +16,12 @@ def button_delete():
     # delete button action
     if 'topicid' in request.args.keys():
         topicid = request.args['topicid']
-        requests.delete( url_for( 'topicInfo', topicid=topicid, _external=True))
+        requests.delete( url_for('api.topicInfo', topicid=topicid, _external=True))
         return redirect( url_for('viewEntry', topic='all') )
 
     elif 'pageid' in request.args.keys():
         pageid = request.args['pageid']
-        requests.delete( url_for('pageInfo', pageid=pageid, _external=True) )
+        requests.delete( url_for('api.pageInfo', pageid=pageid, _external=True) )
         return redirect( url_for('viewEntry', page='all') )
 
 
@@ -32,7 +32,7 @@ def button_remove_pair():
     pageid = request.args['pageid']
     base = request.args['base']
 
-    requests.delete( url_for('associatePageTopic', topicid=topicid, pageid=pageid, _external=True) )
+    requests.delete( url_for('api.associatePageTopic', topicid=topicid, pageid=pageid, _external=True) )
 
     if base == 'topic':
         return redirect( url_for('viewEntry', topic=topicid) )
@@ -47,7 +47,7 @@ def button_add_PTR():
         pageid = request.args['pageid']
         callback = request.args['callback']
 
-        requests.post(url_for('associatePageTopic', topicid=topicid, pageid=pageid, _external=True))
+        requests.post(url_for('api.associatePageTopic', topicid=topicid, pageid=pageid, _external=True))
         if callback == 'topic':
             return redirect( url_for('viewEntry', topic=topicid) )
         if callback == 'page':
@@ -85,7 +85,7 @@ def button_add_TTR():
         lefttopicid = request.args['lefttopicid']
         righttopicid = request.args['righttopicid']
 
-        requests.post(url_for('associateTopicTopic', 
+        requests.post(url_for('api.associateTopicTopic', 
             lefttopicid=lefttopicid, righttopicid=righttopicid, relationshipid=relationshipid,
             _external=True))
 
@@ -108,7 +108,7 @@ def button_remove_TTR():
     righttopicid = request.args['righttopicid']
     relationshipid = 1
 
-    requests.delete( url_for('associateTopicTopic', 
+    requests.delete( url_for('api.associateTopicTopic', 
         lefttopicid=lefttopicid, righttopicid=righttopicid, relationshipid=relationshipid,
         _external=True) )
 

@@ -39,14 +39,14 @@ def packageRows(*args, **kwargs):
     if len(args) > 0:
         if len(kwargs) > 0 or len(args) > 1:
             raise Exception('Not sure how to package')
-        return json.dumps( toDictHelper(args[0]) )
+        return jsonify( toDictHelper(args[0]) )
 
     else:
         outputs = {}
         for k,v in kwargs.items():
             outputs[k] = toDictHelper(v)
 
-        return json.dumps( outputs )
+        return jsonify( outputs )
 
 
 
