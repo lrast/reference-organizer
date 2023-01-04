@@ -13,34 +13,48 @@ import sqlite3 as db
 dbURL = os.environ['FLASK_DATABASE_URL']
 
 
-def makeTopicInfo():
+def makeRelationshipComments():
     conn = db.connect(dbURL)
     cur = conn.cursor()
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS TopicInfo(
+        CREATE TABLE IF NOT EXISTS RelationshipComments(
             id INTEGER PRIMARY KEY,
-            topicid INTEGER,
-            dateAdded TEXT,
+            relationshipid INTEGER,
+            dateadded TEXT,
             commentdata BLOB,
-            FOREIGN KEY( topicid ) REFERENCES Topic(id),
-            UNIQUE( topicid )
+            FOREIGN KEY( relationshipid ) REFERENCES Relationship(id)
         );
         """)
     conn.commit()
     conn.close()
 
 
-def makePageInfoTables():
+def makeTopicComments():
     conn = db.connect(dbURL)
     cur = conn.cursor()
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS PageInfo(
+        CREATE TABLE IF NOT EXISTS TopicComments(
+            id INTEGER PRIMARY KEY,
+            topicid INTEGER,
+            dateadded TEXT,
+            commentdata BLOB,
+            FOREIGN KEY( topicid ) REFERENCES Topic(id)
+        );
+        """)
+    conn.commit()
+    conn.close()
+
+
+def makePageComments():
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS PageComments(
             id INTEGER PRIMARY KEY,
             pageid INTEGER,
-            dateAdded TEXT,
+            dateadded TEXT,m
             commentdata BLOB,
-            FOREIGN KEY( pageid ) REFERENCES Page(id),
-            UNIQUE( pageid )
+            FOREIGN KEY( pageid ) REFERENCES Page(id)
         );
         """)
     conn.commit()

@@ -33,12 +33,19 @@
 <a href='{{ url_for("button_add_PTR", topicid=topic["id"]) }}'> Add page </a> <br>
 <a href='{{ url_for("viewEntry", topic=topic["id"], toggle="selectRelated", **pageState) }}'>Show subtopic pages</a>
 
+
+<!-- Edit Panel -->
 <h3> <a href='{{ url_for("viewEntry", topic=topic["id"], toggle="editPanel", **pageState) }}'> Edit Topic </a> </h3>
+
 {% if pageState["editPanel"] %}
+<a href=''> Edit topic info </a>
+<br>
 <a href='{{ url_for("button_delete", topicid=topic["id"]) }}'> Delete Topic </a>
 {% endif %}
 
 
+
+<!-- Subtopics Panel -->
 <h2> <a href='{{ url_for("viewEntry", topic=topic["id"], toggle="showRelationships", **pageState) }}'> Subtopics </a> </h2>
 
 {% if pageState["showRelationships"] %}
