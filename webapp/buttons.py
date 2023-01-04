@@ -4,8 +4,6 @@ import json
 from flask import request, render_template, redirect, url_for
 
 from webapp import app
-from webapp.apis import allTopics, allPages
-
 
 
 ################################### Front End Drivers ###################################
@@ -55,7 +53,7 @@ def button_add_PTR():
 
     elif 'pageid' in request.args: # adding a topic to a specific page
         currentPage = request.args['pageid']
-        topicsData = json.loads( allTopics() )
+        topicsData = requests.get( url_for('api.allTopics', _external=True)).json()
         for entry in topicsData:
             entry['link'] = url_for('button_add_PTR', topicid=entry['id'], pageid=currentPage, callback='page')
 
@@ -66,7 +64,7 @@ def button_add_PTR():
     elif 'topicid' in request.args: # adding a page to a specific topic
         currentTopic = request.args['topicid']
 
-        pagesData = json.loads( allPages() )
+        pagesData = requests.get(url_for('api.allPages', _external=True)).json()
         for entry in pagesData:
             entry['link'] = url_for('button_add_PTR', topicid=currentTopic, pageid=entry['id'], callback='topic')
 
@@ -93,7 +91,7 @@ def button_add_TTR():
 
     elif 'righttopicid' in request.args:
         currentTopic = request.args['righttopicid']
-        topicsData = json.loads( allTopics() )
+        topicsData = requests.get( url_for('api.allTopics', _external=True)).json()
         for entry in topicsData:
             entry['link'] = url_for('button_add_TTR', lefttopicid=entry['id'], righttopicid=currentTopic)
 
