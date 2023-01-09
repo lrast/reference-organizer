@@ -7,6 +7,12 @@
 
 <h1> {{topic["name"]}} </h1>
 
+<div class="entryblock" contenteditable="true">
+
+</div>
+<br>
+
+
 <table>
     <thead>
         <tr>
@@ -16,13 +22,13 @@
     <tbody>
         {% for page in pages %}
             <tr>
-                <td class="wide-column"> <a href='{{ url_for("servePage", pageid=page["id"])}}' >  {{ page["name"] }}  </a> </td>
-                <td class="thin-column"> <a href='{{ url_for("viewEntry", page=page["id"])}}' > info  </a> </td>
+                <td class="wide-column"> <a href="{{ url_for('servePage', pageid=page['id'])}}" >  {{ page["name"] }}  </a> </td>
+                <td class="thin-column"> <a href="{{ url_for('viewEntry', page=page['id'])}}" > info  </a> </td>
 
                 {% if "topicid" in page and page["topicid"] != topic["id"] %}
-                     <td class="thin-column"> <a href='{{ url_for("viewEntry", topic=page["topicid"]) }}' > {{page["topicname"]}} </a> </td>
+                     <td class="thin-column"> <a href="{{ url_for('viewEntry', topic=page['topicid']) }}" > {{page["topicname"]}} </a> </td>
                 {% else %}
-                    <td class="thin-column"> <a href='{{ url_for("button_remove_pair", pageid=page["id"], topicid=topic["id"], base="topic") }}' > Remove from topic </a> </td>
+                    <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=page['id'], topicid=topic['id'], base='topic') }}" > Remove from topic </a> </td>
                 {% endif %}
             </tr>
         {% endfor %}
@@ -30,23 +36,33 @@
 </table>
 
 
-<a href='{{ url_for("button_add_PTR", topicid=topic["id"]) }}'> Add page </a> <br>
-<a href='{{ url_for("viewEntry", topic=topic["id"], toggle="selectRelated", **pageState) }}'>Show subtopic pages</a>
+<a href="{{ url_for('button.add_PTR', topicid=topic['id']) }}"> Add page </a> <br>
+<a href="{{ url_for('viewEntry', topic=topic['id'], toggle='selectRelated', **pageState) }}">Show subtopic pages</a>
 
 
 <!-- Edit Panel -->
-<h3> <a href='{{ url_for("viewEntry", topic=topic["id"], toggle="editPanel", **pageState) }}'> Edit Topic </a> </h3>
+<h3> <a href="{{ url_for('viewEntry', topic=topic['id'], toggle='editPanel', **pageState) }}"> Edit Topic </a> </h3>
 
 {% if pageState["editPanel"] %}
-<a href=''> Edit topic info </a>
+<form action="{{url_for('button.editTopic')}}" method="post">
+  <input type="hidden" name="id" value="{{topic['id']}}">
+  <div>
+    <label for="name">Topic Name: </label>
+    <input type="text" name="name" value="{{topic['name']}}">
+  </div>
+  <div>
+    <input type="submit" value="Edit">
+  </div>
+</form>
 <br>
-<a href='{{ url_for("button_delete", topicid=topic["id"]) }}'> Delete Topic </a>
+<br>
+<a href="{{ url_for('button.delete', topicid=topic['id']) }}"> Delete Topic </a>
 {% endif %}
 
 
 
 <!-- Subtopics Panel -->
-<h2> <a href='{{ url_for("viewEntry", topic=topic["id"], toggle="showRelationships", **pageState) }}'> Subtopics </a> </h2>
+<h2> <a href="{{ url_for('viewEntry', topic=topic['id'], toggle='showRelationships', **pageState) }}"> Subtopics </a> </h2>
 
 {% if pageState["showRelationships"] %}
 
@@ -59,8 +75,8 @@
     <tbody>
         {% for relatedTopic in relatedTopics %}
             <tr>
-                <td class="thin-column"> <a href='{{url_for("viewEntry", topic=relatedTopic["childid"])}}' >  {{ relatedTopic["childname"] }}  </a> </td>
-                <td class="thin-column"> <a href='{{url_for("button_remove_TTR", lefttopicid=relatedTopic["childid"], righttopicid=topic["id"])}}' > Remove relationship </a> </td>
+                <td class="thin-column"> <a href="{{url_for('viewEntry', topic=relatedTopic['childid'])}}">  {{ relatedTopic['childname'] }}  </a> </td>
+                <td class="thin-column"> <a href="{{url_for('button.remove_TTR', lefttopicid=relatedTopic['childid'], righttopicid=topic['id'])}}"> Remove relationship </a> </td>
             </tr>
         {% endfor %}
     </tbody>
@@ -68,7 +84,7 @@
 
 {% include "topictree.html" %}
 
-<a href='{{url_for("button_add_TTR", righttopicid=topic["id"])}}'> Add subtopic </a> <br>
+<a href="{{url_for('button.add_TTR', righttopicid=topic['id'])}}"> Add subtopic </a> <br>
 
 {% endif %}
 

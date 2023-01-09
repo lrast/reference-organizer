@@ -5,8 +5,16 @@
 {% block body %}
 
 
-<h1> <a href='{{ url_for("servePage", pageid=page["id"]) }}' >  {{ page["name"] }}  </a> </h1>
+<h1> <a href="{{ url_for('servePage', pageid=page['id']) }}" >  {{ page["name"] }}  </a> </h1>
 
+<div class=entryblock contenteditable="true">
+
+</div>
+<br>
+
+<div align="right">
+<input type="submit" value="save" class="savebutton">
+</div>
 
 <table>
     <thead>
@@ -17,23 +25,37 @@
     <tbody>
         {% for topic in topics %}
             <tr>
-                <td class="wide-column"> <a href='{{ url_for("viewEntry", topic=topic["id"]) }}' > {{topic['name']}} </a>  </td>
-                <td class="thin-column"> <a href='{{ url_for("button_remove_pair", pageid=page["id"], topicid=topic["id"], base="page") }}' > Remove topic  </a> </td>
+                <td class="wide-column"> <a href="{{ url_for('viewEntry', topic=topic['id']) }}" > {{topic['name']}} </a>  </td>
+                <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=page['id'], topicid=topic['id'], base='page') }}" > Remove topic  </a> </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<a href='{{ url_for("button_add_PTR", pageid=page["id"]) }}'> Add topic </a>
+<a href="{{ url_for('button.add_PTR', pageid=page['id']) }}"> Add topic </a>
 <br>
-<a href=''>Show including topics</a>
+<a href="">Show including topics</a>
 
 
-<h3> <a href='{{ url_for("viewEntry", page=page["id"], toggle="editPanel", **pageState) }}'> Edit Page </a></h3>
+<h3> <a href="{{ url_for('viewEntry', page=page['id'], toggle='editPanel', **pageState) }}"> Edit Page </a></h3>
 {% if pageState['editPanel'] %}
-<a href=''> Edit page info </a>
+<form action="{{url_for('button.editPage')}}" method="post">
+    <input type="hidden" name="id" value="{{page['id']}}">
+  <div>
+    <label for="url">Page URL: </label>
+    <input type="text" name="url" value="{{page['url']}}">
+  </div>
+  <div>
+    <label for="name">Page Name: </label>
+    <input type="text" name="name" value="{{page['name']}}">
+  </div>
+  <div>
+    <input type="submit" value="Edit">
+  </div>
+</form>
 <br>
-<a href='{{ url_for("button_delete", pageid=page["id"]) }}'> Delete page </a>
+<br>
+<a href="{{ url_for('button.delete', pageid=page['id']) }}"> Delete page </a>
 {% endif %}
 
 

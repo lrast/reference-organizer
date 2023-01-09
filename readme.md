@@ -20,14 +20,17 @@ export FLASK_DATABASE_URL=[url]
 
 
 ## to do:
-1. Editing pages / topics and improve input interface
-2. topic-topic relationships, IV
-3. fetch names for webpages, autofill
-4. API design:
+1. improve input interface
+    - local file dialog
+    - fetch names for webpages, autofill
+    - pdf ingestion: title, authors, references
+2. API design:
     - GET page: can fetch related topics (todo)
-    - Endpoint for info
-    - add comments to this effect
-5. dockerize
-6. local file adding dialog
-7. importing from mendeley and session buddy records
-8. Far future: shareability, searchability of libraries
+3. dockerize
+4. importing from mendeley and session buddy records
+5. Far future: shareability, searchability of libraries
+6. UI for comment adding and editing
+    - fetch and save editable content
+7. Front end:
+    - topic and citation graph visualization
+    - table view for pages including title, authors, journal, year

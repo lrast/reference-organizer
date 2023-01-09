@@ -1,16 +1,15 @@
 import requests
 import json
 
-from flask import request, render_template, redirect, url_for
+from flask import Blueprint, request, render_template, redirect, url_for
 
-from webapp import app
-
+button = Blueprint('button', __name__)
 
 ################################### Front End Drivers ###################################
 # eventually, these will moved to the front end
 
-@app.route('/button_delete')
-def button_delete():
+@button.route('/delete')
+def delete():
     # delete button action
     if 'topicid' in request.args.keys():
         topicid = request.args['topicid']
@@ -23,8 +22,8 @@ def button_delete():
         return redirect( url_for('viewEntry', page='all') )
 
 
-@app.route('/button_remove_pair')
-def button_remove_pair():
+@button.route('/remove_pair')
+def remove_pair():
     # delete topic button action
     topicid = request.args['topicid']
     pageid = request.args['pageid']
@@ -38,8 +37,8 @@ def button_remove_pair():
         return redirect( url_for('viewEntry', page=pageid) )
 
 
-@app.route('/button_add_PTR')
-def button_add_PTR():
+@button.route('/add_PTR')
+def add_PTR():
     if 'pageid' in request.args and 'topicid' in request.args:
         topicid = request.args['topicid']
         pageid = request.args['pageid']
@@ -55,7 +54,7 @@ def button_add_PTR():
         currentPage = request.args['pageid']
         topicsData = requests.get( url_for('api.allTopics', _external=True)).json()
         for entry in topicsData:
-            entry['link'] = url_for('button_add_PTR', topicid=entry['id'], pageid=currentPage, callback='page')
+            entry['link'] = url_for('button.add_PTR', topicid=entry['id'], pageid=currentPage, callback='page')
 
         return render_template("addpairdialog.html",
             tableEntries=topicsData, tableTitle='Topics',
@@ -66,15 +65,15 @@ def button_add_PTR():
 
         pagesData = requests.get(url_for('api.allPages', _external=True)).json()
         for entry in pagesData:
-            entry['link'] = url_for('button_add_PTR', topicid=currentTopic, pageid=entry['id'], callback='topic')
+            entry['link'] = url_for('button.add_PTR', topicid=currentTopic, pageid=entry['id'], callback='topic')
 
         return render_template("addpairdialog.html",
             tableEntries=pagesData, tableTitle='Pages',
             cancel=url_for('viewEntry', topic=currentTopic))
 
 
-@app.route('/button_add_TTR')
-def button_add_TTR():
+@button.route('/add_TTR')
+def add_TTR():
     """Driver for topic-topic relationship addtion"""
     # hard coded for now
     relationshipid = 1
@@ -93,14 +92,14 @@ def button_add_TTR():
         currentTopic = request.args['righttopicid']
         topicsData = requests.get( url_for('api.allTopics', _external=True)).json()
         for entry in topicsData:
-            entry['link'] = url_for('button_add_TTR', lefttopicid=entry['id'], righttopicid=currentTopic)
+            entry['link'] = url_for('button.add_TTR', lefttopicid=entry['id'], righttopicid=currentTopic)
 
         return render_template("addpairdialog.html", tableEntries=topicsData, tableTitle='Topics',
             cancel=url_for('viewEntry', topic=currentTopic))
 
 
-@app.route('/button_remove_TTR')
-def button_remove_TTR():
+@button.route('/remove_TTR')
+def remove_TTR():
     # delete topic button action
     lefttopicid = request.args['lefttopicid']
     righttopicid = request.args['righttopicid']
@@ -111,4 +110,25 @@ def button_remove_TTR():
         _external=True) )
 
     return redirect( url_for('viewEntry', topic=righttopicid, showRelationships=1 ) )
+
+
+@button.route('/editTopic', methods=["POST"])
+def editTopic():
+    topicid = request.form['id']
+    topicname = request.form['name']
+
+    requests.put( url_for('api.topicInfo', topicid=topicid, _external=True), 
+        data={'name': topicname})
+    return redirect( url_for('viewEntry', topic=topicid) )
+
+
+@button.route('/editPage', methods=["POST"])
+def editPage():
+    pageid = request.form['id']
+    pagename = request.form['name']
+    pageurl = request.form['url']
+
+    requests.put( url_for('api.pageInfo', pageid=pageid, _external=True), 
+        data={'name': pagename, 'url': pageurl})
+    return redirect( url_for('viewEntry', page=pageid) )
 
