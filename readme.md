@@ -9,7 +9,6 @@ export FLASK_DEBUG=True
 export FLASK_SECRET_KEY=[key]
 export FLASK_DATABASE_URL=[url]
 ```
-
 2. flask run
 
 
@@ -20,17 +19,15 @@ export FLASK_DATABASE_URL=[url]
 
 
 ## to do:
-1. improve input interface
-    - local file dialog
-    - fetch names for webpages, autofill
-    - pdf ingestion: title, authors, references
-2. API design:
-    - GET page: can fetch related topics (todo)
-3. dockerize
-4. importing from mendeley and session buddy records
-5. Far future: shareability, searchability of libraries
-6. UI for comment adding and editing
-    - fetch and save editable content
-7. Front end:
-    - topic and citation graph visualization
-    - table view for pages including title, authors, journal, year
+- improve input interface
+    * local file dialog
+    * fetch names for webpages, autofill
+    * pdf ingestion: title, authors, references
+- API design:
+    * GET page: can fetch related topics (todo)
+    * modularize commenting api
+- dockerize
+- importing from mendeley and session buddy records
+- Far future: shareability, searchability of libraries
+- topic and citation graph visualization
+- table view for pages including title, authors, journal, year

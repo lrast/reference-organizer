@@ -7,14 +7,7 @@
 
 <h1> <a href="{{ url_for('servePage', pageid=page['id']) }}" >  {{ page["name"] }}  </a> </h1>
 
-<div class=entryblock contenteditable="true">
-
-</div>
-<br>
-
-<div align="right">
-<input type="submit" value="save" class="savebutton">
-</div>
+{% include "editablecomments.html" %}
 
 <table>
     <thead>

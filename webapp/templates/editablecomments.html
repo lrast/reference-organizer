@@ -1,0 +1,41 @@
+{# Base list of editables #}
+
+{% for comment in comments %}
+    <div class="entryblock" contenteditable="true" id="{{comment['id']}}">{{comment['commentdata']}}</div>
+    <br>
+{% endfor %}
+
+<div class="entryblock" contenteditable="true" id="new"> </div>
+<br>
+
+<script>
+const entryBoxes = document.querySelectorAll('.entryblock')
+
+for (const entryBox of entryBoxes) {
+    entryBox.addEventListener('blur', reaction)
+}
+
+function reaction(event) {
+    let callingBox = event.srcElement
+    commentid = callingBox.id
+    commentdata = callingBox.innerText
+
+    if (commentid == "new") {
+        fetch( "{{commentEndpoint}}",
+        { method: 'POST',
+            body: JSON.stringify({commentdata: commentdata}) })
+    }
+    else {
+        let currentEndpoint = "{{commentEndpoint}}"+"?commentid="+commentid
+        if (commentdata==""){ // remove comment
+            fetch( currentEndpoint, {method:'DELETE'} )
+        }
+        else {
+            fetch(currentEndpoint,
+                {method:'PUT',
+                body: JSON.stringify({commentdata: commentdata}) } )
+        }
+    }
+    location.reload()
+}
+</script>
