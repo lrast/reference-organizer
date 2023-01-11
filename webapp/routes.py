@@ -8,6 +8,7 @@ from flask import url_for
 
 from webapp import app
 from webapp.db import get_db, addPageTopic
+from webapp.utilities import isURLWebOrLocal
 
 
 ######################################## Webpages ########################################
@@ -47,16 +48,11 @@ def servePage(pageid):
     db = get_db()
     url = db.execute("SELECT url FROM Page WHERE id=(?)", (pageid,)).fetchone()['url']
 
-    # check for local file vs webpage
-    if url[:7] == 'http://' or url[:8]=='https://':
-        # well formatted webpage
-        return redirect(url)
-    elif url[0] == '/' or url[0] == '~':
-        # definitely a local file
-        return send_file(url)
-    else:
-        # try it like a webpage
-        return redirect('http://'+url)
+    URLsource, formattedURL = isURLWebOrLocal(url)
+    if URLsource == 'web':
+        return redirect(formattedURL)
+    elif URLsource == 'local':
+        return send_file(formattedURL)
 
 
 @app.route('/view', methods=['GET'])

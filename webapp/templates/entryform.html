@@ -24,4 +24,23 @@
   </div>
 </form>
 
+<script>
+var urlField = document.querySelector("form input[name='url']")
+var nameField = document.querySelector("form input[name='name']")
+
+urlField.addEventListener('blur', deselectURL)
+
+function deselectURL(event){
+  if (nameField.value == "") {
+    if (urlField.value==""){
+      return
+    }
+
+    let resourceTitle = fetch("{{url_for('api.getWebpageTitle')}}",
+      {method: 'POST',
+       body: urlField.value}).then((x)=>x.text()).then( (title)=>nameField.value=title )
+  }
+}
+</script>
+
 {% endblock %}

@@ -1,9 +1,10 @@
 import json
+import requests
 
 from flask import request, Response, Blueprint, url_for
 
 from webapp.db import get_db, getPagesInTopic, getTopicGraph, packageRows
-
+from webapp.utilities import isURLWebOrLocal
 
 api = Blueprint('api', __name__)
 
@@ -334,5 +335,30 @@ def associatePagePage():
         db.commit()
         return Response(status=200)
 
+
+# 
+@api.route('/getWebpageTitle', methods=['POST'])
+def getWebpageTitle():
+    """Fetches the title for webpages"""
+    try:
+        url = request.data.decode()
+
+        if len(url) == 0:
+            return Response('', status=200)
+
+        URLsource, formattedURL = isURLWebOrLocal(url)
+        if URLsource != "web":
+            return Response('', status=200)
+
+        resp = requests.get(formattedURL)
+        if resp.status_code != 200:
+            return Response('', status=200)
+
+        workingTitle = ( resp.content.split(b'title>')[1][:-2] ).decode()
+
+        return Response(workingTitle, status=200)
+
+    except:
+        return Response('', status=200)
 
 

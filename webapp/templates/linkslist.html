@@ -9,7 +9,12 @@
         {% for entry in tableEntries  %}
             <tr>
                 <td class="thin-column"> 
-                    <a href="{{ entry['link'] }}" > {{entry['name']}}  </a> 
+                    <a href="{{ entry['link'] }}" > 
+                        {% if entry['name'] %}
+                            {{entry['name']}}
+                        {% else %}
+                            [blank]
+                        {% endif %}  </a> 
                 </td>
             </tr>
         {% endfor %}

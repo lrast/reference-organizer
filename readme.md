@@ -21,7 +21,6 @@ export FLASK_DATABASE_URL=[url]
 ## to do:
 - improve input interface
     * local file dialog
-    * fetch names for webpages, autofill
     * pdf ingestion: title, authors, references
 - API design:
     * GET page: can fetch related topics (todo)
@@ -31,3 +30,4 @@ export FLASK_DATABASE_URL=[url]
 - Far future: shareability, searchability of libraries
 - topic and citation graph visualization
 - table view for pages including title, authors, journal, year
+- improve URL origin testing
