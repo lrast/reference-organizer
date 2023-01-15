@@ -6,7 +6,14 @@ from flask import request, Response, Blueprint, url_for
 from webapp.db import get_db, getPagesInTopic, getTopicGraph, packageRows
 from webapp.utilities import isURLWebOrLocal
 
+from webapp.api.comment import comment
+
 api = Blueprint('api', __name__)
+
+api.register_blueprint(comment, url_prefix='/comment')
+
+
+
 
 
 @api.route('/page', methods=['GET', 'POST'])
@@ -158,101 +165,6 @@ def relationshipInfo(relationshipid):
         db.execute("DELETE FROM TopicTopicRelationship WHERE relationshipid=(?)", (relationshipid,) )
         db.commit()
         return Response(status=200)
-
-
-@api.route('/comments/page/<int:pageid>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def pageComments(pageid):
-    db = get_db()
-
-    if request.method == 'POST' or request.method == 'PUT':
-        print('here')
-        requestData = json.loads(request.data)
-        print(requestData)
-
-    if request.method == 'GET':
-        comments = db.execute("SELECT * FROM PageComments WHERE pageid=(?);", (pageid,)).fetchall()
-        return packageRows(comments)
-
-    if request.method == 'POST':
-        commentdata = requestData['commentdata']
-        db.execute("""INSERT INTO PageComments(pageid, dateadded, commentdata) VALUES 
-            (?, (SELECT DATE()), ?);""", (pageid, commentdata))
-
-    if request.method == 'PUT':
-        commentid = request.args['commentid']
-        commentdata = requestData['commentdata']
-        db.execute("""INSERT OR REPLACE INTO PageComments(id, pageid, dateadded, commentdata)
-            VALUES (?, ?, (SELECT DATE()), ?);""", (commentid, pageid, commentdata))
-
-    if request.method == 'DELETE':
-        print('Called DELETE')
-        commentid = request.args['commentid']
-        db.execute("DELETE FROM PageComments WHERE id=(?);", (commentid,))
-
-    db.commit()
-    return Response(status=200)
-
-
-@api.route('/comments/topic/<int:topicid>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def topicComments(topicid):
-    db = get_db()
-
-    if request.method == 'POST' or request.method == 'PUT':
-        requestData = json.loads(request.data)
-
-    if request.method == 'GET':
-        comments = db.execute("SELECT * FROM TopicComments WHERE topicid=(?);", (topicid,)).fetchall()
-        return packageRows(comments)
-
-    if request.method == 'POST':
-        commentdata = requestData['commentdata']
-        db.execute("""INSERT INTO TopicComments(topicid, dateadded, commentdata) VALUES 
-            (?, (SELECT DATE()), ?);""", (topicid, commentdata))
-
-    if request.method == 'PUT':
-        commentid = request.args['commentid']
-        commentdata = requestData['commentdata']
-        db.execute("""INSERT OR REPLACE INTO TopicComments(id, topicid, dateadded, commentdata)
-            VALUES (?, ?, (SELECT DATE()), ?);""", (commentid, topicid, commentdata))
-
-    if request.method == 'DELETE':
-        commentid = request.args['commentid']
-        db.execute("DELETE FROM TopicComments WHERE id=(?);", (commentid,))
-
-    db.commit()
-    return Response(status=200)
-
-
-@api.route('/comments/page/<int:pageid>', methods=['GET', 'POST', 'PUT', 'DELETE'])
-def relationshipComments(relationshipid):
-    db = get_db()
-
-    if request.method == 'POST' or request.method == 'PUT':
-        requestData = json.loads(request.data)
-
-    if request.method == 'GET':
-        comments = db.execute("SELECT * FROM RelationshipComments WHERE relationshipid=(?);",
-            (relationshipid,))
-        return packageRows(comments)
-
-    if request.method == 'POST':
-        commentdata = requestData['commentdata']
-        db.execute("""INSERT INTO RelationshipComments(relationshipid, dateadded, commentdata) VALUES 
-            (?, (SELECT DATE()), ?);""", (relationshipid, commentdata))
-
-    if request.method == 'PUT':
-        commentid = request.args['commentid']
-        commentdata = requestData['commentdata']
-        db.execute("""INSERT OR REPLACE INTO RelationshipComments(id, relationshipid, dateadded, commentdata)
-            VALUES (?, ?, (SELECT DATE()), ?);""", (commentid, relationshipid, commentdata))
-
-    if request.method == 'DELETE':
-
-        commentid = request.args['commentid']
-        db.execute("DELETE FROM RelationshipComments WHERE id=(?);", (commentid,))
-
-    db.commit()
-    return Response(status=200)
 
 
 

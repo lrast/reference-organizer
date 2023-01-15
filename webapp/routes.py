@@ -92,7 +92,7 @@ def viewEntry():
                     url_for('api.topicInfo', topicid=topicid, fetchThrough=pageState['selectRelated'], _external=True) 
                 ).json()
 
-            commentEndpoint=url_for('api.topicComments', topicid=topicid, _external=True)
+            commentEndpoint=url_for('api.comment.topic', topicid=topicid, _external=True)
             topicComments=requests.get( commentEndpoint ).json()
 
 
@@ -126,7 +126,7 @@ def viewEntry():
             pageid = int(request.args['page'])
             pageData = requests.get( url_for('api.pageInfo', pageid=pageid, _external=True) ).json()
 
-            commentEndpoint=url_for('api.pageComments', pageid=pageid, _external=True)
+            commentEndpoint=url_for('api.comment.page', pageid=pageid, _external=True)
             pageComments=requests.get( commentEndpoint ).json()
 
             return render_template('viewpage.html', 
@@ -140,12 +140,11 @@ def viewEntry():
 
 
 
+@app.route('/table', methods=['GET'])
+def viewTable():
+    """show a table of publications based on the paperMetadata topic"""
 
-@app.route('/editInfo', methods=['GET', 'POST'])
-def editInfo():
-    pass
-
-
+    return render_template('metadatatable.html')
 
 
 

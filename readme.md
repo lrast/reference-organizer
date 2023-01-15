@@ -22,27 +22,37 @@ export FLASK_DATABASE_URL=[url]
 Majory priorities:
 1. Start populating the database
 2. usability features for adding: relationship editing, metadata editing
-3. usability features for viewing: too long of lists
+3. usability features for viewing: better visualization
+    - the lists are just too damn long
 
 ### Short term:
+- API design:
+    * How to make the API make sense for more complicated queries?
+    * I think the thing to do is to make the routes reflect the SQL query. eg.
+        - SELECT FROM Page JOIN Topic ON Topic.id=Page.id JOIN 
+
 - topic autofill
 - improve input interface
     * local file dialog -- this is difficult because the browser is explicitly sandboxed to hide local file locations
     * pdf ingestion: title, authors, references
-- importing from mendeley and session buddy records
-    > important for populating the database
-- topic and citation graph visualization
-    - to start: a series of trees with each unique root
+    * importing from mendeley and session buddy records
+        > important for populating the database
 - table view for pages including title, authors, journal, year
 - interface to relationships
 - super topics
+- dockerize to a local application
+
 
 ### Long term:
+- topic and citation graph visualization
+    - to start: a series of trees with each unique root
 - improve URL origin testing
 - searching
 - API design:
     * GET page: can fetch related topics (todo)
-    * modularize commenting api
-- dockerize
 - Far future: shareability, searchability of libraries
 - topic and citation graph visualization
+
+### bugs:
+- commenting: new lines become spaces
+
