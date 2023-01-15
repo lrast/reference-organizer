@@ -13,12 +13,12 @@ def delete():
     # delete button action
     if 'topicid' in request.args.keys():
         topicid = request.args['topicid']
-        requests.delete( url_for('api.topicInfo', topicid=topicid, _external=True))
+        requests.delete( url_for('api.topic.info', topicid=topicid, _external=True))
         return redirect( url_for('viewEntry', topic='all') )
 
     elif 'pageid' in request.args.keys():
         pageid = request.args['pageid']
-        requests.delete( url_for('api.pageInfo', pageid=pageid, _external=True) )
+        requests.delete( url_for('api.page.info', pageid=pageid, _external=True) )
         return redirect( url_for('viewEntry', page='all') )
 
 
@@ -29,7 +29,7 @@ def remove_pair():
     pageid = request.args['pageid']
     base = request.args['base']
 
-    requests.delete( url_for('api.associatePageTopic', topicid=topicid, pageid=pageid, _external=True) )
+    requests.delete( url_for('api.topic.related_pages_id', topicid=topicid, relatedpageid=pageid, _external=True) )
 
     if base == 'topic':
         return redirect( url_for('viewEntry', topic=topicid) )
@@ -44,7 +44,7 @@ def add_PTR():
         pageid = request.args['pageid']
         callback = request.args['callback']
 
-        requests.post(url_for('api.associatePageTopic', topicid=topicid, pageid=pageid, _external=True))
+        requests.put(url_for('api.topic.related_pages_id', topicid=topicid, relatedpageid=pageid, _external=True))
         if callback == 'topic':
             return redirect( url_for('viewEntry', topic=topicid) )
         if callback == 'page':
@@ -52,7 +52,7 @@ def add_PTR():
 
     elif 'pageid' in request.args: # adding a topic to a specific page
         currentPage = request.args['pageid']
-        topicsData = requests.get( url_for('api.allTopics', _external=True)).json()
+        topicsData = requests.get( url_for('api.topic.all_topics', _external=True)).json()
         for entry in topicsData:
             entry['link'] = url_for('button.add_PTR', topicid=entry['id'], pageid=currentPage, callback='page')
 
@@ -63,7 +63,7 @@ def add_PTR():
     elif 'topicid' in request.args: # adding a page to a specific topic
         currentTopic = request.args['topicid']
 
-        pagesData = requests.get(url_for('api.allPages', _external=True)).json()
+        pagesData = requests.get(url_for('api.page.all_pages', _external=True)).json()
         for entry in pagesData:
             entry['link'] = url_for('button.add_PTR', topicid=currentTopic, pageid=entry['id'], callback='topic')
 
@@ -82,15 +82,15 @@ def add_TTR():
         lefttopicid = request.args['lefttopicid']
         righttopicid = request.args['righttopicid']
 
-        requests.post(url_for('api.associateTopicTopic', 
-            lefttopicid=lefttopicid, righttopicid=righttopicid, relationshipid=relationshipid,
-            _external=True))
+        requests.put(url_for('api.topic.related_topics_id', 
+            topicid=lefttopicid, relatedtopicid=righttopicid, relationshipid=relationshipid,
+            primaryside='left', _external=True))
 
         return redirect( url_for('viewEntry', topic=righttopicid, showRelationships='1') )
 
     elif 'righttopicid' in request.args:
         currentTopic = request.args['righttopicid']
-        topicsData = requests.get( url_for('api.allTopics', _external=True)).json()
+        topicsData = requests.get( url_for('api.topic.all_topics', _external=True)).json()
         for entry in topicsData:
             entry['link'] = url_for('button.add_TTR', lefttopicid=entry['id'], righttopicid=currentTopic)
 
@@ -105,9 +105,9 @@ def remove_TTR():
     righttopicid = request.args['righttopicid']
     relationshipid = 1
 
-    requests.delete( url_for('api.associateTopicTopic', 
-        lefttopicid=lefttopicid, righttopicid=righttopicid, relationshipid=relationshipid,
-        _external=True) )
+    requests.delete( url_for('api.topic.related_topics_id', 
+        topicid=lefttopicid, relatedtopicid=righttopicid, relationshipid=relationshipid,
+        primaryside='left', _external=True) )
 
     return redirect( url_for('viewEntry', topic=righttopicid, showRelationships=1 ) )
 
@@ -117,7 +117,7 @@ def editTopic():
     topicid = request.form['id']
     topicname = request.form['name']
 
-    requests.put( url_for('api.topicInfo', topicid=topicid, _external=True), 
+    requests.put( url_for('api.topic.info', topicid=topicid, _external=True), 
         data={'name': topicname})
     return redirect( url_for('viewEntry', topic=topicid) )
 
@@ -128,7 +128,7 @@ def editPage():
     pagename = request.form['name']
     pageurl = request.form['url']
 
-    requests.put( url_for('api.pageInfo', pageid=pageid, _external=True), 
+    requests.put( url_for('api.page.info', pageid=pageid, _external=True), 
         data={'name': pagename, 'url': pageurl})
     return redirect( url_for('viewEntry', page=pageid) )
 

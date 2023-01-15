@@ -55,4 +55,5 @@ Majory priorities:
 
 ### bugs:
 - commenting: new lines become spaces
+- 'maximum recursion depth' when there are subtopic loops
 

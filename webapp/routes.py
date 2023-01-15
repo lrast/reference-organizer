@@ -26,13 +26,13 @@ def newPage():
     elif request.method == 'POST':
         pageAdded = False
         if request.form['url'] != '':
-            requests.post( url_for('api.allPages', _external=True), 
+            requests.post( url_for('api.page.all_pages', _external=True), 
                 {'url': request.form['url'], 'name': request.form['name']})
             pageAdded = True
 
         if request.form['topics'] != '':
             for topic in request.form['topics'].split(','):
-                requests.post( url_for('api.allTopics', _external=True), {'name': topic})
+                requests.post( url_for('api.topic.all_topics', _external=True), {'name': topic})
 
                 if pageAdded:
                     db = get_db()
@@ -80,7 +80,7 @@ def viewEntry():
     if 'topic' in request.args:
         if request.args['topic'] == 'all':
             #show all topics
-            topicsData = requests.get( url_for('api.allTopics', _external=True)).json()
+            topicsData = requests.get( url_for('api.topic.all_topics', _external=True)).json()
             for entry in topicsData:
                 entry['link'] = url_for('viewEntry', topic=entry['id'])
             return render_template('topiclist.html',
@@ -89,7 +89,7 @@ def viewEntry():
         else:
             topicid = int(request.args['topic'])
             topicData = requests.get( 
-                    url_for('api.topicInfo', topicid=topicid, fetchThrough=pageState['selectRelated'], _external=True) 
+                    url_for('api.topic.info', topicid=topicid, fetchThrough=pageState['selectRelated'], _external=True) 
                 ).json()
 
             commentEndpoint=url_for('api.comment.topic', topicid=topicid, _external=True)
@@ -118,7 +118,7 @@ def viewEntry():
     elif 'page' in request.args:
         if request.args['page'] == 'all':
             #show all pages
-            pagesData = requests.get(url_for('api.allPages', _external=True)).json()
+            pagesData = requests.get(url_for('api.page.all_pages', _external=True)).json()
             for entry in pagesData:
                 entry['link'] = url_for('viewEntry', page=entry['id'])
             return render_template('pagelist.html',
@@ -127,7 +127,7 @@ def viewEntry():
 
         else:
             pageid = int(request.args['page'])
-            pageData = requests.get( url_for('api.pageInfo', pageid=pageid, _external=True) ).json()
+            pageData = requests.get( url_for('api.page.info', pageid=pageid, _external=True) ).json()
 
             commentEndpoint=url_for('api.comment.page', pageid=pageid, _external=True)
             pageComments=requests.get( commentEndpoint ).json()
