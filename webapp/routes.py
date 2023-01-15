@@ -98,8 +98,11 @@ def viewEntry():
 
             if bool(pageState['showRelationships']):
                 # hard coding with a single relationship type for now
+                print(requests.get(
+                    url_for('api.relationship.info', relationshipid=1, topic=topicid, fetchThrough=1, _external=True)
+                    ))
                 relatedTopics = requests.get(
-                    url_for('api.relationshipInfo', relationshipid=1, topic=topicid, fetchThrough=1, _external=True)
+                    url_for('api.relationship.info', relationshipid=1, topic=topicid, fetchThrough=1, _external=True)
                     ).json()['topics']
             else:
                 relatedTopics=[]

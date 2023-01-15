@@ -2,10 +2,11 @@
 import json
 
 from flask import Blueprint, request, Response
-
 from webapp.db import get_db, packageRows
 
+
 comment = Blueprint('comment', __name__)
+
 
 @comment.route('/page/<int:pageid>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def page(pageid):
