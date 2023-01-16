@@ -17,7 +17,13 @@
   </div>
   <div>
     <label for="topics">Topics: </label>
-    <input type="text" name="topics" multiple>
+    <!-- Hack from stack overflow: set to email as to allow multiple autofill.  -->
+    <input type="email" name="topics" list="knowntopics" multiple> 
+    <datalist id="knowntopics">
+      {% for topic in topicList %}
+        <option value="{{topic['name']}}">
+      {% endfor %}
+    </datalist>
   </div>
   <div>
     <input type="submit" value="Add">
@@ -27,8 +33,14 @@
 <script>
 var urlField = document.querySelector("form input[name='url']")
 var nameField = document.querySelector("form input[name='name']")
+var topicField = document.querySelector("form input[name='topics']")
+var submitButton = document.querySelector("form input[type='submit']")
 
+
+submitButton.addEventListener('click', makeText)
 urlField.addEventListener('blur', deselectURL)
+
+
 
 function deselectURL(event){
   if (nameField.value == "") {
@@ -41,6 +53,14 @@ function deselectURL(event){
        body: urlField.value}).then((x)=>x.text()).then( (title)=>nameField.value=title )
   }
 }
+
+function makeText(event) {
+  topicField.type = "text"
+  console.log(topicField.type)
+}
+
+
+
 </script>
 
 {% endblock %}

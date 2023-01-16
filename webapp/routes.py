@@ -21,7 +21,10 @@ def home():
 @app.route('/newpage', methods=['GET', 'POST'])
 def newPage():
     if request.method == 'GET':
-        return render_template("entryform.html")
+        topicList = json.loads(
+            requests.get(url_for('api.topic.all_topics', _external=True)).content
+            )
+        return render_template("entryform.html", topicList=topicList)
 
     elif request.method == 'POST':
         pageAdded = False

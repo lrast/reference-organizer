@@ -27,11 +27,7 @@ Majory priorities:
 
 ### Short term:
 - API design:
-    * How to make the API make sense for more complicated queries?
-    * I think the thing to do is to make the routes reflect the SQL query. eg.
-        - SELECT FROM Page JOIN Topic ON Topic.id=Page.id JOIN 
-
-- topic autofill
+    * Implement new API
 - improve input interface
     * local file dialog -- this is difficult because the browser is explicitly sandboxed to hide local file locations
     * pdf ingestion: title, authors, references
