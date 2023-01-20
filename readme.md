@@ -26,20 +26,21 @@ Majory priorities:
     - the lists are just too damn long
 
 ### Short term:
+- adding topics and pages: make autofill textboxes
 - API design:
     * Implement new API
+    * POSTs rely too much on form data input. It's clunky
 - improve input interface
-    * local file dialog -- this is difficult because the browser is explicitly sandboxed to hide local file locations
+    * local file dialog -- difficult because the browser is explicitly sandboxed to hide local file locations
     * pdf ingestion: title, authors, references
     * importing from mendeley and session buddy records
         > important for populating the database
 - table view for pages including title, authors, journal, year
-- interface to relationships
-- super topics
-- dockerize to a local application
 
 
 ### Long term:
+- interface to relationships
+- dockerize to a local application
 - topic and citation graph visualization
     - to start: a series of trees with each unique root
 - improve URL origin testing
@@ -47,7 +48,6 @@ Majory priorities:
 - API design:
     * GET page: can fetch related topics (todo)
 - Far future: shareability, searchability of libraries
-- topic and citation graph visualization
 
 ### bugs:
 - commenting: new lines become spaces

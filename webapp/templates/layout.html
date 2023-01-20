@@ -3,7 +3,7 @@
 
   <head>
 
-    <title>Organizer {% block subtitle %} {% endblock %}</title>
+    <title>Organizer {% block subtitle %}{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="../static/styles.css" />
 
     {% block includes %} {% endblock %}
@@ -15,6 +15,7 @@
         <li class="navheader"><a href="{{ url_for('home') }}">Home</a></li>
         <li class="navheader"><a href="{{ url_for('viewEntry', page='all') }}">Pages</a></li>
         <li class="navheader"><a href="{{ url_for('viewEntry', topic='all') }}">Topics</a></li>
+        <li class="navheader"><a href="{{url_for('viewTable')}}"> Table </a></li>
       </ol>
     </nav>
 

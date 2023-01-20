@@ -20,9 +20,10 @@ def all_relationships():
     if request.method == 'POST':
         # add a new relationship
         name = request.form['name']
-        db.execute("INSERT INTO Relationship (name) VALUES (?);", (name,))
+        inserted = db.execute("INSERT INTO Relationship (name) VALUES (?) RETURNING id;", (name,))
+        response = packageRows(inserted.fetchone())
         db.commit()
-        return Response(status=200 )
+        return response
 
 
 @relationship.route('/<int:relationshipid>', methods=['GET', 'PUT', 'DELETE'])

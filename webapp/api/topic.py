@@ -11,6 +11,7 @@ topic = Blueprint('topic', __name__)
 def all_topics():
     """fetching lists of topics"""
     db = get_db()
+
     if request.method == 'GET':
         # PROCESS query arguments here
         # 
@@ -21,31 +22,51 @@ def all_topics():
     if request.method == 'POST':
         name = request.form['name']
 
-        db.execute("INSERT INTO Topic (name) VALUES (?)", (name,))
+        inserted = db.execute("INSERT INTO Topic(name) VALUES (?) RETURNING id", (name,))
+        response = packageRows(inserted.fetchone())
         db.commit()
-        return Response( status=200 )
+
+        return response
 
 
 
 @topic.route('/<int:topicid>', methods=['GET', 'PUT', 'DELETE'])
 def info(topicid):
-    """Topic API: info on a specific topic, including pages and pages affiliated with related topics"""
+    """all info on a specific topic, including affiliated pages and topics"""
     db = get_db()
     if request.method == 'GET':
         # to do: update to new interface
 
-
-        #getpages = request.args.get('getpages', True)
-        #getlefttopics = request.args.get('getlefttopics', True)
-        #getrighttopics = request.args.get('getrighttopics', True)
-
         topicInfo = db.execute("SELECT * FROM Topic WHERE id=(?)", (topicid,) ).fetchone()
 
+        if bool(request.args.get('infoOnly', '')):
+            return packageRows(topic=topicInfo)
+
+        # page fetch needs to be update with the view function
         topicPages = getPagesInTopic(db, topicid,
             request.args.get('fetchThrough', None), request.args.get('onThe', 'left')
             )
-        return packageRows(topic=topicInfo, pages=topicPages)
+        leftTopics = db.execute(
+            """
+            SELECT Topic.name, TopicTopicRelationship.lefttopicid,
+            TopicTopicRelationship.relationshipid
+            FROM TopicTopicRelationship INNER JOIN Topic ON
+            TopicTopicRelationship.lefttopicid = Topic.id WHERE
+            TopicTopicRelationship.righttopicid=(?);
+            """,
+            (topicid,)).fetchall()
+        rightTopics = db.execute(
+            """
+            SELECT Topic.name, TopicTopicRelationship.righttopicid,
+            TopicTopicRelationship.relationshipid
+            FROM TopicTopicRelationship INNER JOIN Topic ON
+            TopicTopicRelationship.righttopicid = Topic.id WHERE 
+            TopicTopicRelationship.lefttopicid=(?);
+            """,
+            (topicid,)).fetchall()
 
+        return packageRows(topic=topicInfo, pages=topicPages, leftTopics=leftTopics,
+            rightTopics=rightTopics)
 
     if request.method == 'PUT':
         if 'name' in request.form.keys():
@@ -62,16 +83,17 @@ def info(topicid):
         return Response(status=200)
 
 
-
 @topic.route('/<int:topicid>/page?QUERYPARAMS', methods=['GET', 'POST'])
-def related_pages():
-    """-> 'affiliated Pages'"""
+def related_pages(topicid):
+    """More involved selections of pages that relate to the topic"""
     db = get_db()
     if request.method == 'GET':
+        # PROCESS query arguments here
         pass
 
     if request.method == 'POST':
-        pass
+        pageid = request.form['pageid']
+        db.execute("INSERT INTO PageTopic(pageid, topicid) VALUES (?,?);", (pageid, topicid))
 
 
 @topic.route('/<int:topicid>/page/<int:relatedpageid>', methods=['PUT', 'DELETE'])
@@ -88,13 +110,32 @@ def related_pages_id(topicid, relatedpageid):
 
 
 
-
-
 @topic.route('/<int:topicid>/topic?QUERYPARAMS', methods=['GET', 'POST'])
-def related_topics():
-    """ -> 'affiliated Topics"""
-    pass
+def related_topics(topicid):
+    """More involved selections of topis that relate to the topic"""
+    db = get_db()
+    if request.method == 'GET':
+        # PROCESS query arguments here
+        pass
 
+    if request.method == 'POST':
+        relatedtopicid = request.form['relatedtopicid']
+        relationshipid = request.form['relationshipid']
+        side = request.form['side']
+
+        ok, resp = checkNodeType(relationshipid)
+        if not ok:
+            return resp
+
+        if side == 'left':
+            db.execute("""
+                INSERT INTO TopicTopicRelationship(relationshipid, lefttopicid, righttopicid)
+                VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
+
+        if side == 'right':
+            db.execute("""
+                INSERT INTO TopicTopicRelationship(relationshipid, righttopicid, lefttopicid)
+                VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
 
 
 
@@ -112,10 +153,9 @@ def related_topics_id(topicid, relatedtopicid):
         lefttopicid = relatedtopicid
         righttopicid = topicid
 
-    nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?);""",
-        (relationshipid,)).fetchone()[0]
-    if nodeType != 'topic':
-        return Response('Relationship is not betweeen Topics', status=422)
+    ok, resp = checkNodeType(relationshipid)
+    if not ok:
+        return resp
 
     if request.method == 'PUT':
         db.execute("""
@@ -134,6 +174,15 @@ def related_topics_id(topicid, relatedtopicid):
 
 
 
+####################### utilities #######################
+
+def checkNodeType(relationshipid):
+    """Double check that the relationship is between topics"""
+    nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?);""",
+        (relationshipid,)).fetchone()[0]
+    if nodeType != 'topic':
+        return False,Response('Relationship is not betweeen Topics', status=422)
+    return True, '_'
 
 
 

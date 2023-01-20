@@ -21,9 +21,9 @@ def home():
 @app.route('/newpage', methods=['GET', 'POST'])
 def newPage():
     if request.method == 'GET':
-        topicList = json.loads(
+        topicList = sortbyname( json.loads(
             requests.get(url_for('api.topic.all_topics', _external=True)).content
-            )
+            ) )
         return render_template("entryform.html", topicList=topicList)
 
     elif request.method == 'POST':
@@ -83,7 +83,8 @@ def viewEntry():
     if 'topic' in request.args:
         if request.args['topic'] == 'all':
             #show all topics
-            topicsData = requests.get( url_for('api.topic.all_topics', _external=True)).json()
+            topicsData = sortbyname(
+                requests.get( url_for('api.topic.all_topics', _external=True)).json())
             for entry in topicsData:
                 entry['link'] = url_for('viewEntry', topic=entry['id'])
             return render_template('topiclist.html',
@@ -121,7 +122,8 @@ def viewEntry():
     elif 'page' in request.args:
         if request.args['page'] == 'all':
             #show all pages
-            pagesData = requests.get(url_for('api.page.all_pages', _external=True)).json()
+            pagesData = sortbyname( 
+                requests.get(url_for('api.page.all_pages', _external=True)).json() )
             for entry in pagesData:
                 entry['link'] = url_for('viewEntry', page=entry['id'])
             return render_template('pagelist.html',
@@ -151,6 +153,14 @@ def viewTable():
     """show a table of publications based on the paperMetadata topic"""
 
     return render_template('metadatatable.html')
+
+
+
+
+# utilities
+def sortbyname(inlist):
+    inlist.sort(key=lambda x: x['name'].lower())
+    return inlist
 
 
 

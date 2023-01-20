@@ -23,9 +23,10 @@ def all_pages():
         name = request.form['name']
         url = request.form['url']
 
-        db.execute("INSERT INTO Page (name, url) VALUES (?,?);", (name, url))
+        inserted = db.execute("INSERT INTO Page (name, url) VALUES (?,?) RETURNING id;", (name, url))
+        response = packageRows(inserted.fetchone())
         db.commit()
-        return Response(status=200 )
+        return response
 
 
 @page.route('/<int:pageid>', methods=['GET', 'PUT', 'DELETE'])
@@ -35,17 +36,34 @@ def info(pageid):
     if request.method == 'GET':
         # info on a specific page
 
-        # PROCESS query arguments
-        # here
-
         pageInfo = db.execute("SELECT * FROM Page WHERE id=(?)", (pageid,)).fetchone()
+
+        if bool(request.args.get('infoOnly', '')):
+            return packageRows(page=pageInfo)
 
         pageTopics = db.execute(
             """SELECT Topic.id, Topic.name FROM 
             Topic INNER JOIN PageTopic ON Topic.id = PageTopic.topicid
             WHERE PageTopic.pageid =(?)
             """, (pageid,)).fetchall()
-        return packageRows(page=pageInfo, topics=pageTopics)
+        leftPages = db.execute(
+            """
+            SELECT Page.name, PagePageRelationship.leftpageid,
+            PagePageRelationship.relationshipid
+            FROM PagePageRelationship INNER JOIN Page 
+            ON PagePageRelationship.leftpageid = Page.id
+            WHERE PagePageRelationship.rightpageid=(?);
+            """, (pageid,)).fetchall()
+        rightPages = db.execute(
+            """
+            SELECT Page.name, PagePageRelationship.rightpageid,
+            PagePageRelationship.relationshipid
+            FROM PagePageRelationship INNER JOIN Page 
+            ON PagePageRelationship.rightpageid = Page.id
+            WHERE PagePageRelationship.leftpageid=(?);
+            """, (pageid,)).fetchall()
+
+        return packageRows(page=pageInfo, topics=pageTopics, leftPages=leftPages, rightPages=rightPages)
 
     if request.method == 'PUT':
         # over write the contents of the entry
@@ -67,8 +85,17 @@ def info(pageid):
 
 @page.route('/<int:pageid>/topic?QUERYPARAMS', methods=['GET', 'POST'])
 def related_topics():
-    """ -> 'affiliated Topics"""
-    pass
+    """More involved selections of topis that relate to the page"""
+    db = get_db()
+    if request.method == 'GET':
+        # PROCESS query arguments here
+        pass
+
+    if request.method == 'POST':
+        topicid = request.form['topicid']
+        db.execute("INSERT INTO PageTopic(pageid, topicid) VALUES (?,?);", (pageid, topicid))
+
+
 
 
 
@@ -90,8 +117,32 @@ def related_topics_id(pageid, relatedtopicid):
 
 @page.route('/<int:pageid>/page?QUERYPARAMS', methods=['GET', 'POST'])
 def related_pages():
-    """-> 'affiliated Pages'"""
-    pass
+    """More involved selections of pages that relate to the page"""
+    db = get_db()
+    if request.method == 'GET':
+        # PROCESS query arguments here
+        pass
+
+    if request.method == 'POST':
+        relatedpageid = request.form['relatedpageid']
+        relationshipid = request.form['relationshipid']
+        side = request.form['side']
+
+        ok, resp = checkNodeType(relationshipid)
+        if not ok:
+            return resp
+
+        if side == 'left':
+            db.execute("""
+                INSERT INTO PagePageRelationship(relationshipid, lefttopicid, righttopicid)
+                VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
+
+        if side == 'right':
+            db.execute("""
+                INSERT INTO PagePageRelationship(relationshipid, righttopicid, lefttopicid)
+                VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
+
+
 
 
 
@@ -110,10 +161,9 @@ def related_pages_id(pageid, relatedpageid):
         leftpageid = relatedpageid
         rightpageid = pageid
 
-    nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?)""",
-        (relationshipid,)).fetchone()[0]
-    if nodeType != 'page':
-        return Response('Relationship is not betweeen Page',status=422)
+    ok, resp = checkNodeType(relationshipid)
+    if not ok:
+        return resp
 
     if request.method == 'PUT':
         entryData = db.execute("""
@@ -133,7 +183,16 @@ def related_pages_id(pageid, relatedpageid):
 
 
 
+####################### utilities #######################
 
+def checkNodeType(relationshipid):
+    """Double check that the relationship is between pages"""
+    nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?)""",
+        (relationshipid,)).fetchone()[0]
+    if nodeType != 'page':
+        return False, Response('Relationship is not betweeen Page',status=422)
+
+    return True, '_'
 
 
 
