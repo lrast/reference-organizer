@@ -7,6 +7,7 @@ from webapp.db import get_db, packageRows, getTopicGraph, getPagesInTopic
 topic = Blueprint('topic', __name__)
 
 
+
 @topic.route('/', methods=['GET', 'POST'])
 def all_topics():
     """fetching lists of topics"""
@@ -14,8 +15,7 @@ def all_topics():
 
     if request.method == 'GET':
         # PROCESS query arguments here
-        # 
-        #
+
         topicsData = db.execute("SELECT * FROM Topic;").fetchall()
         return packageRows(topicsData)
 
@@ -29,23 +29,17 @@ def all_topics():
         return response
 
 
-
 @topic.route('/<int:topicid>', methods=['GET', 'PUT', 'DELETE'])
 def info(topicid):
     """all info on a specific topic, including affiliated pages and topics"""
     db = get_db()
     if request.method == 'GET':
-        # to do: update to new interface
-
         topicInfo = db.execute("SELECT * FROM Topic WHERE id=(?)", (topicid,) ).fetchone()
 
         if bool(request.args.get('infoOnly', '')):
             return packageRows(topic=topicInfo)
 
-        # page fetch needs to be update with the view function
-        topicPages = getPagesInTopic(db, topicid,
-            request.args.get('fetchThrough', None), request.args.get('onThe', 'left')
-            )
+        topicPages = getPagesInTopic(db, topicid, selectThrough=None)
         leftTopics = db.execute(
             """
             SELECT Topic.name, TopicTopicRelationship.lefttopicid,
@@ -88,8 +82,13 @@ def related_pages(topicid):
     """More involved selections of pages that relate to the topic"""
     db = get_db()
     if request.method == 'GET':
-        # PROCESS query arguments here
-        pass
+        selectThrough = request.args.get('selectThrough', None)
+        onThe = request.args.get('onThe', 'left')
+
+        pages = getPagesInTopic(db, topicid, selectThrough, onThe)
+
+        return packageRows(pages)
+
 
     if request.method == 'POST':
         pageid = request.form['pageid']
@@ -109,7 +108,6 @@ def related_pages_id(topicid, relatedpageid):
     return Response(status=200)
 
 
-
 @topic.route('/<int:topicid>/topic?QUERYPARAMS', methods=['GET', 'POST'])
 def related_topics(topicid):
     """More involved selections of topis that relate to the topic"""
@@ -123,7 +121,7 @@ def related_topics(topicid):
         relationshipid = request.form['relationshipid']
         side = request.form['side']
 
-        ok, resp = checkNodeType(relationshipid)
+        ok, resp = checkNodeType(db, relationshipid)
         if not ok:
             return resp
 
@@ -136,7 +134,6 @@ def related_topics(topicid):
             db.execute("""
                 INSERT INTO TopicTopicRelationship(relationshipid, righttopicid, lefttopicid)
                 VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
-
 
 
 @topic.route('/<int:topicid>/topic/<int:relatedtopicid>', methods=['PUT', 'DELETE'])
@@ -153,7 +150,7 @@ def related_topics_id(topicid, relatedtopicid):
         lefttopicid = relatedtopicid
         righttopicid = topicid
 
-    ok, resp = checkNodeType(relationshipid)
+    ok, resp = checkNodeType(db, relationshipid)
     if not ok:
         return resp
 
@@ -173,10 +170,8 @@ def related_topics_id(topicid, relatedtopicid):
 
 
 
-
 ####################### utilities #######################
-
-def checkNodeType(relationshipid):
+def checkNodeType(db, relationshipid):
     """Double check that the relationship is between topics"""
     nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?);""",
         (relationshipid,)).fetchone()[0]

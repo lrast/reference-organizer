@@ -92,32 +92,21 @@ def viewEntry():
                 tableEntries=topicsData)
         else:
             topicid = int(request.args['topic'])
-            topicData = requests.get( 
-                    url_for('api.topic.info', topicid=topicid, fetchThrough=pageState['selectRelated'], _external=True) 
+            topicData = requests.get( url_for('api.topic.info', topicid=topicid, _external=True) 
                 ).json()
+
+            if pageState['selectRelated']:
+                # hard coding with a single relationship type for now
+                pageData = requests.get( url_for('api.topic.related_pages', topicid=topicid, 
+                    selectThrough=1, onThe='left', _external=True) ).json()
+                topicData['pages'] = pageData
 
             commentEndpoint=url_for('api.comment.topic', topicid=topicid, _external=True)
             topicComments=requests.get( commentEndpoint ).json()
 
+            return render_template('viewtopic.html', pagedata=topicData, pageState=pageState,
+                comments=topicComments, commentEndpoint=commentEndpoint)
 
-            if bool(pageState['showRelationships']):
-                # hard coding with a single relationship type for now
-                print(requests.get(
-                    url_for('api.relationship.info', relationshipid=1, topic=topicid, fetchThrough=1, _external=True)
-                    ))
-                relatedTopics = requests.get(
-                    url_for('api.relationship.info', relationshipid=1, topic=topicid, fetchThrough=1, _external=True)
-                    ).json()['topics']
-            else:
-                relatedTopics=[]
-
-            return render_template('viewtopic.html',
-                topic=topicData["topic"],
-                pages=topicData["pages"],
-                pageState=pageState,
-                relatedTopics=relatedTopics,
-                comments=topicComments,
-                commentEndpoint=commentEndpoint)
 
     elif 'page' in request.args:
         if request.args['page'] == 'all':

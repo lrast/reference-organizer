@@ -26,6 +26,7 @@ Majory priorities:
     - the lists are just too damn long
 
 ### Short term:
+- clean up view for pages and comments
 - adding topics and pages: make autofill textboxes
 - API design:
     * Implement new API
@@ -52,4 +53,5 @@ Majory priorities:
 ### bugs:
 - commenting: new lines become spaces
 - 'maximum recursion depth' when there are subtopic loops
+- fix wedge view tree
 

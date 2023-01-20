@@ -35,7 +35,6 @@ def info(pageid):
     db = get_db()
     if request.method == 'GET':
         # info on a specific page
-
         pageInfo = db.execute("SELECT * FROM Page WHERE id=(?)", (pageid,)).fetchone()
 
         if bool(request.args.get('infoOnly', '')):
@@ -128,7 +127,7 @@ def related_pages():
         relationshipid = request.form['relationshipid']
         side = request.form['side']
 
-        ok, resp = checkNodeType(relationshipid)
+        ok, resp = checkNodeType(db, relationshipid)
         if not ok:
             return resp
 
@@ -161,7 +160,7 @@ def related_pages_id(pageid, relatedpageid):
         leftpageid = relatedpageid
         rightpageid = pageid
 
-    ok, resp = checkNodeType(relationshipid)
+    ok, resp = checkNodeType(db, relationshipid)
     if not ok:
         return resp
 
@@ -185,7 +184,7 @@ def related_pages_id(pageid, relatedpageid):
 
 ####################### utilities #######################
 
-def checkNodeType(relationshipid):
+def checkNodeType(db, relationshipid):
     """Double check that the relationship is between pages"""
     nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?)""",
         (relationshipid,)).fetchone()[0]
