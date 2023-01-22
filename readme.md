@@ -20,14 +20,14 @@ export FLASK_DATABASE_URL=[url]
 
 ## to do:
 Majory priorities:
+
 1. Start populating the database
-2. usability features for adding: relationship editing, metadata editing
+2. usability features for adding: loading from archives 
 3. usability features for viewing: better visualization
     - the lists are just too damn long
+    - As I populate the database, it's becoming clear that this is the most important feature
 
 ### Short term:
-- clean up view for pages and comments
-- adding topics and pages: make autofill textboxes
 - API design:
     * Implement new API
     * POSTs rely too much on form data input. It's clunky
@@ -37,6 +37,7 @@ Majory priorities:
     * importing from mendeley and session buddy records
         > important for populating the database
 - table view for pages including title, authors, journal, year
+- multiple entries for page, topic entry
 
 
 ### Long term:
@@ -53,5 +54,5 @@ Majory priorities:
 ### bugs:
 - commenting: new lines become spaces
 - 'maximum recursion depth' when there are subtopic loops
-- fix wedge view tree
+- fix topic tree wedges
 

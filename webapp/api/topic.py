@@ -1,5 +1,6 @@
 # topic api
 
+import json
 from flask import Blueprint, request, Response
 from webapp.db import get_db, packageRows, getTopicGraph, getPagesInTopic
 
@@ -77,7 +78,7 @@ def info(topicid):
         return Response(status=200)
 
 
-@topic.route('/<int:topicid>/page?QUERYPARAMS', methods=['GET', 'POST'])
+@topic.route('/<int:topicid>/page', methods=['GET', 'POST'])
 def related_pages(topicid):
     """More involved selections of pages that relate to the topic"""
     db = get_db()
@@ -89,10 +90,18 @@ def related_pages(topicid):
 
         return packageRows(pages)
 
-
     if request.method == 'POST':
-        pageid = request.form['pageid']
-        db.execute("INSERT INTO PageTopic(pageid, topicid) VALUES (?,?);", (pageid, topicid))
+        if 'pageid' in request.form:
+            pageid = request.form['pageid']
+        else:
+            pageid = json.loads(request.data)['pageid']
+
+        inserted = db.execute("""
+            INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;
+            """, (pageid, topicid))
+        response = packageRows(inserted.fetchone())
+        db.commit()
+        return response
 
 
 @topic.route('/<int:topicid>/page/<int:relatedpageid>', methods=['PUT', 'DELETE'])
@@ -108,7 +117,7 @@ def related_pages_id(topicid, relatedpageid):
     return Response(status=200)
 
 
-@topic.route('/<int:topicid>/topic?QUERYPARAMS', methods=['GET', 'POST'])
+@topic.route('/<int:topicid>/topic', methods=['GET', 'POST'])
 def related_topics(topicid):
     """More involved selections of topis that relate to the topic"""
     db = get_db()
@@ -117,23 +126,31 @@ def related_topics(topicid):
         pass
 
     if request.method == 'POST':
-        relatedtopicid = request.form['relatedtopicid']
-        relationshipid = request.form['relationshipid']
-        side = request.form['side']
+        if 'relatedtopicid' in request.form:
+            relatedtopicid = request.form['relatedtopicid']
+        else:
+            relatedtopicid = json.loads(request.data)['relatedtopicid']
+
+        relationshipid = request.values['relationshipid']
+        side = request.values['side']
 
         ok, resp = checkNodeType(db, relationshipid)
         if not ok:
             return resp
 
         if side == 'left':
-            db.execute("""
+            inserted = db.execute("""
                 INSERT INTO TopicTopicRelationship(relationshipid, lefttopicid, righttopicid)
-                VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
+                VALUES (?,?,?) RETURNING id;""", (relationshipid, relatedtopicid, topicid) )
 
         if side == 'right':
-            db.execute("""
+            inserted = db.execute("""
                 INSERT INTO TopicTopicRelationship(relationshipid, righttopicid, lefttopicid)
-                VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
+                VALUES (?,?,?) RETURNING id;""", (relationshipid, relatedtopicid, topicid) )
+
+        response = packageRows(inserted.fetchone())
+        db.commit()
+        return response
 
 
 @topic.route('/<int:topicid>/topic/<int:relatedtopicid>', methods=['PUT', 'DELETE'])

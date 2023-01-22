@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
-{% block subtitle %}Page: {{ page["name"] }}{% endblock %}
+{% block subtitle %}Page: {{ pagedata['page']["name"] }}{% endblock %}
 
 {% block body %}
 
 
-<h1> <a href="{{ url_for('servePage', pageid=page['id']) }}" >  {{ page["name"] }}  </a> </h1>
+<h1> <a href="{{ url_for('servePage', pageid=pagedata['page']['id']) }}" >  {{ pagedata['page']["name"] }}  </a> </h1>
 
 {% include "editablecomments.html" %}
 
@@ -16,31 +16,41 @@
         </tr>
     </thead>
     <tbody>
-        {% for topic in topics %}
+        {% for topic in pagedata['topics'] %}
             <tr>
                 <td class="wide-column"> <a href="{{ url_for('viewEntry', topic=topic['id']) }}" > {{topic['name']}} </a>  </td>
-                <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=page['id'], topicid=topic['id'], base='page') }}" > Remove topic  </a> </td>
+                <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=pagedata['page']['id'], topicid=topic['id'], base='page') }}" > Remove topic  </a> </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<a href="{{ url_for('button.add_PTR', pageid=page['id']) }}"> Add topic </a>
+
+<div class="autofill-form" data-endpoint="{{url_for('api.page.related_topics', pageid=pagedata['page']['id'], _external=True)}}">
+  <input name="topicid" list="knowntopics" class="autofill-box"> 
+  <datalist id="knowntopics">
+    {% for topic in allTopics %}
+      <option data-requestkey="topicid" data-requestvalue="{{topic['id']}}">{{topic['name']}}</option>
+    {% endfor %}
+  </datalist>
+  <input type="submit" value="Add topic">
+</div>
+
 <br>
 <a href="">Show including topics</a>
 
 
-<h3> <a href="{{ url_for('viewEntry', page=page['id'], toggle='editPanel', **pageState) }}"> Edit Page </a></h3>
+<h3> <a href="{{ url_for('viewEntry', page=pagedata['page']['id'], toggle='editPanel', **pageState) }}"> Edit Page </a></h3>
 {% if pageState['editPanel'] %}
 <form action="{{url_for('button.editPage')}}" method="post">
-    <input type="hidden" name="id" value="{{page['id']}}">
+    <input type="hidden" name="id" value="{{pagedata['page']['id']}}">
   <div>
     <label for="url">Page URL: </label>
-    <input type="text" name="url" value="{{page['url']}}">
+    <input type="text" name="url" value="{{pagedata['page']['url']}}">
   </div>
   <div>
     <label for="name">Page Name: </label>
-    <input type="text" name="name" value="{{page['name']}}">
+    <input type="text" name="name" value="{{pagedata['page']['name']}}">
   </div>
   <div>
     <input type="submit" value="Edit">
@@ -48,7 +58,7 @@
 </form>
 <br>
 <br>
-<a href="{{ url_for('button.delete', pageid=page['id']) }}"> Delete page </a>
+<a href="{{ url_for('button.delete', pageid=pagedata['page']['id']) }}"> Delete page </a>
 {% endif %}
 
 

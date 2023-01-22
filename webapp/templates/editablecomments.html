@@ -1,6 +1,6 @@
 {# Base list of editables #}
 
-{% for comment in comments %}
+{% for comment in commentdata['comments'] %}
     <div class="entryblock" contenteditable="true" id="{{comment['id']}}">{{comment['commentdata']}}</div>
     <br>
 {% endfor %}
@@ -21,12 +21,12 @@ function reaction(event) {
     commentdata = callingBox.innerText
 
     if (commentid == "new") {
-        fetch( "{{commentEndpoint}}",
+        fetch( "{{commentdata['endpoint']}}",
         { method: 'POST',
             body: JSON.stringify({commentdata: commentdata}) })
     }
     else {
-        let currentEndpoint = "{{commentEndpoint}}"+"?commentid="+commentid
+        let currentEndpoint = "{{commentdata['endpoint']}}"+"?commentid="+commentid
         if (commentdata==""){ // remove comment
             fetch( currentEndpoint, {method:'DELETE'} )
         }

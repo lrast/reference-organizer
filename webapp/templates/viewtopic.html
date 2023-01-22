@@ -31,9 +31,22 @@
     </tbody>
 </table>
 
-
-<a href="{{ url_for('button.add_PTR', topicid=pagedata['topic']['id']) }}"> Add page </a> <br>
+<div align="right">
 <a href="{{ url_for('viewEntry', topic=pagedata['topic']['id'], toggle='selectRelated', **pageState) }}">Show subtopic pages</a>
+</div>
+
+
+<div class="autofill-form" data-endpoint="{{url_for('api.topic.related_pages', topicid=pagedata['topic']['id'], _external=True)}}">
+  <input name="pageid" list="knownpages" class="autofill-box"> 
+  <datalist id="knownpages">
+    {% for page in allPages %}
+      <option data-requestkey="pageid" data-requestvalue="{{page['id']}}" >{{page['name']}}</option>
+    {% endfor %}
+  </datalist>
+  <input type="submit" value="Add page">
+</div>
+
+
 
 
 <!-- Edit Panel -->
@@ -51,16 +64,13 @@
   </div>
 </form>
 <br>
-<br>
 <a href="{{ url_for('button.delete', topicid=pagedata['topic']['id']) }}"> Delete Topic </a>
 {% endif %}
 
 
 
 <!-- Subtopics Panel -->
-<h2> <a href="{{ url_for('viewEntry', topic=pagedata['topic']['id'], toggle='showRelationships', **pageState) }}"> Related </a> </h2>
-
-{% if pageState["showRelationships"] %}
+<h2> Related Topics </h2>
 
 <table>
     <thead>
@@ -80,8 +90,16 @@
 
 {% include "topictree.html" %}
 
-<a href="{{url_for('button.add_TTR', righttopicid=pagedata['topic']['id'])}}"> Add subtopic </a> <br>
+<div class="autofill-form" data-endpoint="{{url_for('api.topic.related_topics', topicid=pagedata['topic']['id'], relationshipid=1, side='left', _external=True)}}">
+  <input name="topicid" list="knowntopics" class="autofill-box"> 
+  <datalist id="knowntopics">
+    {% for topic in allTopics %}
+      <option data-requestkey="relatedtopicid" data-requestvalue="{{topic['id']}}">{{topic['name']}}</option>
+    {% endfor %}
+  </datalist>
+  <input type="submit" value="Add subtopic">
+</div>
 
-{% endif %}
+
 
 {% endblock %}

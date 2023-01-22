@@ -1,4 +1,5 @@
 # Page api
+import json
 
 from flask import Blueprint, request, Response
 from webapp.db import get_db, packageRows, getTopicGraph
@@ -82,8 +83,8 @@ def info(pageid):
 
 
 
-@page.route('/<int:pageid>/topic?QUERYPARAMS', methods=['GET', 'POST'])
-def related_topics():
+@page.route('/<int:pageid>/topic', methods=['GET', 'POST'])
+def related_topics(pageid):
     """More involved selections of topis that relate to the page"""
     db = get_db()
     if request.method == 'GET':
@@ -91,10 +92,16 @@ def related_topics():
         pass
 
     if request.method == 'POST':
-        topicid = request.form['topicid']
-        db.execute("INSERT INTO PageTopic(pageid, topicid) VALUES (?,?);", (pageid, topicid))
+        if 'topicid' in request.form:
+            topicid = request.form['topicid']
+        else:
+            topicid = json.loads(request.data)['topicid']
 
-
+        inserted = db.execute("""INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;""", 
+            (pageid, topicid))
+        response = packageRows(inserted.fetchone())
+        db.commit()
+        return response
 
 
 

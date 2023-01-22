@@ -8,8 +8,7 @@ from flask import url_for
 
 from webapp import app
 from webapp.db import get_db, addPageTopic
-from webapp.utilities import isURLWebOrLocal
-
+from webapp.utilities import isURLWebOrLocal, sortbyname
 
 ######################################## Webpages ########################################
 
@@ -87,9 +86,7 @@ def viewEntry():
                 requests.get( url_for('api.topic.all_topics', _external=True)).json())
             for entry in topicsData:
                 entry['link'] = url_for('viewEntry', topic=entry['id'])
-            return render_template('topiclist.html',
-                tableTitle='Topics',
-                tableEntries=topicsData)
+            return render_template('topiclist.html', tableTitle='Topics', tableEntries=topicsData)
         else:
             topicid = int(request.args['topic'])
             topicData = requests.get( url_for('api.topic.info', topicid=topicid, _external=True) 
@@ -100,12 +97,18 @@ def viewEntry():
                 pageData = requests.get( url_for('api.topic.related_pages', topicid=topicid, 
                     selectThrough=1, onThe='left', _external=True) ).json()
                 topicData['pages'] = pageData
+            sortbyname(topicData['pages'])
 
             commentEndpoint=url_for('api.comment.topic', topicid=topicid, _external=True)
             topicComments=requests.get( commentEndpoint ).json()
+            commentdata = {'comments': topicComments, 'endpoint':commentEndpoint}
 
-            return render_template('viewtopic.html', pagedata=topicData, pageState=pageState,
-                comments=topicComments, commentEndpoint=commentEndpoint)
+            allTopics = sortbyname( requests.get(url_for('api.topic.all_topics', _external=True)).json() )
+            allPages = sortbyname( requests.get(url_for('api.page.all_pages', _external=True)).json() )
+
+
+            return render_template('viewtopic.html', pageState=pageState, pagedata=topicData,
+                commentdata=commentdata, allTopics=allTopics, allPages=allPages)
 
 
     elif 'page' in request.args:
@@ -115,23 +118,23 @@ def viewEntry():
                 requests.get(url_for('api.page.all_pages', _external=True)).json() )
             for entry in pagesData:
                 entry['link'] = url_for('viewEntry', page=entry['id'])
-            return render_template('pagelist.html',
-                tableTitle='Pages',
-                tableEntries=pagesData)
+            return render_template('pagelist.html', tableTitle='Pages', tableEntries=pagesData)
 
         else:
             pageid = int(request.args['page'])
             pageData = requests.get( url_for('api.page.info', pageid=pageid, _external=True) ).json()
+            sortbyname(pageData['topics'])
 
             commentEndpoint=url_for('api.comment.page', pageid=pageid, _external=True)
             pageComments=requests.get( commentEndpoint ).json()
+            commentdata = {'comments': pageComments, 'endpoint':commentEndpoint}
 
-            return render_template('viewpage.html', 
-                page=pageData['page'],
-                topics=pageData['topics'],
-                pageState=pageState,
-                comments=pageComments,
-                commentEndpoint=commentEndpoint)
+            allTopics = sortbyname( requests.get(url_for('api.topic.all_topics', _external=True)).json() )
+            allPages = sortbyname( requests.get(url_for('api.page.all_pages', _external=True)).json() )
+
+
+            return render_template('viewpage.html', pagedata=pageData, pageState=pageState,
+                commentdata=commentdata, allTopics=allTopics, allPages=allPages)
     else:
         return render_template('home.html')
 
@@ -147,9 +150,6 @@ def viewTable():
 
 
 # utilities
-def sortbyname(inlist):
-    inlist.sort(key=lambda x: x['name'].lower())
-    return inlist
 
 
 
