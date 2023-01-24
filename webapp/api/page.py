@@ -4,6 +4,8 @@ import json
 from flask import Blueprint, request, Response
 from webapp.db import get_db, packageRows, getTopicGraph
 
+from webapp.api.utilities import checkNodeType, getPOSTData
+
 
 page = Blueprint('page', __name__)
 
@@ -21,8 +23,9 @@ def all_pages():
 
     if request.method == 'POST':
         # add a new page
-        name = request.form['name']
-        url = request.form['url']
+        receivedData = getPOSTData(request, ['name', 'url'])
+        name = receivedData['name']
+        url = receivedData['url']
 
         inserted = db.execute("INSERT INTO Page (name, url) VALUES (?,?) RETURNING id;", (name, url))
         response = packageRows(inserted.fetchone())
@@ -92,10 +95,7 @@ def related_topics(pageid):
         pass
 
     if request.method == 'POST':
-        if 'topicid' in request.form:
-            topicid = request.form['topicid']
-        else:
-            topicid = json.loads(request.data)['topicid']
+        topicid = getPOSTData(request, 'topicid')['topicid']
 
         inserted = db.execute("""INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;""", 
             (pageid, topicid))
@@ -130,11 +130,13 @@ def related_pages():
         pass
 
     if request.method == 'POST':
-        relatedpageid = request.form['relatedpageid']
-        relationshipid = request.form['relationshipid']
-        side = request.form['side']
+        receivedData = getPOSTData(request, ['relatedpageid', 'relationshipid', 'side'])
 
-        ok, resp = checkNodeType(db, relationshipid)
+        relatedpageid = receivedData['relatedpageid']
+        relationshipid = receivedData['relationshipid']
+        side = receivedData['side']
+
+        ok, resp = checkNodeType(db, relationshipid, 'page')
         if not ok:
             return resp
 
@@ -167,7 +169,7 @@ def related_pages_id(pageid, relatedpageid):
         leftpageid = relatedpageid
         rightpageid = pageid
 
-    ok, resp = checkNodeType(db, relationshipid)
+    ok, resp = checkNodeType(db, relationshipid, 'page')
     if not ok:
         return resp
 
@@ -186,19 +188,6 @@ def related_pages_id(pageid, relatedpageid):
             (relationshipid, leftpageid, rightpageid))
         db.commit()
         return Response(status=200)
-
-
-
-####################### utilities #######################
-
-def checkNodeType(db, relationshipid):
-    """Double check that the relationship is between pages"""
-    nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?)""",
-        (relationshipid,)).fetchone()[0]
-    if nodeType != 'page':
-        return False, Response('Relationship is not betweeen Page',status=422)
-
-    return True, '_'
 
 
 

@@ -4,6 +4,8 @@ import json
 from flask import Blueprint, request, Response
 from webapp.db import get_db, packageRows, getTopicGraph, getPagesInTopic
 
+from webapp.api.utilities import checkNodeType, getPOSTData
+
 
 topic = Blueprint('topic', __name__)
 
@@ -21,7 +23,7 @@ def all_topics():
         return packageRows(topicsData)
 
     if request.method == 'POST':
-        name = request.form['name']
+        name = getPOSTData(request, 'name')['name']
 
         inserted = db.execute("INSERT INTO Topic(name) VALUES (?) RETURNING id", (name,))
         response = packageRows(inserted.fetchone())
@@ -91,10 +93,7 @@ def related_pages(topicid):
         return packageRows(pages)
 
     if request.method == 'POST':
-        if 'pageid' in request.form:
-            pageid = request.form['pageid']
-        else:
-            pageid = json.loads(request.data)['pageid']
+        pageid = getPOSTData(request, 'pageid')['pageid']
 
         inserted = db.execute("""
             INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;
@@ -126,15 +125,12 @@ def related_topics(topicid):
         pass
 
     if request.method == 'POST':
-        if 'relatedtopicid' in request.form:
-            relatedtopicid = request.form['relatedtopicid']
-        else:
-            relatedtopicid = json.loads(request.data)['relatedtopicid']
+        relatedtopicid = getPOSTData(request, 'relatedtopicid')['relatedtopicid']
 
         relationshipid = request.values['relationshipid']
         side = request.values['side']
 
-        ok, resp = checkNodeType(db, relationshipid)
+        ok, resp = checkNodeType(db, relationshipid, 'topic')
         if not ok:
             return resp
 
@@ -167,7 +163,7 @@ def related_topics_id(topicid, relatedtopicid):
         lefttopicid = relatedtopicid
         righttopicid = topicid
 
-    ok, resp = checkNodeType(db, relationshipid)
+    ok, resp = checkNodeType(db, relationshipid, 'topic')
     if not ok:
         return resp
 
@@ -184,17 +180,5 @@ def related_topics_id(topicid, relatedtopicid):
 
     db.commit()
     return Response(status=200)
-
-
-
-####################### utilities #######################
-def checkNodeType(db, relationshipid):
-    """Double check that the relationship is between topics"""
-    nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?);""",
-        (relationshipid,)).fetchone()[0]
-    if nodeType != 'topic':
-        return False,Response('Relationship is not betweeen Topics', status=422)
-    return True, '_'
-
 
 

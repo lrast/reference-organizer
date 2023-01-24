@@ -21,16 +21,14 @@ export FLASK_DATABASE_URL=[url]
 ## to do:
 Majory priorities:
 
-1. Start populating the database
-2. usability features for adding: loading from archives 
-3. usability features for viewing: better visualization
+1. usability features for adding: loading from archives 
+2. usability features for viewing: better visualization
     - the lists are just too damn long
-    - As I populate the database, it's becoming clear that this is the most important feature
+    - As I populate the database, it's becoming clear that this is _the_ most important feature
 
 ### Short term:
 - API design:
-    * Implement new API
-    * POSTs rely too much on form data input. It's clunky
+    * Finish implementing new API
 - improve input interface
     * local file dialog -- difficult because the browser is explicitly sandboxed to hide local file locations
     * pdf ingestion: title, authors, references
@@ -51,8 +49,8 @@ Majory priorities:
     * GET page: can fetch related topics (todo)
 - Far future: shareability, searchability of libraries
 
+
 ### bugs:
 - commenting: new lines become spaces
 - 'maximum recursion depth' when there are subtopic loops
 - fix topic tree wedges
-
