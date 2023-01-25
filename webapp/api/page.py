@@ -1,9 +1,11 @@
 # Page api
 import json
 
-from flask import Blueprint, request, Response
-from webapp.db import get_db, packageRows, getTopicGraph
+from datetime import datetime
 
+from flask import Blueprint, request, Response
+
+from webapp.db import get_db, packageRows, getTopicGraph
 from webapp.api.utilities import checkNodeType, getPOSTData
 
 
@@ -23,11 +25,13 @@ def all_pages():
 
     if request.method == 'POST':
         # add a new page
-        receivedData = getPOSTData(request, ['name', 'url'])
+        receivedData = getPOSTData(request)
         name = receivedData['name']
         url = receivedData['url']
+        date = receivedData.get('date', datetime.today().strftime('%Y-%m-%d'))
 
-        inserted = db.execute("INSERT INTO Page (name, url) VALUES (?,?) RETURNING id;", (name, url))
+        inserted = db.execute("""INSERT INTO Page (name, url, dateadded) 
+            VALUES (?,?, ?) RETURNING id;""", (name, url, date))
         response = packageRows(inserted.fetchone())
         db.commit()
         return response
@@ -95,7 +99,7 @@ def related_topics(pageid):
         pass
 
     if request.method == 'POST':
-        topicid = getPOSTData(request, 'topicid')['topicid']
+        topicid = getPOSTData(request)['topicid']
 
         inserted = db.execute("""INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;""", 
             (pageid, topicid))
@@ -130,7 +134,7 @@ def related_pages():
         pass
 
     if request.method == 'POST':
-        receivedData = getPOSTData(request, ['relatedpageid', 'relationshipid', 'side'])
+        receivedData = getPOSTData(request)
 
         relatedpageid = receivedData['relatedpageid']
         relationshipid = receivedData['relationshipid']

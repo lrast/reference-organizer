@@ -12,27 +12,12 @@ def checkNodeType(db, relationshipid, target):
     return True, '_'
 
 
-def getPOSTData(request, names):
+def getPOSTData(request):
     """Get data sent in POST requests, either form or body"""
-    toReturn = {}
-
-    try:
-        bodydata = json.loads(request.data)
-    except:
-        bodydata = {}
-
-    def getItem(name):
-        if name in request.form:
-            toReturn[name] = request.form[name]
-        else:
-            toReturn[name] = bodydata[name]
-
-    if type(names) == list:
-        for name in names:
-            getItem(name)
+    if len(request.form) != 0:
+        return request.form
     else:
-        getItem(names)
+        return json.loads(request.data)
 
-    return toReturn
 
 

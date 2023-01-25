@@ -23,7 +23,7 @@ def all_topics():
         return packageRows(topicsData)
 
     if request.method == 'POST':
-        name = getPOSTData(request, 'name')['name']
+        name = getPOSTData(request)['name']
 
         inserted = db.execute("INSERT INTO Topic(name) VALUES (?) RETURNING id", (name,))
         response = packageRows(inserted.fetchone())
@@ -93,7 +93,7 @@ def related_pages(topicid):
         return packageRows(pages)
 
     if request.method == 'POST':
-        pageid = getPOSTData(request, 'pageid')['pageid']
+        pageid = getPOSTData(request)['pageid']
 
         inserted = db.execute("""
             INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;
@@ -125,7 +125,7 @@ def related_topics(topicid):
         pass
 
     if request.method == 'POST':
-        relatedtopicid = getPOSTData(request, 'relatedtopicid')['relatedtopicid']
+        relatedtopicid = getPOSTData(request)['relatedtopicid']
 
         relationshipid = request.values['relationshipid']
         side = request.values['side']

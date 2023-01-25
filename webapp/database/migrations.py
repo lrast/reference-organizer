@@ -13,6 +13,18 @@ import sqlite3 as db
 dbURL = os.environ['FLASK_DATABASE_URL']
 
 
+def addPageDateAddedField():
+    """I think its really required to have a date added field for the pages"""
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    conn.execute("""ALTER TABLE Page ADD 'dateadded' TEXT;""")
+    conn.execute("""
+        UPDATE Page SET dateadded=(SELECT DATE())
+        WHERE dateadded IS NULL;""")
+    conn.commit()
+    conn.close()
+
+
 def makeRelationshipComments():
     conn = db.connect(dbURL)
     cur = conn.cursor()
