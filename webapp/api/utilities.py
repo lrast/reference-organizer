@@ -2,7 +2,6 @@
 import json
 
 def checkNodeType(db, relationshipid, target):
-    print('here')
     """Double check that the relationship is between pages"""
     nodeType = db.execute("""SELECT nodetype FROM Relationship WHERE id=(?)""",
         (relationshipid,)).fetchone()[0]

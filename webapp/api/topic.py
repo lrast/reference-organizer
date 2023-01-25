@@ -1,6 +1,7 @@
 # topic api
-
 import json
+import sqlite3
+
 from flask import Blueprint, request, Response
 from webapp.db import get_db, packageRows, getTopicGraph, getPagesInTopic
 
@@ -25,9 +26,13 @@ def all_topics():
     if request.method == 'POST':
         name = getPOSTData(request)['name']
 
-        inserted = db.execute("INSERT INTO Topic(name) VALUES (?) RETURNING id", (name,))
-        response = packageRows(inserted.fetchone())
-        db.commit()
+        try:
+            inserted = db.execute("INSERT INTO Topic(name) VALUES (?) RETURNING id", (name,))
+            response = packageRows(inserted.fetchone())
+            db.commit()
+        except sqlite3.IntegrityError:
+            existing = db.execute("SELECT id FROM Topic WHERE name=(?);", (name,))
+            response = packageRows(existing.fetchone())
 
         return response
 

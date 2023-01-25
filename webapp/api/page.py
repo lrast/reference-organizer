@@ -1,5 +1,6 @@
 # Page api
 import json
+import sqlite3
 
 from datetime import datetime
 
@@ -30,10 +31,14 @@ def all_pages():
         url = receivedData['url']
         date = receivedData.get('date', datetime.today().strftime('%Y-%m-%d'))
 
-        inserted = db.execute("""INSERT INTO Page (name, url, dateadded) 
-            VALUES (?,?, ?) RETURNING id;""", (name, url, date))
-        response = packageRows(inserted.fetchone())
-        db.commit()
+        try:
+            inserted = db.execute("""INSERT INTO Page (name, url, dateadded) 
+                VALUES (?,?, ?) RETURNING id;""", (name, url, date))
+            response = packageRows(inserted.fetchone())
+            db.commit()
+        except sqlite3.IntegrityError:
+            existing = db.execute("""SELECT id FROM Page WHERE url=(?)""", (url,))
+            response = packageRows(existing.fetchone())
         return response
 
 
@@ -84,6 +89,8 @@ def info(pageid):
     if request.method == 'DELETE':
         db.execute("DELETE FROM Page WHERE id=(?);", (pageid,))
         db.execute("DELETE FROM PageTopic WHERE pageid=(?);", (pageid,))
+        db.execute("DELETE FROM PagePageRelationship WHERE leftpageid=(?) OR rightpageid=(?);", 
+            (pageid, pageid))
         db.commit()
         return Response(status=200)
 
