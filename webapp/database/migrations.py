@@ -12,6 +12,16 @@ import sqlite3 as db
 
 dbURL = os.environ['FLASK_DATABASE_URL']
 
+def addRelationshipReversename():
+    """recreates the Page Topic table to have unique (rel, left, right) triples"""
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""
+        ALTER TABLE Relationship ADD reversename TEXT;
+        """)
+    conn.commit()
+    conn.close()
+
 
 def addPageDateAddedField():
     """I think its really required to have a date added field for the pages"""

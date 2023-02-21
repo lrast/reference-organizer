@@ -86,7 +86,7 @@ def viewEntry():
                 requests.get( url_for('api.topic.all_topics', _external=True)).json())
             for entry in topicsData:
                 entry['link'] = url_for('viewEntry', topic=entry['id'])
-            return render_template('topiclist.html', tableTitle='Topics', tableEntries=topicsData)
+            return render_template('listtopics.html', tableTitle='Topics', tableEntries=topicsData)
         else:
             topicid = int(request.args['topic'])
             topicData = requests.get( url_for('api.topic.info', topicid=topicid, _external=True) 
@@ -118,7 +118,7 @@ def viewEntry():
                 requests.get(url_for('api.page.all_pages', _external=True)).json() )
             for entry in pagesData:
                 entry['link'] = url_for('viewEntry', page=entry['id'])
-            return render_template('pagelist.html', tableTitle='Pages', tableEntries=pagesData)
+            return render_template('listpages.html', tableTitle='Pages', tableEntries=pagesData)
 
         else:
             pageid = int(request.args['page'])
@@ -139,7 +139,6 @@ def viewEntry():
         return render_template('home.html')
 
 
-
 @app.route('/table', methods=['GET'])
 def viewTable():
     """show a table of publications based on the paperMetadata topic"""
@@ -149,7 +148,50 @@ def viewTable():
 
 
 
-# utilities
+@app.route('/table/relationship', methods=['GET'])
+def viewRelationships():
+    """Root view for relationships"""
+    allRelationships = requests.get(url_for('api.relationship.all_relationships', _external=True)).json()
+    for entry in allRelationships:
+        entry['link'] = url_for('viewRelationship_new', relationshipid=entry['id'])
+
+    return render_template('listrelationships.html', relationships=allRelationships)
+
+
+
+
+
+
+@app.route('/view/relationship/<int:relationshipid>', methods=['GET'])
+def viewRelationship_new(relationshipid):
+    return render_template('relationshipview.html', sidebar=topicsData)
+
+
+
+
+
+@app.route('/relationship/<int:relationshipid>', methods=['GET'])
+def viewRelationship(relationshipid):
+    """Exploration view for related topics / pages"""
+    if 'root' in request.args:
+        # query for topics (pages at the root)
+        pass
+
+    topicsData = sortbyname(
+        requests.get( url_for('api.topic.all_topics', rootOnly='1', _external=True)).json())
+
+    for entry in topicsData:
+        entry['link'] = url_for('viewEntry', topic=entry['id'])
+
+
+    return render_template('relationshipview.html', sidebar=topicsData)
+
+
+
+
+
+
+
 
 
 

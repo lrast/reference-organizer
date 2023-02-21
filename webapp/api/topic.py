@@ -19,6 +19,11 @@ def all_topics():
 
     if request.method == 'GET':
         # PROCESS query arguments here
+        if 'rootOnly' in request.args and bool(request.args['rootOnly']):
+            topicsData = db.execute("""
+                SELECT * FROM Topic WHERE Topic.id NOT IN (SELECT lefttopicid FROM TopicTopicRelationship);
+                """).fetchall()
+            return packageRows(topicsData)
 
         topicsData = db.execute("SELECT * FROM Topic;").fetchall()
         return packageRows(topicsData)

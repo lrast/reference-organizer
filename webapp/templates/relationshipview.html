@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block subtitle %}Topics List{% endblock %}
+
+{% block body %}
+
+<div style="display:flex; height: 100vh;">
+    <div class="flat-tree-sidebar">
+        {% for topic in sidebar %}
+            <button class="sidebar-button" onclick=test("{{topic['name']}}")>{{topic['name']}}</button>
+        {% endfor %}
+
+    </div>
+    <div id="flat-tree-body">
+        CONTENT GOES HERE
+
+    </div>
+
+</div>
+
+
+<script>
+    function test(buttonName){
+        console.log(buttonName)
+        let div = document.getElementById('flat-tree-body');
+        console.log(div)
+        div.innerHTML += buttonName
+    }
+</script>
+
+
+
+{% endblock %}

@@ -10,7 +10,7 @@ app.config.from_prefixed_env()
 app.register_blueprint(api, url_prefix='/api')
 app.register_blueprint(button, url_prefix='/button')
 
-import webapp.routes
+import webapp.views
 
 
 database_setup(app)

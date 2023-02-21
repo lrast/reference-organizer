@@ -3,7 +3,7 @@ import requests
 
 from flask import request, Response, Blueprint, url_for
 
-from webapp.db import get_db, getPagesInTopic, getTopicGraph, packageRows
+from webapp.db import get_db, packageRows
 from webapp.utilities import isURLWebOrLocal
 
 from webapp.api.comment import comment

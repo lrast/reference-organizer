@@ -20,15 +20,16 @@ export FLASK_DATABASE_URL=[url]
 
 ## to do:
 Majory priorities:
-
-1. usability features for adding: loading from archives 
-2. usability features for viewing: better visualization
+1. usability features for viewing: better visualization
     - the lists are just too damn long
     - As I populate the database, it's becoming clear that this is _the_ most important feature
+2. usability features for adding: loading from mendeley archives 
+
 
 ### Short term:
+- tables view: filtering and sorting
 - API design:
-    * Finish implementing new API
+    * more expressive queries
 - improve input interface
     * local file dialog -- difficult because the browser is explicitly sandboxed to hide local file locations
     * pdf ingestion: title, authors, references
@@ -36,13 +37,14 @@ Majory priorities:
         > important for populating the database
 - table view for pages including title, authors, journal, year
 - multiple entries for page, topic entry
-
+- fix style issues: table centering
+- clean-up css, html, and view code.
+- interface to relationships
+    * topic and citation graph visualization
+        > to start: a series of trees with each unique root
 
 ### Long term:
-- interface to relationships
 - dockerize to a local application
-- topic and citation graph visualization
-    - to start: a series of trees with each unique root
 - improve URL origin testing
 - searching
 - API design:
@@ -54,3 +56,5 @@ Majory priorities:
 - commenting: new lines become spaces
 - 'maximum recursion depth' when there are subtopic loops
 - fix topic tree wedges
+- fix style issues: table centering
+

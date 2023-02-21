@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block subtitle %}Topics List{% endblock %}
+
+{% block body %}
+
+<div style="margin:auto">
+<table style="margin:auto; width:80%">
+    <thead>
+        <tr>
+            <th colspan="3" style="margin:auto">Relationships</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th class="thin-column" style="width:34%; margin:auto">Name</th> 
+            <th class="thin-column" style="width:34%; margin:auto">Reverse Name</th>
+            <th class="thin-column" style="width:34%; margin:auto">Between</th> 
+        </tr>
+        {% for entry in relationships %}
+            <tr>
+                <td class="thin-column"><a href="{{ entry['link'] }}" >{{entry['name']}}</a></td>
+                <td class="thin-column">{{entry['reversename']}}</td>
+                <td class="thin-column">{{entry['nodetype']}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</div>
+
+<a href=""> Add Relationship </a>
+
+{% endblock %}
