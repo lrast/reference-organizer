@@ -15,7 +15,77 @@ body {
   word-wrap: break-word;
 }
 
-/* awefull... this is row styling, and has nothing to do with widths */
+
+/* main table styling */
+.table-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.table-body,
+.table-sidebar {
+  padding: 2px;
+}
+
+.table-body {
+  /* border: 3px solid black; */
+  width: 70%;
+}
+
+.table-sidebar {
+  width: 27%;
+  height: 95vh;
+  background-color: #F2F3F4;
+  border-radius: 10px;
+
+
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+
+  overflow: scroll;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* Styling for the side bar base tree view */
+.flat-tree-sidebar {
+  width: 20%;
+  margin-right:10px;
+  overflow: scroll;
+}
+
+
+.flat-tree-body {
+  width: 80%;
+  height:100%;
+  overflow: scroll;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* aweful... this is row styling, and has nothing to do with widths */
 .thin-column {
   width: 250px;
   padding: 15px 10px;
@@ -90,24 +160,6 @@ input {
     width: 80%;
     margin: auto;
 }
-
-
-/* Styling for the side bar base tree view */
-.flat-tree-sidebar {
-  width: 20%;
-  margin-right:10px;
-  overflow: scroll;
-}
-
-
-.flat-tree-body {
-  width: 80%;
-  height:100%;
-  overflow: scroll;
-}
-
-
-
 
 
 

@@ -4,8 +4,13 @@
 
 {% block body %}
 
-{% include "linkslist.html" %}
-
-<a href="{{ url_for('newPage') }}"> Add Topic </a>
+<div class="table-wrapper">
+    <div class="table-body">
+        {% include "linkslist.html" %}
+    </div>
+    <div class="table-sidebar">
+        <a href="{{ url_for('newPage') }}"> Add Topic </a>
+    </div>
+</div>
 
 {% endblock %}

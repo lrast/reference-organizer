@@ -9,27 +9,37 @@
 
 {% include "editablecomments.html" %}
 
-<table>
-    <thead>
-        <tr>
-            <th colspan="2">Pages:</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for page in pagedata['pages'] %}
-            <tr>
-                <td class="wide-column"> <a href="{{ url_for('servePage', pageid=page['id'])}}" >  {{ page["name"] }}  </a> </td>
-                <td class="thin-column"> <a href="{{ url_for('viewEntry', page=page['id'])}}" > info  </a> </td>
+<div class="table-wrapper">
+    <div class="table-body">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Pages:</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for page in pagedata['pages'] %}
+                    <tr>
+                        <td class="wide-column"> <a href="{{ url_for('servePage', pageid=page['id'])}}" >  {{ page["name"] }}  </a> </td>
+                        <td class="thin-column"> <a href="{{ url_for('viewEntry', page=page['id'])}}" > info  </a> </td>
 
-                {% if "topicid" in page and page["topicid"] != pagedata['topic']['id'] %}
-                     <td class="thin-column"> <a href="{{ url_for('viewEntry', topic=page['topicid']) }}" > {{page["topicname"]}} </a> </td>
-                {% else %}
-                    <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=page['id'], topicid=pagedata['topic']['id'], base='topic') }}" > Remove from topic </a> </td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                        {% if "topicid" in page and page["topicid"] != pagedata['topic']['id'] %}
+                             <td class="thin-column"> <a href="{{ url_for('viewEntry', topic=page['topicid']) }}" > {{page["topicname"]}} </a> </td>
+                        {% else %}
+                            <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=page['id'], topicid=pagedata['topic']['id'], base='topic') }}" > Remove from topic </a> </td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    <div class="table-sidebar">
+
+    </div>
+</div>
+
+
 
 <div align="right">
 <a href="{{ url_for('viewEntry', topic=pagedata['topic']['id'], toggle='selectRelated', **pageState) }}">Show subtopic pages</a>

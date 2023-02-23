@@ -16,6 +16,7 @@ export FLASK_DATABASE_URL=[url]
 1. track a database of webpages and local resources
 2. resources are organized by tagging them with topic labels
 3. organization is done at the level of topics, for example by make subsets of topics
+4. Key restriction: there is only one type of relationship between topics and pages
 
 
 ## to do:
@@ -27,34 +28,39 @@ Majory priorities:
 
 
 ### Short term:
+- find basic set of components
 - tables view: filtering and sorting
 - API design:
     * more expressive queries
-- improve input interface
-    * local file dialog -- difficult because the browser is explicitly sandboxed to hide local file locations
-    * pdf ingestion: title, authors, references
-    * importing from mendeley and session buddy records
-        > important for populating the database
-- table view for pages including title, authors, journal, year
 - multiple entries for page, topic entry
 - fix style issues: table centering
 - clean-up css, html, and view code.
 - interface to relationships
     * topic and citation graph visualization
         > to start: a series of trees with each unique root
+- local files: opening jupyter notebooks
+- ability to abbreviate column values
+
 
 ### Long term:
+- table view for pages including title, authors, journal, year
 - dockerize to a local application
 - improve URL origin testing
 - searching
 - API design:
     * GET page: can fetch related topics (todo)
 - Far future: shareability, searchability of libraries
-
+- improve input interface
+    * local file dialog -- difficult because the browser is explicitly sandboxed to hide local file locations
+    * pdf ingestion: title, authors, references
+    * importing from mendeley and session buddy records
+        > important for populating the database
 
 ### bugs:
 - commenting: new lines become spaces
 - 'maximum recursion depth' when there are subtopic loops
 - fix topic tree wedges
 - fix style issues: table centering
+- pages that are tagged more than once are listed multiple times in the tables
+
 

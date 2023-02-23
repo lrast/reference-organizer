@@ -57,9 +57,12 @@ def servePage(pageid):
         return send_file(formattedURL)
 
 
+
 @app.route('/view', methods=['GET'])
 def viewEntry():
     """Display an entry from the database"""
+
+    # refactor this into a individual pages with react to handle page states.
 
     # Handling page state
     pageState = {}
@@ -80,64 +83,107 @@ def viewEntry():
 
 
     if 'topic' in request.args:
-        if request.args['topic'] == 'all':
-            #show all topics
-            topicsData = sortbyname(
-                requests.get( url_for('api.topic.all_topics', _external=True)).json())
-            for entry in topicsData:
-                entry['link'] = url_for('viewEntry', topic=entry['id'])
-            return render_template('listtopics.html', tableTitle='Topics', tableEntries=topicsData)
-        else:
-            topicid = int(request.args['topic'])
-            topicData = requests.get( url_for('api.topic.info', topicid=topicid, _external=True) 
-                ).json()
+        topicid = int(request.args['topic'])
+        topicData = requests.get( url_for('api.topic.info', topicid=topicid, _external=True) 
+            ).json()
 
-            if pageState['selectRelated']:
-                # hard coding with a single relationship type for now
-                pageData = requests.get( url_for('api.topic.related_pages', topicid=topicid, 
-                    selectThrough=1, onThe='left', _external=True) ).json()
-                topicData['pages'] = pageData
-            sortbyname(topicData['pages'])
+        if pageState['selectRelated']:
+            # hard coding with a single relationship type for now
+            pageData = requests.get( url_for('api.topic.related_pages', topicid=topicid, 
+                selectThrough=1, onThe='left', _external=True) ).json()
+            topicData['pages'] = pageData
+        sortbyname(topicData['pages'])
 
-            commentEndpoint=url_for('api.comment.topic', topicid=topicid, _external=True)
-            topicComments=requests.get( commentEndpoint ).json()
-            commentdata = {'comments': topicComments, 'endpoint':commentEndpoint}
+        commentEndpoint=url_for('api.comment.topic', topicid=topicid, _external=True)
+        topicComments=requests.get( commentEndpoint ).json()
+        commentdata = {'comments': topicComments, 'endpoint':commentEndpoint}
 
-            allTopics = sortbyname( requests.get(url_for('api.topic.all_topics', _external=True)).json() )
-            allPages = sortbyname( requests.get(url_for('api.page.all_pages', _external=True)).json() )
+        allTopics = sortbyname( requests.get(url_for('api.topic.all_topics', _external=True)).json() )
+        allPages = sortbyname( requests.get(url_for('api.page.all_pages', _external=True)).json() )
 
 
-            return render_template('viewtopic.html', pageState=pageState, pagedata=topicData,
-                commentdata=commentdata, allTopics=allTopics, allPages=allPages)
+        return render_template('viewtopic.html', pageState=pageState, pagedata=topicData,
+            commentdata=commentdata, allTopics=allTopics, allPages=allPages)
 
 
     elif 'page' in request.args:
-        if request.args['page'] == 'all':
-            #show all pages
-            pagesData = sortbyname( 
-                requests.get(url_for('api.page.all_pages', _external=True)).json() )
-            for entry in pagesData:
-                entry['link'] = url_for('viewEntry', page=entry['id'])
-            return render_template('listpages.html', tableTitle='Pages', tableEntries=pagesData)
+        pageid = int(request.args['page'])
+        pageData = requests.get( url_for('api.page.info', pageid=pageid, _external=True) ).json()
+        sortbyname(pageData['topics'])
 
-        else:
-            pageid = int(request.args['page'])
-            pageData = requests.get( url_for('api.page.info', pageid=pageid, _external=True) ).json()
-            sortbyname(pageData['topics'])
+        commentEndpoint=url_for('api.comment.page', pageid=pageid, _external=True)
+        pageComments=requests.get( commentEndpoint ).json()
+        commentdata = {'comments': pageComments, 'endpoint':commentEndpoint}
 
-            commentEndpoint=url_for('api.comment.page', pageid=pageid, _external=True)
-            pageComments=requests.get( commentEndpoint ).json()
-            commentdata = {'comments': pageComments, 'endpoint':commentEndpoint}
-
-            allTopics = sortbyname( requests.get(url_for('api.topic.all_topics', _external=True)).json() )
-            allPages = sortbyname( requests.get(url_for('api.page.all_pages', _external=True)).json() )
+        allTopics = sortbyname( requests.get(url_for('api.topic.all_topics', _external=True)).json() )
+        allPages = sortbyname( requests.get(url_for('api.page.all_pages', _external=True)).json() )
 
 
-            return render_template('viewpage.html', pagedata=pageData, pageState=pageState,
+        return render_template('viewpage.html', pagedata=pageData, pageState=pageState,
                 commentdata=commentdata, allTopics=allTopics, allPages=allPages)
     else:
         return render_template('home.html')
 
+
+
+
+
+@app.route('/page', methods=['GET'])
+def viewPages():
+    """Table view for pages"""
+    pagesData = sortbyname( 
+        requests.get(url_for('api.page.all_pages', _external=True)).json() )
+    for entry in pagesData:
+        entry['link'] = url_for('viewEntry', page=entry['id'])
+    return render_template('listpages.html', tableTitle='Pages', tableEntries=pagesData)
+
+
+@app.route('/page/<int:pageid>', methods=['GET'])
+def viewPage(pageid):
+    """Detail view for a single page"""
+    return 
+
+
+
+@app.route('/topic', methods=['GET'])
+def viewTopics():
+    """Table view for topics"""
+    topicsData = sortbyname(
+        requests.get( url_for('api.topic.all_topics', _external=True)).json())
+    for entry in topicsData:
+        entry['link'] = url_for('viewEntry', topic=entry['id'])
+    return render_template('listtopics.html', tableTitle='Topics', tableEntries=topicsData)
+
+
+@app.route('/topic/<int:topicid>', methods=['GET'])
+def viewTopic(topicid):
+    """Detail view for a single topic"""
+    return 
+
+
+
+@app.route('/relationship', methods=['GET'])
+def viewRelationships():
+    """Table view for relationships"""
+    allRelationships = requests.get(url_for('api.relationship.all_relationships', _external=True)).json()
+    for entry in allRelationships:
+        entry['link'] = url_for('viewRelationship', relationshipid=entry['id'])
+
+    return render_template('listrelationships.html', relationships=allRelationships)
+
+
+@app.route('/relationship/<int:relationshipid>', methods=['GET'])
+def viewRelationship(relationshipid):
+    """Detail view for a single relationship"""
+    return render_template('viewrelationship.html')
+
+
+
+
+
+
+
+# work in progress
 
 @app.route('/table', methods=['GET'])
 def viewTable():
@@ -147,31 +193,8 @@ def viewTable():
 
 
 
-
-@app.route('/table/relationship', methods=['GET'])
-def viewRelationships():
-    """Root view for relationships"""
-    allRelationships = requests.get(url_for('api.relationship.all_relationships', _external=True)).json()
-    for entry in allRelationships:
-        entry['link'] = url_for('viewRelationship_new', relationshipid=entry['id'])
-
-    return render_template('listrelationships.html', relationships=allRelationships)
-
-
-
-
-
-
-@app.route('/view/relationship/<int:relationshipid>', methods=['GET'])
-def viewRelationship_new(relationshipid):
-    return render_template('relationshipview.html', sidebar=topicsData)
-
-
-
-
-
-@app.route('/relationship/<int:relationshipid>', methods=['GET'])
-def viewRelationship(relationshipid):
+@app.route('/experimental/<int:relationshipid>', methods=['GET'])
+def experimental(relationshipid):
     """Exploration view for related topics / pages"""
     if 'root' in request.args:
         # query for topics (pages at the root)
@@ -184,11 +207,7 @@ def viewRelationship(relationshipid):
         entry['link'] = url_for('viewEntry', topic=entry['id'])
 
 
-    return render_template('relationshipview.html', sidebar=topicsData)
-
-
-
-
+    return render_template('experimental.html', sidebar=topicsData)
 
 
 

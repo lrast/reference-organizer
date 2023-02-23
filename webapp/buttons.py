@@ -14,12 +14,12 @@ def delete():
     if 'topicid' in request.args.keys():
         topicid = request.args['topicid']
         requests.delete( url_for('api.topic.info', topicid=topicid, _external=True))
-        return redirect( url_for('viewEntry', topic='all') )
+        return redirect( url_for('viewTopics') )
 
     elif 'pageid' in request.args.keys():
         pageid = request.args['pageid']
         requests.delete( url_for('api.page.info', pageid=pageid, _external=True) )
-        return redirect( url_for('viewEntry', page='all') )
+        return redirect( url_for('viewPages', page='all') )
 
 
 @button.route('/remove_pair')

@@ -9,21 +9,30 @@
 
 {% include "editablecomments.html" %}
 
-<table>
-    <thead>
-        <tr>
-            <th colspan="2">Topics:</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for topic in pagedata['topics'] %}
-            <tr>
-                <td class="wide-column"> <a href="{{ url_for('viewEntry', topic=topic['id']) }}" > {{topic['name']}} </a>  </td>
-                <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=pagedata['page']['id'], topicid=topic['id'], base='page') }}" > Remove topic  </a> </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+<div class="table-wrapper">
+    <div class="table-body">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Topics:</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for topic in pagedata['topics'] %}
+                    <tr>
+                        <td class="wide-column"> <a href="{{ url_for('viewEntry', topic=topic['id']) }}" > {{topic['name']}} </a>  </td>
+                        <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=pagedata['page']['id'], topicid=topic['id'], base='page') }}" > Remove topic  </a> </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="table-sidebar" style="height: 35vh;">
+    </div>
+</div>
+
+
 
 
 <div class="autofill-form" data-endpoint="{{url_for('api.page.related_topics', pageid=pagedata['page']['id'], _external=True)}}">
