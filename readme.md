@@ -57,7 +57,6 @@ Majory priorities:
         > important for populating the database
 
 ### bugs:
-- commenting: new lines become spaces
 - 'maximum recursion depth' when there are subtopic loops
 - fix topic tree wedges
 - fix style issues: table centering

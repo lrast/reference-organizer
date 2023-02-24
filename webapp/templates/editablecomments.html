@@ -1,7 +1,14 @@
 {# Base list of editables #}
 
 {% for comment in commentdata['comments'] %}
-    <div class="entryblock" contenteditable="true" id="{{comment['id']}}">{{comment['commentdata']}}</div>
+    <div class="entryblock" contenteditable="true" id="{{comment['id']}}">
+        {% for row in comment['commentdata'].split('\n') %}
+            {% if loop.index > 1 %}
+                <br>
+            {% endif %}
+            {{row}}
+        {% endfor %}
+    </div>
     <br>
 {% endfor %}
 
