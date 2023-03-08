@@ -1,7 +1,7 @@
 // script elements to include on all pages
 
 
-
+/* autofilling forms*/
 var autofillForms = document.querySelectorAll(".autofill-form")
 
 for (const pageForm of autofillForms) {
@@ -28,6 +28,42 @@ for (const pageForm of autofillForms) {
     }
   })
 }
+
+
+
+/* table sidebar */
+const sidebar = ReactDOM.createRoot( document.querySelector(".table-sidebar") )
+
+
+class FilterList extends React.Component {
+  constructor() {
+    super()
+    this.filters = [
+        React.createElement('li', {key:1}, 
+          React.createElement('a', {onClick: this.makeNewFilter.bind(this)}, 'new Filter')
+        )
+      ]
+  }
+
+  makeNewFilter() {
+    // make a new Filter, add it to the list, rerender the list of filters
+    let key = this.filters.length + 1
+    console.log(key)
+    let newItem = React.createElement('li', {key: key}, 'element '+ (key-1) )
+    this.filters.unshift(newItem)
+    this.renderToSidebar()
+  }
+
+  renderToSidebar() {
+    sidebar.render( React.createElement('ul', null, this.filters ) )
+    }
+}
+
+
+currentFilters = new FilterList
+currentFilters.renderToSidebar()
+
+
 
 
 
