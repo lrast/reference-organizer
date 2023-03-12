@@ -10,18 +10,25 @@ class FilterList extends React.Component {
            'new Filter')
         )
       ]
+    this.totalNumberAdded = 1
   }
 
   makeNewFilter() {
     // make a new Filter, add it to the list, rerender the list of filters
-    console.log('call')
-    let key = this.filters.length + 1
+    let key = this.totalNumberAdded += 1
     let newItem = FilterComponent(key, this)
     this.filters.unshift(newItem)
     this.renderToSidebar()
   }
 
   removeFilter(key) {
+    for (let i = 0; i<this.filters.length; i++){
+      if (this.filters[i].key == key) {
+        this.filters.splice(i, 1)
+      }
+    }
+
+    this.renderToSidebar()
   }
 
   renderToSidebar() {
@@ -31,11 +38,10 @@ class FilterList extends React.Component {
 
 function FilterComponent(key, parent) {
   // sets up blank filter element
-  console.log(key)
   return <li className="sidebar-filter-item" key={key}>
     <div className="sidebar-filter-body">
       <div className="sidebar-filter-exit">
-          <a> X </a>
+          <a onClick={() => parent.removeFilter.bind(parent)(key)}> X </a>
       </div>
 
       <form action="">

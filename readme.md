@@ -28,7 +28,6 @@ Majory priorities:
 
 
 ### Short term:
-- setup jsx support
 - find basic set of components
 - tables view: filtering and sorting
 - API design:
