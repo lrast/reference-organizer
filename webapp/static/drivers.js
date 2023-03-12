@@ -40,7 +40,8 @@ class FilterList extends React.Component {
     super()
     this.filters = [
         React.createElement('li', {key:1}, 
-          React.createElement('a', {onClick: this.makeNewFilter.bind(this)}, 'new Filter')
+          React.createElement('a', {onClick: this.makeNewFilter.bind(this), className:"sidebar-filter-body"},
+           'new Filter')
         )
       ]
   }
@@ -48,16 +49,42 @@ class FilterList extends React.Component {
   makeNewFilter() {
     // make a new Filter, add it to the list, rerender the list of filters
     let key = this.filters.length + 1
-    console.log(key)
-    let newItem = React.createElement('li', {key: key}, 'element '+ (key-1) )
+    let newItem = FilterComponent(key, this)
     this.filters.unshift(newItem)
     this.renderToSidebar()
+  }
+  removeFilter(key) {
+
   }
 
   renderToSidebar() {
     sidebar.render( React.createElement('ul', null, this.filters ) )
     }
 }
+
+function FilterComponent(key, parent) {
+  // sets up blank filter element
+  return React.createElement('li', {key: key, className:"sidebar-filter-item"},
+      React.createElement('div', {className:"sidebar-filter-body"}, [
+
+        React.createElement('div', {className:"sidebar-filter-exit"}, [
+           React.createElement('a', null, 'X'),
+        ]),
+       
+        React.createElement('form', {action:""}, [
+          React.createElement('label', {for:"filter-on"}, "On: " ),
+          React.createElement('select', {id:"filter-on"}, [
+            React.createElement('option',null, 'Name'),
+            React.createElement('option',null, 'Relationship'),
+          ])
+        ])
+        
+      ])
+   )
+}
+
+
+
 
 
 currentFilters = new FilterList

@@ -44,9 +44,32 @@ body {
   top: 0;
 
   overflow: scroll;
+  text-align: center;
 }
 
+.table-sidebar ul{
+  display: inline-block;
+  text-align: center;
+  padding: 0px;
+  width: 90%;
+}
 
+.sidebar-filter-exit {
+  text-align: right;
+}
+
+.sidebar-filter-item {
+  width: 100%;
+  margin-bottom: 10px;
+  display: inline-block;
+  text-align: left;
+}
+
+.sidebar-filter-body {
+  border-radius: 10px;
+  width: 100%;
+  background-color: #E5E4E2;
+}
 
 
 
