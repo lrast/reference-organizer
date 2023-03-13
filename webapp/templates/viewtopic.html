@@ -102,8 +102,6 @@
     </tbody>
 </table>
 
-{% include "topictree.html" %}
-
 <div class="autofill-form" data-endpoint="{{url_for('api.topic.related_topics', topicid=pagedata['topic']['id'], relationshipid=1, side='left', _external=True)}}">
   <input name="topicid" list="knowntopics" class="autofill-box"> 
   <datalist id="knowntopics">

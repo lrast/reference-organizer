@@ -106,11 +106,6 @@ body {
 
 
 
-
-
-
-
-
 /* aweful... this is row styling, and has nothing to do with widths */
 .thin-column {
   width: 250px;
@@ -187,39 +182,4 @@ input {
     margin: auto;
 }
 
-
-
-
-
-
-
-/* topic tree styling */
-ul, #topicTree {
-  list-style-type: none;
-}
-
-#topicTree {
-  margin: 0;
-  padding: 0;
-}
-.caret {
-  cursor: pointer;
-  user-select: none; /* Prevent text selection */
-}
-.caret::before {
-  content: "\25B6";
-  color: black;
-  display: inline-block;
-  margin-right: 6px;
-}
-.caret-down::before {
-  transform: rotate(90deg);
-}
-/* Hide the nested, show active */
-.nested {
-  display: none;
-}
-.active {
-  display: block;
-}
 
