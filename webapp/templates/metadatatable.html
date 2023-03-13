@@ -2,9 +2,15 @@
 
 {% block subtitle %}Publications Table{% endblock %}
 
+{% block includes %}
+ <script type="text/javascript" src="../static/TableComponents.js" defer></script>
+{% endblock %}
+
 {% block body %}
 
-
+<div id="root">
+  <h1> test </h1>
+</div>
 <h1>Working layout for tables</h1>
 
 <div class="table-wrapper">
@@ -67,10 +73,11 @@
   </div>
 </div>
 
-
-</div>
-
-
+<script>
+  console.log('test')
+  const root = ReactDOM.createRoot(document.getElementById("root"))
+  root.render( React.createElement('h1', null, 'Hello, world!') )
+</script>
 
 
 

@@ -14,7 +14,7 @@
 {%- endmacro %}
 
 <ul id="topicTree">
-  {{subtree(topic["id"], topic["name"], relatedTopics) }}
+  {{subtree(pagedata['topic']['id'], pagedata['topic']['name'], pagedata['leftTopics']) }}
 <ul id="topicTree">
 
 

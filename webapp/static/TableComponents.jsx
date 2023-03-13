@@ -1,16 +1,72 @@
-/* table sidebar */
+/* 
+      main table element
+
+*/
+
+
+const divForTable = document.querySelector(".table-body")
+const reactTableRoot = ReactDOM.createRoot( divForTable )
+
+
+/*
+var test2;
+function update(data){
+  test2 = data
+}
+
+
+const fetchTableData = async (path) => {
+  const item = await fetch(`http://127.0.0.1:5000/api/${path}`);
+  const items = await item.json()
+  test2 = items
+  // console.log(items)
+  return items
+}
+
+
+const endpart = 'page'
+
+const test = fetchTableData(endpart)
+console.log( fetchTableData(endpart) )
+
+
+const Table = () => {
+  const [tableContent, setTableContent ] = React.useState([])
+  React.useEffect(async() => {
+    const items = await fetchTableData('page');
+    setTableContent(items);
+
+
+  }, []);
+  return (
+  <div>
+  {tableContent?.map(item => <h1 key={item?.id}>{item?.title}</h1>)}
+  </div>)
+}
+
+reactTableRoot.render(Table())
+*/
+
+
+
+/*  
+      table sidebar:
+
+*/
 const sidebar = ReactDOM.createRoot( document.querySelector(".table-sidebar") )
 
 class FilterList extends React.Component {
+  // component representing the list of different filters
   constructor() {
     super()
     this.filters = [
-        React.createElement('li', {key:1}, 
-          React.createElement('a', {onClick: this.makeNewFilter.bind(this), className:"sidebar-filter-body"},
-           'new Filter')
-        )
+
+        <li key="1">
+          <a onClick={this.makeNewFilter.bind(this)} className="sidebar-filter-body">New Filter</a>
+        </li>
       ]
     this.totalNumberAdded = 1
+    this.makeNewFilter()
   }
 
   makeNewFilter() {
@@ -50,15 +106,20 @@ function FilterComponent(key, parent) {
           <option > Name </option>
           <option > Relationship </option>
         </select>
+        <input type="text" name="test" style={{width: '30%'}} />
       </form>
     </div>
   </li>
 }
 
-
-
-
-
 currentFilters = new FilterList
 currentFilters.renderToSidebar()
+
+
+
+
+
+
+
+
 

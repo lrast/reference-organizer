@@ -2,8 +2,12 @@
 
 {% block subtitle %}Topic: {{pagedata['topic']['name']}}{% endblock %}
 
-{% block body %}
+{% block includes %}
+ <script type="text/javascript" src="../static/TableComponents.js" defer></script>
+{% endblock %}
 
+
+{% block body %}
 
 <h1> {{pagedata['topic']['name']}} </h1>
 

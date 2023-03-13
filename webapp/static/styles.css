@@ -16,6 +16,8 @@ body {
 }
 
 
+
+
 /* main table styling */
 .table-wrapper {
   display: flex;
@@ -32,12 +34,13 @@ body {
   width: 70%;
 }
 
+
+/* Sidebar styling */
 .table-sidebar {
   width: 27%;
   height: 95vh;
   background-color: #F2F3F4;
   border-radius: 10px;
-
 
   position: -webkit-sticky;
   position: sticky;
