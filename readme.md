@@ -30,6 +30,7 @@ Majory priorities:
 
 ### Short term:
 - find basic set of components
+    * eg: https://react-table-v7.tanstack.com/
 - tables view: filtering and sorting
 - API design:
     * more expressive queries
