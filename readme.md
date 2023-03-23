@@ -35,7 +35,6 @@ Majory priorities:
 - API design:
     * more expressive queries
 - multiple entries for page, topic entry
-- fix style issues: table centering
 - clean-up css, html, and view code.
 - interface to relationships
     * topic and citation graph visualization
@@ -60,8 +59,6 @@ Majory priorities:
 
 ### bugs:
 - 'maximum recursion depth' when there are subtopic loops
-- fix topic tree wedges
-- fix style issues: table centering
 - pages that are tagged more than once are listed multiple times in the tables
 
 

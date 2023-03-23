@@ -141,7 +141,7 @@ def viewPages():
 @app.route('/page/<int:pageid>', methods=['GET'])
 def viewPage(pageid):
     """Detail view for a single page"""
-    return 
+    return
 
 
 
@@ -188,29 +188,5 @@ def viewRelationship(relationshipid):
 @app.route('/table', methods=['GET'])
 def viewTable():
     """show a table of publications based on the paperMetadata topic"""
-
     return render_template('metadatatable.html')
-
-
-
-@app.route('/experimental/<int:relationshipid>', methods=['GET'])
-def experimental(relationshipid):
-    """Exploration view for related topics / pages"""
-    if 'root' in request.args:
-        # query for topics (pages at the root)
-        pass
-
-    topicsData = sortbyname(
-        requests.get( url_for('api.topic.all_topics', rootOnly='1', _external=True)).json())
-
-    for entry in topicsData:
-        entry['link'] = url_for('viewEntry', topic=entry['id'])
-
-
-    return render_template('experimental.html', sidebar=topicsData)
-
-
-
-
-
 

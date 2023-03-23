@@ -22,21 +22,31 @@ body {
 .table-wrapper {
   display: flex;
   justify-content: space-between;
+
 }
 
-.table-body,
-.table-sidebar {
-  padding: 2px;
-}
-
+/* Table styling */
 .table-body {
   /* border: 3px solid black; */
+  padding: 2px;
   width: 70%;
+
+  text-align: center;
+  display: flex;
+  justify-content: space-between;
 }
+
+.reference-table{
+  margin: auto;
+  position: relative;
+}
+
+
 
 
 /* Sidebar styling */
 .table-sidebar {
+  padding: 2px;
   width: 27%;
   height: 95vh;
   background-color: #F2F3F4;
@@ -117,6 +127,7 @@ body {
   flex-grow: 1;
   padding: 15px 1px;
   border: 1px solid #eee;
+  text-align: left;
 }
 
 .navheader ol {
