@@ -3,7 +3,7 @@ import json
 import sqlite3
 
 from flask import Blueprint, request, Response
-from webapp.db import get_db, packageRows, getTopicGraph, getPagesInTopic
+from webapp.db import get_db, packageRows
 
 from webapp.api.utilities import checkNodeType, getPOSTData
 
@@ -132,7 +132,26 @@ def related_topics(topicid):
     db = get_db()
     if request.method == 'GET':
         # PROCESS query arguments here
-        pass
+        leftTopics = db.execute(
+            """
+            SELECT Topic.name, TopicTopicRelationship.lefttopicid,
+            TopicTopicRelationship.relationshipid
+            FROM TopicTopicRelationship INNER JOIN Topic ON
+            TopicTopicRelationship.lefttopicid = Topic.id WHERE
+            TopicTopicRelationship.righttopicid=(?);
+            """,
+            (topicid,)).fetchall()
+        rightTopics = db.execute(
+            """
+            SELECT Topic.name, TopicTopicRelationship.righttopicid,
+            TopicTopicRelationship.relationshipid
+            FROM TopicTopicRelationship INNER JOIN Topic ON
+            TopicTopicRelationship.righttopicid = Topic.id WHERE 
+            TopicTopicRelationship.lefttopicid=(?);
+            """,
+            (topicid,)).fetchall()
+
+        return packageRows(leftTopics=leftTopics, rightTopics=rightTopics)
 
     if request.method == 'POST':
         relatedtopicid = getPOSTData(request)['relatedtopicid']
@@ -190,5 +209,50 @@ def related_topics_id(topicid, relatedtopicid):
 
     db.commit()
     return Response(status=200)
+
+
+
+
+########################################### Utilities ###########################################
+
+def getPagesInTopic(db, topicid, selectThrough=None, onThe='left' ):
+    """Fetch pages corresponding to a particular topic"""
+    if selectThrough is None: # only topic pages
+        return db.execute("""
+            SELECT Page.id, Page.name, Topic.id AS topicid, Topic.name as topicname
+            FROM Page INNER JOIN PageTopic ON Page.id=PageTopic.pageid
+            INNER JOIN Topic on PageTopic.topicid=Topic.id
+            WHERE PageTopic.topicid =(?)
+            """, (topicid,) ).fetchall()
+
+    relationshipid = selectThrough
+    if onThe == 'left':
+        childCol = 'lefttopicid'
+        parentCol = 'righttopicid'
+    if onThe == 'right':
+        childCol = 'righttopicid'
+        parentCol = 'lefttopicid'
+
+    return db.execute("""
+        WITH RECURSIVE AllRelated(topicid) AS (
+            SELECT (?)
+            UNION
+            SELECT DISTINCT TopicTopicRelationship.{childCol} FROM
+            TopicTopicRelationship INNER JOIN AllRelated ON
+            TopicTopicRelationship.{parentCol} = AllRelated.topicid
+            WHERE TopicTopicRelationship.relationshipid=(?)
+            LIMIT 10000
+        )
+        SELECT Page.id, Page.name, PageTopic.topicid, Topic.name AS topicname FROM Page INNER JOIN 
+        PageTopic ON Page.id=PageTopic.pageid INNER JOIN
+        AllRelated ON PageTopic.topicid=AllRelated.topicid INNER JOIN
+        Topic ON PageTopic.topicid=Topic.id;
+        """.format(childCol=childCol, parentCol=parentCol), (topicid, relationshipid)).fetchall()
+
+
+
+
+
+
 
 
