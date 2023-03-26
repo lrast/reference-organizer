@@ -4,12 +4,12 @@ import requests
 from flask import request, Response, Blueprint, url_for
 
 from database.oldInterface import get_db, packageRows
-from webapp.utilities import isURLWebOrLocal
+from backend.utilities import isURLWebOrLocal
 
-from webapp.api.comment import comment
-from webapp.api.relationship import relationship
-from webapp.api.page import page
-from webapp.api.topic import topic
+from backend.api.comment import comment
+from backend.api.relationship import relationship
+from backend.api.page import page
+from backend.api.topic import topic
 
 api = Blueprint('api', __name__)
 

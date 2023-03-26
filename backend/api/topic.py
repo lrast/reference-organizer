@@ -5,7 +5,7 @@ import sqlite3
 from flask import Blueprint, request, Response
 from database.oldInterface import get_db, packageRows
 
-from webapp.api.utilities import checkNodeType, getPOSTData
+from backend.api.utilities import checkNodeType, getPOSTData
 
 
 topic = Blueprint('topic', __name__)

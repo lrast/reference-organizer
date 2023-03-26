@@ -7,7 +7,7 @@ from datetime import datetime
 from flask import Blueprint, request, Response
 
 from database.oldInterface import get_db, packageRows
-from webapp.api.utilities import checkNodeType, getPOSTData
+from backend.api.utilities import checkNodeType, getPOSTData
 
 
 page = Blueprint('page', __name__)

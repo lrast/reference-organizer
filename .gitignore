@@ -1,7 +1,7 @@
 __pycache__/*
 */__pycache__/*
 */__pycache/*
-webapp/api/__pycache__/*
+backend/api/__pycache__/*
 static/node_modules/*
 static/*.json
 database/pages.db

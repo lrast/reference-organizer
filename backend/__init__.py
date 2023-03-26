@@ -2,8 +2,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from database.oldInterface import database_setup
-from webapp.apis import api
-from webapp.buttons import button
+from backend.apis import api
+from backend.buttons import button
 
 
 # setup and configure the application
@@ -15,6 +15,6 @@ app.register_blueprint(button, url_prefix='/button')
 sqlaDB = SQLAlchemy()
 sqlaDB.init_app(app)
 
-import webapp.views
+import backend.views
 
 database_setup(app)
