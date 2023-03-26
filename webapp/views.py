@@ -1,5 +1,4 @@
 import requests
-import sqlite3
 import json
 
 from flask import request, g
@@ -7,13 +6,15 @@ from flask import render_template, send_file, redirect, flash
 from flask import url_for
 
 from webapp import app
-from webapp.db import get_db, addPageTopic
+from webapp import sqlaDB
+from database.oldInterface import get_db, addPageTopic
 from webapp.utilities import isURLWebOrLocal, sortbyname
 
 ######################################## Webpages ########################################
 
 @app.route('/')
 def home():
+    print(sqlaDB.session)
     return render_template("home.html")
 
 

@@ -2,7 +2,7 @@
 # to do: overhaul to make conformant with the new api design
 
 from flask import Blueprint, request, Response
-from webapp.db import get_db, packageRows
+from database.oldInterface import get_db, packageRows
 
 
 relationship = Blueprint('relationship', __name__)

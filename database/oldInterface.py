@@ -72,6 +72,3 @@ def addTopicTopicRelation(conn, leftTopic, rightTopic, relationshipName):
     conn.commit()
 
 
-################################### Helpers for querying ###################################
-
-

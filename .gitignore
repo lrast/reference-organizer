@@ -2,7 +2,7 @@ __pycache__/*
 */__pycache__/*
 */__pycache/*
 webapp/api/__pycache__/*
-webapp/static/node_modules/*
-webapp/static/*.json
-webapp/database/pages.db
+static/node_modules/*
+static/*.json
+database/pages.db
 readme.html

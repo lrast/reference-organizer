@@ -2,7 +2,7 @@
 import json
 
 from flask import Blueprint, request, Response
-from webapp.db import get_db, packageRows
+from database.oldInterface import get_db, packageRows
 
 
 comment = Blueprint('comment', __name__)
