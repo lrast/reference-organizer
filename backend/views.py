@@ -6,15 +6,15 @@ from flask import render_template, send_file, redirect, flash
 from flask import url_for
 
 from backend import app
-from backend import sqlaDB
-from database.oldInterface import get_db, addPageTopic
 from backend.utilities import isURLWebOrLocal, sortbyname
+
+from database.oldInterface import get_db, addPageTopic
 
 ######################################## Webpages ########################################
 
+
 @app.route('/')
 def home():
-    print(sqlaDB.session)
     return render_template("home.html")
 
 
@@ -182,12 +182,14 @@ def viewRelationship(relationshipid):
 
 
 
-
-
-# work in progress
+# work in progress / testing
 
 @app.route('/table', methods=['GET'])
 def viewTable():
     """show a table of publications based on the paperMetadata topic"""
+    from backend import sqlaDB as db
+    from database.model import Topic
+    print( Topic.query.all()[1].related_topics_left)
+
     return render_template('metadatatable.html')
 
