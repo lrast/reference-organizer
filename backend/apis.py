@@ -10,6 +10,7 @@ from backend.api.comment import comment
 from backend.api.relationship import relationship
 from backend.api.page import page
 from backend.api.topic import topic
+from backend.api.graphQL import GQLendpoint
 
 api = Blueprint('api', __name__)
 
@@ -17,7 +18,7 @@ api.register_blueprint(page, url_prefix='/page')
 api.register_blueprint(topic, url_prefix='/topic')
 api.register_blueprint(relationship, url_prefix='/relationship')
 api.register_blueprint(comment, url_prefix='/comment')
-
+api.register_blueprint(GQLendpoint, url_prefix='/gql')
 
 
 # utilities 
