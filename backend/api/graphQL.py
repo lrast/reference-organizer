@@ -2,7 +2,7 @@
 import graphene
 
 from graphene_sqlalchemy import SQLAlchemyObjectType
-from database.model import Page, Topic, Relationship
+from database.model import Page, Topic, Relationship, TopicTopicAssociation
 
 
 class PageType(SQLAlchemyObjectType):
@@ -16,6 +16,10 @@ class TopicType(SQLAlchemyObjectType):
 class RelationshipType(SQLAlchemyObjectType):
     class Meta:
         model = Relationship
+
+class TopicTopicAssociationType(SQLAlchemyObjectType):
+    class Meta:
+        model = TopicTopicAssociation
 
 
 class Query(graphene.ObjectType):
@@ -50,9 +54,13 @@ GQLendpoint = Blueprint('gql', __name__)
 def acceptQuery():
     query = request.args.get('query', None)
     if not query:
-        return '{}'
+        return None
 
-    print(schema.execute(query))
+    query_result = schema.execute(query)
 
-    return jsonify( schema.execute(query).data )
+    if query_result.errors is not None:
+        print(query_result.errors)
+        return query_result.errors[0].message, 400
+
+    return jsonify( query_result.data )
 
