@@ -15,6 +15,7 @@ PageTopicAssociation = db.Table(
     sa.Column( 'topicid', sa.Integer, sa.ForeignKey('Topic.id'))
 )
 
+"""
 PagePageAssociation =db.Table(
     'PagePageRelationship',
     sa.Column('id', sa.Integer, primary_key=True),
@@ -22,6 +23,42 @@ PagePageAssociation =db.Table(
     sa.Column('leftpageid', sa.Integer, sa.ForeignKey('Page.id')),
     sa.Column('rightpageid', sa.Integer, sa.ForeignKey('Page.id'))
 )
+"""
+
+
+class PagePageAssociation(db.Model):
+    __tablename__ = 'PagePageRelationship'
+    id = sa.Column( sa.Integer, primary_key=True)
+    relationshipid = sa.Column(sa.Integer, sa.ForeignKey('Relationship.id'))
+    leftpageid = sa.Column(sa.Integer, sa.ForeignKey('Page.id'))
+    rightpageid = sa.Column(sa.Integer, sa.ForeignKey('Page.id'))
+
+
+
+
+class Page(db.Model):
+    __tablename__ = 'Page'
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    url = sa.Column( sa.String, unique=True, nullable=False)
+    name = sa.Column( sa.String )
+    dateadded = sa.Column( sa.Date )
+
+    topics = orm.relationship('Topic', secondary=PageTopicAssociation, back_populates='pages')
+    rightPages = orm.relationship(
+            'Page',
+            secondary= PagePageAssociation.__table__,
+            primaryjoin=(PagePageAssociation.leftpageid == id),
+            secondaryjoin=(PagePageAssociation.rightpageid == id)
+        )
+    comments = orm.relationship('PageComments', back_populates='page')
+
+
+
+
+
+
+
 
 '''
 TopicTopicAssociation = db.Table(
@@ -86,24 +123,6 @@ class Relationship(db.Model):
 
     comments = orm.relationship('RelationshipComments', back_populates='relationship')
 
-
-class Page(db.Model):
-    __tablename__ = 'Page'
-
-    id = sa.Column(sa.Integer, primary_key=True)
-    url = sa.Column( sa.String, unique=True, nullable=False)
-    name = sa.Column( sa.String )
-    dateadded = sa.Column( sa.Date )
-
-    topics = orm.relationship('Topic', secondary=PageTopicAssociation, back_populates='pages')
-    related_pages_right = orm.relationship(
-            'Page',
-            secondary=PagePageAssociation,
-            primaryjoin=(PagePageAssociation.c.leftpageid == id),
-            secondaryjoin=(PagePageAssociation.c.rightpageid == id),
-            backref='related_pages_left'
-        )
-    comments = orm.relationship('PageComments', back_populates='page')
 
 
 

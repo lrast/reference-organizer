@@ -188,8 +188,8 @@ def viewRelationship(relationshipid):
 def viewTable():
     """show a table of publications based on the paperMetadata topic"""
     from backend import sqlaDB as db
-    from database.model import Topic
-    print( Topic.query.all()[1].related_topics_left)
+    from database.model import Page
+    print( Page.query.all()[1])
 
     return render_template('metadatatable.html')
 
