@@ -33,8 +33,8 @@ class PagePageAssociation(db.Model):
     leftpageid = sa.Column(sa.Integer, sa.ForeignKey('Page.id'))
     rightpageid = sa.Column(sa.Integer, sa.ForeignKey('Page.id'))
 
-    rightpage = orm.relationship('Topic', foreign_keys=[rightpageid])
-    leftpage = orm.relationship('Topic', foreign_keys=[leftpageid])
+    rightpage = orm.relationship('Page', foreign_keys=[rightpageid])
+    leftpage = orm.relationship('Page', foreign_keys=[leftpageid])
 
 
 

@@ -16,7 +16,6 @@ class PagePageEdgeType(SQLAlchemyObjectType):
     class Meta:
         model = PagePageAssociation
 
-
 class PageType(SQLAlchemyObjectType):
     class Meta:
         model = Page
