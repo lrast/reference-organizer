@@ -1,35 +1,96 @@
 # setup for graph QL interface
 import graphene
 
+import sqlalchemy as sa
+
 from graphene_sqlalchemy import SQLAlchemyObjectType
-from database.model import Page, Topic, Relationship, TopicTopicAssociation
+from database.model import *
+
+
+
+class TopicTopicEdgeType(SQLAlchemyObjectType):
+    class Meta:
+        model = TopicTopicAssociation
+
+class PagePageEdgeType(SQLAlchemyObjectType):
+    class Meta:
+        model = PagePageAssociation
 
 
 class PageType(SQLAlchemyObjectType):
     class Meta:
         model = Page
 
+    rightEdges = graphene.List( PagePageEdgeType, relationshipid=graphene.Int(), remoteid=graphene.Int())
+    leftEdges = graphene.List( PagePageEdgeType, relationshipid=graphene.Int(), remoteid=graphene.Int())
+
+    def resolve_rightEdges(self, info, relationshipid=None, remoteid=None):
+        query = PagePageEdgeType.get_query(info).filter(PagePageAssociation.leftpageid == self.id)
+
+        if relationshipid is not None:
+            query = query.filter( PagePageAssociation.relationshipid == relationshipid)
+        if remoteid is not None:
+            query = query.filter( PagePageAssociation.rightpageid == remoteid)
+
+        return query.all()
+
+    def resolve_leftEdges(self, info, relationshipid=None, remoteid=None):
+        query = PagePageEdgeType.get_query(info).filter(PagePageAssociation.rightpageid == self.id)
+
+        if relationshipid is not None:
+            query = query.filter( PagePageAssociation.relationshipid == relationshipid)
+        if remoteid is not None:
+            query = query.filter( PagePageAssociation.leftpageid == remoteid)
+
+        return query.all()
+
+
+
 class TopicType(SQLAlchemyObjectType):
     class Meta:
         model = Topic
+
+    rightEdges = graphene.List( TopicTopicEdgeType, relationshipid=graphene.Int(), remoteid=graphene.Int())
+    leftEdges = graphene.List( TopicTopicEdgeType, relationshipid=graphene.Int(), remoteid=graphene.Int())
+
+    def resolve_rightEdges(self, info, relationshipid=None, remoteid=None):
+        query = TopicTopicEdgeType.get_query(info).filter(TopicTopicAssociation.lefttopicid == self.id)
+
+        if relationshipid is not None:
+            query = query.filter( TopicTopicAssociation.relationshipid == relationshipid)
+        if remoteid is not None:
+            query = query.filter( TopicTopicAssociation.righttopicid == remoteid)
+
+        return query.all()
+
+    def resolve_leftEdges(self, info, relationshipid=None, remoteid=None):
+        query = TopicTopicEdgeType.get_query(info).filter(TopicTopicAssociation.righttopicid == self.id)
+
+        if relationshipid is not None:
+            query = query.filter( TopicTopicAssociation.relationshipid == relationshipid)
+        if remoteid is not None:
+            query = query.filter( TopicTopicAssociation.lefttopicid == remoteid)
+
+        return query.all()
+
+
 
 class RelationshipType(SQLAlchemyObjectType):
     class Meta:
         model = Relationship
 
-class TopicTopicAssociationType(SQLAlchemyObjectType):
-    class Meta:
-        model = TopicTopicAssociation
-
 
 class Query(graphene.ObjectType):
-    topics = graphene.List(TopicType)
-    pages = graphene.List(PageType)
+    topics = graphene.List(TopicType, id=graphene.Int(), name=graphene.String())
+    pages = graphene.List(PageType, id=graphene.Int(), name=graphene.String())
     relationships = graphene.List(RelationshipType)
 
-
-    def resolve_topics(self, info):
+    def resolve_topics(self, info, id=None, name=None):
         query = TopicType.get_query(info)
+        if id is not None:
+            query = query.filter(Topic.id == id)
+        if name is not None:
+            query = query.filter(Topic.name == name)
         return query.all()
 
     def resolve_pages(self, info):
@@ -40,8 +101,8 @@ class Query(graphene.ObjectType):
         query = RelationshipType.get_query(info)
         return query.all()
 
-schema = graphene.Schema(query=Query)
 
+schema = graphene.Schema(query=Query)
 
 
 # endpoint

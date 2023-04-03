@@ -22,5 +22,3 @@ sqlaDB.init_app(app)
 from database.oldInterface import database_setup
 database_setup(app)
 
-
-

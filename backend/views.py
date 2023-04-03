@@ -182,14 +182,30 @@ def viewRelationship(relationshipid):
 
 
 
+
 # work in progress / testing
+
+# graph ql fiddle
+from backend.api.graphQL import schema
+from flask_graphql import GraphQLView
+app.add_url_rule(
+    '/graphql',
+    view_func=GraphQLView.as_view(
+        'graphql',
+        schema=schema,
+        graphiql=True
+    )
+)
+
+
+
 
 @app.route('/table', methods=['GET'])
 def viewTable():
     """show a table of publications based on the paperMetadata topic"""
     from backend import sqlaDB as db
     from database.model import Page
-    print( Page.query.all()[1])
+    print( Page.query)
 
     return render_template('metadatatable.html')
 
