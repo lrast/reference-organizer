@@ -12,9 +12,11 @@ class TopicTopicEdgeType(SQLAlchemyObjectType):
     class Meta:
         model = TopicTopicAssociation
 
+
 class PagePageEdgeType(SQLAlchemyObjectType):
     class Meta:
         model = PagePageAssociation
+
 
 class PageType(SQLAlchemyObjectType):
     class Meta:
@@ -42,7 +44,6 @@ class PageType(SQLAlchemyObjectType):
             query = query.filter( PagePageAssociation.leftpageid == remoteid)
 
         return query.all()
-
 
 
 class TopicType(SQLAlchemyObjectType):
@@ -73,7 +74,6 @@ class TopicType(SQLAlchemyObjectType):
         return query.all()
 
 
-
 class RelationshipType(SQLAlchemyObjectType):
     class Meta:
         model = Relationship
@@ -92,8 +92,12 @@ class Query(graphene.ObjectType):
             query = query.filter(Topic.name == name)
         return query.all()
 
-    def resolve_pages(self, info):
+    def resolve_pages(self, info, id=None, name=None):
         query = PageType.get_query(info)
+        if id is not None:
+            query = query.filter(Page.id == id)
+        if name is not None:
+            query = query.filter(Page.name == name)
         return query.all()
 
     def resolve_relationships(self, info):
@@ -102,6 +106,16 @@ class Query(graphene.ObjectType):
 
 
 schema = graphene.Schema(query=Query)
+
+
+def execute_gql_query(query, unpackage=lambda x:x):
+    """ run the query. unpackage is a function on the result """
+    query_result = schema.execute(query)
+
+    if query_result.errors is not None:
+        return query_result.errors[0].message, 400
+
+    return unpackage( query_result.data )
 
 
 # endpoint

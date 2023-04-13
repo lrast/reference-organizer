@@ -189,15 +189,13 @@ def viewRelationship(relationshipid):
 from backend.api.graphQL import schema
 from flask_graphql import GraphQLView
 app.add_url_rule(
-    '/graphql',
+    '/graphiql',
     view_func=GraphQLView.as_view(
-        'graphql',
+        'graphiql',
         schema=schema,
         graphiql=True
     )
 )
-
-
 
 
 @app.route('/table', methods=['GET'])

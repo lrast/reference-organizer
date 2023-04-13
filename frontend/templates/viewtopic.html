@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block subtitle %}Topic: {{pagedata['topic']['name']}}{% endblock %}
+{% block subtitle %}Topic: {{pagedata['name']}}{% endblock %}
 
 {% block includes %}
  <script type="text/javascript" src="../static/TableComponents.js" defer></script>
@@ -9,7 +9,7 @@
 
 {% block body %}
 
-<h1> {{pagedata['topic']['name']}} </h1>
+<h1> {{pagedata['name']}} </h1>
 
 {% include "editablecomments.html" %}
 
@@ -27,10 +27,10 @@
                         <td class="wide-column"> <a href="{{ url_for('servePage', pageid=page['id'])}}" >  {{ page["name"] }}  </a> </td>
                         <td class="thin-column"> <a href="{{ url_for('viewEntry', page=page['id'])}}" > info  </a> </td>
 
-                        {% if "topicid" in page and page["topicid"] != pagedata['topic']['id'] %}
+                        {% if "topicid" in page and page["topicid"] != pagedata['id'] %}
                              <td class="thin-column"> <a href="{{ url_for('viewEntry', topic=page['topicid']) }}" > {{page["topicname"]}} </a> </td>
                         {% else %}
-                            <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=page['id'], topicid=pagedata['topic']['id'], base='topic') }}" > Remove from topic </a> </td>
+                            <td class="thin-column"> <a href="{{ url_for('button.remove_pair', pageid=page['id'], topicid=pagedata['id'], base='topic') }}" > Remove from topic </a> </td>
                         {% endif %}
                     </tr>
                 {% endfor %}
@@ -46,11 +46,11 @@
 
 
 <div align="right">
-<a href="{{ url_for('viewEntry', topic=pagedata['topic']['id'], toggle='selectRelated', **pageState) }}">Show subtopic pages</a>
+<a href="{{ url_for('viewEntry', topic=pagedata['id'], toggle='selectRelated', **pageState) }}">Show subtopic pages</a>
 </div>
 
 
-<div class="autofill-form" data-endpoint="{{url_for('api.topic.related_pages', topicid=pagedata['topic']['id'], _external=True)}}">
+<div class="autofill-form" data-endpoint="{{url_for('api.topic.related_pages', topicid=pagedata['id'], _external=True)}}">
   <input name="pageid" list="knownpages" class="autofill-box"> 
   <datalist id="knownpages">
     {% for page in allPages %}
@@ -64,21 +64,21 @@
 
 
 <!-- Edit Panel -->
-<h3> <a href="{{ url_for('viewEntry', topic=pagedata['topic']['id'], toggle='editPanel', **pageState) }}"> Edit Topic </a> </h3>
+<h3> <a href="{{ url_for('viewEntry', topic=pagedata['id'], toggle='editPanel', **pageState) }}"> Edit Topic </a> </h3>
 
 {% if pageState["editPanel"] %}
 <form action="{{url_for('button.editTopic')}}" method="post">
-  <input type="hidden" name="id" value="{{pagedata['topic']['id']}}">
+  <input type="hidden" name="id" value="{{pagedata['id']}}">
   <div>
     <label for="name">Topic Name: </label>
-    <input type="text" name="name" value="{{pagedata['topic']['name']}}">
+    <input type="text" name="name" value="{{pagedata['name']}}">
   </div>
   <div>
     <input type="submit" value="Edit">
   </div>
 </form>
 <br>
-<a href="{{ url_for('button.delete', topicid=pagedata['topic']['id']) }}"> Delete Topic </a>
+<a href="{{ url_for('button.delete', topicid=pagedata['id']) }}"> Delete Topic </a>
 {% endif %}
 
 
@@ -96,13 +96,13 @@
         {% for relatedTopic in pagedata['leftTopics'] %}
             <tr>
                 <td class="thin-column"> <a href="{{url_for('viewEntry', topic=relatedTopic['lefttopicid'])}}">  {{ relatedTopic['name'] }}  </a> </td>
-                <td class="thin-column"> <a href="{{url_for('button.remove_TTR', lefttopicid=relatedTopic['lefttopicid'], righttopicid=pagedata['topic']['id'])}}"> Remove relationship </a> </td>
+                <td class="thin-column"> <a href="{{url_for('button.remove_TTR', lefttopicid=relatedTopic['lefttopicid'], righttopicid=pagedata['id'])}}"> Remove relationship </a> </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
-<div class="autofill-form" data-endpoint="{{url_for('api.topic.related_topics', topicid=pagedata['topic']['id'], relationshipid=1, side='left', _external=True)}}">
+<div class="autofill-form" data-endpoint="{{url_for('api.topic.related_topics', topicid=pagedata['id'], relationshipid=1, side='left', _external=True)}}">
   <input name="topicid" list="knowntopics" class="autofill-box"> 
   <datalist id="knowntopics">
     {% for topic in allTopics %}

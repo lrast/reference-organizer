@@ -22,8 +22,8 @@ class TopicTopicAssociation(db.Model):
     lefttopicid = sa.Column(sa.Integer, sa.ForeignKey('Topic.id'))
     righttopicid = sa.Column(sa.Integer, sa.ForeignKey('Topic.id'))
 
-    righttopic = orm.relationship('Topic', foreign_keys=[righttopicid])
-    lefttopic = orm.relationship('Topic', foreign_keys=[lefttopicid])
+    righttopic = orm.relationship('Topic', foreign_keys=[righttopicid], viewonly=True)
+    lefttopic = orm.relationship('Topic', foreign_keys=[lefttopicid], viewonly=True)
 
 
 class PagePageAssociation(db.Model):
@@ -33,8 +33,8 @@ class PagePageAssociation(db.Model):
     leftpageid = sa.Column(sa.Integer, sa.ForeignKey('Page.id'))
     rightpageid = sa.Column(sa.Integer, sa.ForeignKey('Page.id'))
 
-    rightpage = orm.relationship('Page', foreign_keys=[rightpageid])
-    leftpage = orm.relationship('Page', foreign_keys=[leftpageid])
+    rightpage = orm.relationship('Page', foreign_keys=[rightpageid], viewonly=True)
+    leftpage = orm.relationship('Page', foreign_keys=[leftpageid], viewonly=True)
 
 
 
@@ -53,7 +53,7 @@ class Page(db.Model):
     rightPages = orm.relationship('Page', secondary=PagePageAssociation.__table__,
         primaryjoin=(PagePageAssociation.leftpageid == id),
         secondaryjoin=(PagePageAssociation.rightpageid == id),
-        backref = 'leftPages'
+        backref = 'leftPages',
         )
 
 class Topic(db.Model):
@@ -68,7 +68,7 @@ class Topic(db.Model):
     rightTopics = orm.relationship('Topic', secondary=TopicTopicAssociation.__table__,
         primaryjoin=(TopicTopicAssociation.lefttopicid == id),
         secondaryjoin=(TopicTopicAssociation.righttopicid == id),
-        backref = 'leftTopics'
+        backref = 'leftTopics',
         )
 
 class Relationship(db.Model):

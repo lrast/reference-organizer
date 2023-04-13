@@ -9,6 +9,7 @@ export FLASK_ENV=development
 export FLASK_DEBUG=True
 export FLASK_SECRET_KEY=[key]
 export FLASK_DATABASE_URL=[url]
+export FLASK_SQLALCHEMY_DATABASE_URI='sqlite:///[url]'
 ```
 2. flask run
 
@@ -25,20 +26,20 @@ Majory priorities:
 1. usability features for viewing: better visualization
     - the lists are just too damn long
     - As I populate the database, it's becoming clear that this is _the_ most important feature
-2. usability features for adding: loading from mendeley archives 
+2. usability features for adding: 
+    - loading from mendeley archives 
+    - reading in papers: authors, journal, referenced papers
 
 
 ### Short term:
 - find basic set of components
     * eg: https://react-table-v7.tanstack.com/
+    * searching
 - tables view: filtering and sorting
-- API design:
-    * more expressive queries
 - multiple entries for page, topic entry
 - clean-up css, html, and view code.
-- interface to relationships
+- visual interface to relationships
     * topic and citation graph visualization
-        > to start: a series of trees with each unique root
 - local files: opening jupyter notebooks
 - ability to abbreviate column values
 
@@ -47,10 +48,7 @@ Majory priorities:
 - table view for pages including title, authors, journal, year
 - dockerize to a local application
 - improve URL origin testing
-- searching
-- API design:
-    * GET page: can fetch related topics (todo)
-- Far future: shareability, searchability of libraries
+- Far future: shareability, searchability of remote libraries
 - improve input interface
     * local file dialog -- difficult because the browser is explicitly sandboxed to hide local file locations
     * pdf ingestion: title, authors, references

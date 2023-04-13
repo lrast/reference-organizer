@@ -8,7 +8,7 @@ from flask import Blueprint, request, Response
 
 from database.oldInterface import get_db, packageRows
 from backend.api.utilities import checkNodeType, getPOSTData
-
+from backend.api.graphQL import execute_gql_query
 
 page = Blueprint('page', __name__)
 
@@ -18,11 +18,9 @@ def all_pages():
     """Page API: data on all pages"""
     db = get_db()
     if request.method == 'GET':
-        # PROCESS query arguments
-        # here
-
-        pagesData = db.execute("SELECT * FROM Page;").fetchall()
-        return packageRows(pagesData)
+        subquery = request.args.get('query', '{id, name, url, dateadded}')
+        gql_query = '{pages'  + subquery + '}'
+        return execute_gql_query(gql_query, lambda x:x['pages'])
 
     if request.method == 'POST':
         # add a new page
@@ -42,40 +40,23 @@ def all_pages():
         return response
 
 
+
 @page.route('/<int:pageid>', methods=['GET', 'PUT', 'DELETE'])
 def info(pageid):
     """Page API: info on a specific page, including topics and topics related to them"""
     db = get_db()
     if request.method == 'GET':
         # info on a specific page
-        pageInfo = db.execute("SELECT * FROM Page WHERE id=(?)", (pageid,)).fetchone()
+        default_subquery = """{ 
+                    id, name, url, dateadded
+                    topics {id, name}, 
+                    leftPages {id, name}, 
+                    rightPages { id, name }
+                    }"""
 
-        if bool(request.args.get('infoOnly', '')):
-            return packageRows(page=pageInfo)
-
-        pageTopics = db.execute(
-            """SELECT Topic.id, Topic.name FROM 
-            Topic INNER JOIN PageTopic ON Topic.id = PageTopic.topicid
-            WHERE PageTopic.pageid =(?)
-            """, (pageid,)).fetchall()
-        leftPages = db.execute(
-            """
-            SELECT Page.name, PagePageRelationship.leftpageid,
-            PagePageRelationship.relationshipid
-            FROM PagePageRelationship INNER JOIN Page 
-            ON PagePageRelationship.leftpageid = Page.id
-            WHERE PagePageRelationship.rightpageid=(?);
-            """, (pageid,)).fetchall()
-        rightPages = db.execute(
-            """
-            SELECT Page.name, PagePageRelationship.rightpageid,
-            PagePageRelationship.relationshipid
-            FROM PagePageRelationship INNER JOIN Page 
-            ON PagePageRelationship.rightpageid = Page.id
-            WHERE PagePageRelationship.leftpageid=(?);
-            """, (pageid,)).fetchall()
-
-        return packageRows(page=pageInfo, topics=pageTopics, leftPages=leftPages, rightPages=rightPages)
+        subquery = request.args.get('query', default_subquery)
+        gql_query = '{pages (id: %s)'%pageid + subquery + '}'
+        return execute_gql_query(gql_query, lambda x:x['pages'][0])
 
     if request.method == 'PUT':
         # over write the contents of the entry
@@ -96,14 +77,14 @@ def info(pageid):
 
 
 
-
 @page.route('/<int:pageid>/topic', methods=['GET', 'POST'])
 def related_topics(pageid):
     """More involved selections of topis that relate to the page"""
     db = get_db()
     if request.method == 'GET':
-        # PROCESS query arguments here
-        pass
+        subquery = request.args.get('query', '{ id, name }')
+        gql_query = '{ pages (id: %s) { topics'%pageid + subquery + '} }'
+        return execute_gql_query(gql_query, lambda x:x['pages'][0]['topics'])
 
     if request.method == 'POST':
         topicid = getPOSTData(request)['topicid']
@@ -131,14 +112,19 @@ def related_topics_id(pageid, relatedtopicid):
 
 
 
-
-@page.route('/<int:pageid>/page?QUERYPARAMS', methods=['GET', 'POST'])
-def related_pages():
+@page.route('/<int:pageid>/page', methods=['GET', 'POST'])
+def related_pages(pageid):
     """More involved selections of pages that relate to the page"""
     db = get_db()
     if request.method == 'GET':
-        # PROCESS query arguments here
-        pass
+
+        subquery = request.args.get('query', '{id, name}')
+        gql_query = ('{ pages (id: %s) { leftPages '%pageid + 
+            subquery + 
+            ', rightPages' + 
+            subquery +
+            '} }' )
+        return execute_gql_query(gql_query, lambda x:x['pages'][0])
 
     if request.method == 'POST':
         receivedData = getPOSTData(request)
@@ -160,7 +146,6 @@ def related_pages():
             db.execute("""
                 INSERT INTO PagePageRelationship(relationshipid, righttopicid, lefttopicid)
                 VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
-
 
 
 

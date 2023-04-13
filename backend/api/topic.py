@@ -6,6 +6,7 @@ from flask import Blueprint, request, Response
 from database.oldInterface import get_db, packageRows
 
 from backend.api.utilities import checkNodeType, getPOSTData
+from backend.api.graphQL import execute_gql_query
 
 
 topic = Blueprint('topic', __name__)
@@ -18,15 +19,8 @@ def all_topics():
     db = get_db()
 
     if request.method == 'GET':
-        # PROCESS query arguments here
-        if 'rootOnly' in request.args and bool(request.args['rootOnly']):
-            topicsData = db.execute("""
-                SELECT * FROM Topic WHERE Topic.id NOT IN (SELECT lefttopicid FROM TopicTopicRelationship);
-                """).fetchall()
-            return packageRows(topicsData)
-
-        topicsData = db.execute("SELECT * FROM Topic;").fetchall()
-        return packageRows(topicsData)
+        subquery = request.args.get( 'query', '{ id, name }' )
+        return execute_gql_query('{ topics' + subquery + '}', lambda x: x['topics'])
 
     if request.method == 'POST':
         name = getPOSTData(request)['name']
@@ -47,33 +41,16 @@ def info(topicid):
     """all info on a specific topic, including affiliated pages and topics"""
     db = get_db()
     if request.method == 'GET':
-        topicInfo = db.execute("SELECT * FROM Topic WHERE id=(?)", (topicid,) ).fetchone()
+        default_subquery = """{ 
+                    id, name,
+                    pages {id, name}, 
+                    leftTopics {id, name}, 
+                    rightTopics { id, name }
+                    }"""
 
-        if bool(request.args.get('infoOnly', '')):
-            return packageRows(topic=topicInfo)
-
-        topicPages = getPagesInTopic(db, topicid, selectThrough=None)
-        leftTopics = db.execute(
-            """
-            SELECT Topic.name, TopicTopicRelationship.lefttopicid,
-            TopicTopicRelationship.relationshipid
-            FROM TopicTopicRelationship INNER JOIN Topic ON
-            TopicTopicRelationship.lefttopicid = Topic.id WHERE
-            TopicTopicRelationship.righttopicid=(?);
-            """,
-            (topicid,)).fetchall()
-        rightTopics = db.execute(
-            """
-            SELECT Topic.name, TopicTopicRelationship.righttopicid,
-            TopicTopicRelationship.relationshipid
-            FROM TopicTopicRelationship INNER JOIN Topic ON
-            TopicTopicRelationship.righttopicid = Topic.id WHERE 
-            TopicTopicRelationship.lefttopicid=(?);
-            """,
-            (topicid,)).fetchall()
-
-        return packageRows(topic=topicInfo, pages=topicPages, leftTopics=leftTopics,
-            rightTopics=rightTopics)
+        subquery = request.args.get('query', default_subquery)
+        gql_query = '{ topics (id: %s)'%topicid + subquery + '}'
+        return execute_gql_query(gql_query, lambda x:x['topics'][0])
 
     if request.method == 'PUT':
         if 'name' in request.form.keys():
@@ -95,12 +72,10 @@ def related_pages(topicid):
     """More involved selections of pages that relate to the topic"""
     db = get_db()
     if request.method == 'GET':
-        selectThrough = request.args.get('selectThrough', None)
-        onThe = request.args.get('onThe', 'left')
+        subquery = request.args.get('query', '{id, name}')
+        gql_query = '{ topics (id: %s) { pages '%topicid + subquery + '} }'
 
-        pages = getPagesInTopic(db, topicid, selectThrough, onThe)
-
-        return packageRows(pages)
+        return execute_gql_query(gql_query, lambda x:x['topics'][0]['pages'])
 
     if request.method == 'POST':
         pageid = getPOSTData(request)['pageid']
@@ -131,27 +106,15 @@ def related_topics(topicid):
     """More involved selections of topis that relate to the topic"""
     db = get_db()
     if request.method == 'GET':
-        # PROCESS query arguments here
-        leftTopics = db.execute(
-            """
-            SELECT Topic.name, TopicTopicRelationship.lefttopicid,
-            TopicTopicRelationship.relationshipid
-            FROM TopicTopicRelationship INNER JOIN Topic ON
-            TopicTopicRelationship.lefttopicid = Topic.id WHERE
-            TopicTopicRelationship.righttopicid=(?);
-            """,
-            (topicid,)).fetchall()
-        rightTopics = db.execute(
-            """
-            SELECT Topic.name, TopicTopicRelationship.righttopicid,
-            TopicTopicRelationship.relationshipid
-            FROM TopicTopicRelationship INNER JOIN Topic ON
-            TopicTopicRelationship.righttopicid = Topic.id WHERE 
-            TopicTopicRelationship.lefttopicid=(?);
-            """,
-            (topicid,)).fetchall()
+        subquery = request.args.get( 'query', '{ id, name }' )
 
-        return packageRows(leftTopics=leftTopics, rightTopics=rightTopics)
+        gql_query = ('{topics (id: %s) { rightTopics'%topicid + 
+            subquery + 
+            ', leftTopics' +
+            subquery + 
+            '} }')
+
+        return execute_gql_query(gql_query, lambda x: x['topics'][0] )
 
     if request.method == 'POST':
         relatedtopicid = getPOSTData(request)['relatedtopicid']
@@ -209,50 +172,4 @@ def related_topics_id(topicid, relatedtopicid):
 
     db.commit()
     return Response(status=200)
-
-
-
-
-########################################### Utilities ###########################################
-
-def getPagesInTopic(db, topicid, selectThrough=None, onThe='left' ):
-    """Fetch pages corresponding to a particular topic"""
-    if selectThrough is None: # only topic pages
-        return db.execute("""
-            SELECT Page.id, Page.name, Topic.id AS topicid, Topic.name as topicname
-            FROM Page INNER JOIN PageTopic ON Page.id=PageTopic.pageid
-            INNER JOIN Topic on PageTopic.topicid=Topic.id
-            WHERE PageTopic.topicid =(?)
-            """, (topicid,) ).fetchall()
-
-    relationshipid = selectThrough
-    if onThe == 'left':
-        childCol = 'lefttopicid'
-        parentCol = 'righttopicid'
-    if onThe == 'right':
-        childCol = 'righttopicid'
-        parentCol = 'lefttopicid'
-
-    return db.execute("""
-        WITH RECURSIVE AllRelated(topicid) AS (
-            SELECT (?)
-            UNION
-            SELECT DISTINCT TopicTopicRelationship.{childCol} FROM
-            TopicTopicRelationship INNER JOIN AllRelated ON
-            TopicTopicRelationship.{parentCol} = AllRelated.topicid
-            WHERE TopicTopicRelationship.relationshipid=(?)
-            LIMIT 10000
-        )
-        SELECT Page.id, Page.name, PageTopic.topicid, Topic.name AS topicname FROM Page INNER JOIN 
-        PageTopic ON Page.id=PageTopic.pageid INNER JOIN
-        AllRelated ON PageTopic.topicid=AllRelated.topicid INNER JOIN
-        Topic ON PageTopic.topicid=Topic.id;
-        """.format(childCol=childCol, parentCol=parentCol), (topicid, relationshipid)).fetchall()
-
-
-
-
-
-
-
 
