@@ -32,6 +32,7 @@ Majory priorities:
 
 
 ### Short term:
+- replace favicon
 - find basic set of components
     * eg: https://react-table-v7.tanstack.com/
     * searching

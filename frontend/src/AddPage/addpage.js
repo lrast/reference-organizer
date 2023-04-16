@@ -1,7 +1,11 @@
 import React from 'react'
 
 function AddPage() {
-    return <div> Add Page </div>
+    return (
+        <>
+            <h1> Add a new page </h1>
+        </>
+        )
 }
 
 export default AddPage;

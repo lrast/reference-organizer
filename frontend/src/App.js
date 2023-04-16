@@ -35,7 +35,7 @@ function App() {
         <Route path="relationship" element={<RelationshipsList/>}/>
         <Route path="page/:pageId" element={<PageView/>}/>
         <Route path="topic/:topicId" element={<TopicView/>}/>
-        <Route path="addPage" element={<AddPage/>}/>
+        <Route path="newpage" element={<AddPage/>}/>
       </Routes>
     </>
   );
