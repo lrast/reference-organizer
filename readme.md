@@ -1,7 +1,12 @@
 # Basic visual file organizer
 
-## To run it:
-1. set environment variables:
+## Backend setup:
+1. install requirements
+```
+pip install -r requirements.txt
+```
+
+2. set environment variables:
 ```
 export FLASK_APP=run
 export FLASK_SERVER_NAME=127.0.0.1:5000
@@ -11,7 +16,19 @@ export FLASK_SECRET_KEY=[key]
 export FLASK_DATABASE_URL=[url]
 export FLASK_SQLALCHEMY_DATABASE_URI='sqlite:///[url]'
 ```
-2. flask run
+3. ```flask run```
+
+
+## Frontend setup:
+1. install requirements
+```
+cd frontend
+npm install package.json
+```
+
+2. ```npm start```
+
+
 
 
 ## organization scheme:
@@ -20,6 +37,9 @@ export FLASK_SQLALCHEMY_DATABASE_URI='sqlite:///[url]'
 3. organization is done at the level of topics, for example by make subsets of topics
 4. Key restriction: there is only one type of relationship between topics and pages
 
+
+
+# Work in progress
 
 ## to do:
 Majory priorities:
@@ -32,13 +52,15 @@ Majory priorities:
 
 
 ### Short term:
-- replace favicon
 - find basic set of components
-    * eg: https://react-table-v7.tanstack.com/
+    * table: https://react-table-v7.tanstack.com/
     * searching
+    * forms, etc
+- port fully to react app
+- replace favicon
+
 - tables view: filtering and sorting
 - multiple entries for page, topic entry
-- clean-up css, html, and view code.
 - visual interface to relationships
     * topic and citation graph visualization
 - local files: opening jupyter notebooks
@@ -55,9 +77,11 @@ Majory priorities:
     * pdf ingestion: title, authors, references
     * importing from mendeley and session buddy records
         > important for populating the database
+- store page favicons
 
 ### bugs:
 - 'maximum recursion depth' when there are subtopic loops
+    * replace all recursive calls by graphql queries
 - pages that are tagged more than once are listed multiple times in the tables
 
 
