@@ -1,14 +1,21 @@
-import React from 'react'
-import Sidebar from '../TableComponents'
+import React, {useState, useEffect} from 'react'
+import {Sidebar, DataTable} from '../TableComponents'
+
 
 function TopicsList() {
-    return (
-        <div className="table-wrapper">
-            <div className="table-body">
-                <h1> Topics List </h1>
-            </div>
-            <Sidebar/>
-        </div>
+  const [tableData, setData] = useState(null);
+
+  console.log('here')
+  useEffect( () =>{
+    fetch( '/api/topic')
+    .then( (response) => console.log(response.json()) )
+  })
+
+  return (
+      <div className="table-wrapper">
+          <DataTable/>
+          <Sidebar/>
+      </div>
 )
 }
 

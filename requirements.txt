@@ -1,4 +1,5 @@
 flask
 requests
 flask-sqlalchemy
+flask-cors
 graphene-sqlalchemy

@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 
 app = Flask(__name__, template_folder='../frontend/templates', static_folder='../frontend/static')
 app.config.from_prefixed_env()
@@ -18,7 +19,8 @@ app.register_blueprint(button, url_prefix='/button')
 from database.model import db as sqlaDB
 sqlaDB.init_app(app)
 
-
 from database.oldInterface import database_setup
 database_setup(app)
 
+# cors configuration
+CORS(app, resources={r"/api/*": {"origins": 'http://localhost:3000'}} )

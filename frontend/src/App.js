@@ -23,7 +23,7 @@ function App() {
       <nav className="navheader">
         <li className="navheader"> <Link to="/home">Home</Link> </li>
         <li className="navheader"> <Link to="/page">Pages</Link> </li>
-        <li className="navheader"> <Link to="/topic">Topic</Link> </li>
+        <li className="navheader"> <Link to="/topic">Topics</Link> </li>
         <li className="navheader"> <Link to="/relationship">Relationships</Link> </li>
       </nav>
 

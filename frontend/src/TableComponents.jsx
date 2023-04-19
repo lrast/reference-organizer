@@ -1,12 +1,105 @@
 import React from 'react';
-import { useState } from 'react';
-import ReactDOM from 'react-dom/client';
+
+import {useTable} from 'react-table'
 
 // table component
+function DataTable() {
+  // needs to be renamed.
+    const data = React.useMemo(
+      () => [
+       {
+         col1: 'Hello',
+         col2: 'World',
+       },
+       {
+         col1: 'react-table',
+         col2: 'rocks',
+       },
+       {
+         col1: 'whatever',
+         col2: 'you want',
+       },
+      ],
+      []
+   )
+
+    const columns = React.useMemo(
+      () => [
+       {
+         Header: 'Column 1',
+         accessor: 'col1', // accessor is the "key" in the data
+       },
+       {
+         Header: 'Column 2',
+         accessor: 'col2',
+       },
+      ],
+      []
+    )
+    const tableInstance = useTable({ columns, data })
+
+    const {
+      getTableProps,
+      getTableBodyProps,
+      headerGroups,
+      rows,
+      prepareRow,
+    } = tableInstance
+
+
+    return (
+      <div className="table-body">
+        <table {...getTableProps()} style={{ border: 'solid 1px blue' }} className="reference-table">
+         <thead>
+           {headerGroups.map(headerGroup => (
+             <tr {...headerGroup.getHeaderGroupProps()}>
+               {headerGroup.headers.map(column => (
+                 <th
+                   {...column.getHeaderProps()}
+                   style={{
+                     borderBottom: 'solid 3px red',
+                     background: 'aliceblue',
+                     color: 'black',
+                     fontWeight: 'bold',
+                   }}
+                 >
+                   {column.render('Header')}
+                 </th>
+               ))}
+             </tr>
+           ))}
+         </thead>
+         <tbody {...getTableBodyProps()}>
+           {rows.map(row => {
+             prepareRow(row)
+             return (
+               <tr {...row.getRowProps()}>
+                 {row.cells.map(cell => {
+                   return (
+                     <td
+                       {...cell.getCellProps()}
+                       style={{
+                         padding: '10px',
+                         border: 'solid 1px gray',
+                         background: 'papayawhip',
+                       }}
+                     >
+                       {cell.render('Cell')}
+                     </td>
+                   )
+                 })}
+               </tr>
+             )
+           })}
+         </tbody>
+        </table>
+      </div>
+   )
 
 
 
-//To do
+}
+
 
 
 // table sidebar
@@ -19,12 +112,9 @@ function Sidebar() {
 }
 
 
-export default Sidebar;
-
 
 class FilterList extends React.Component {
   // component representing the list of different filters
-
   constructor() {
     super()
     this.filters = [
@@ -39,7 +129,6 @@ class FilterList extends React.Component {
 
   makeNewFilter() {
     // make a new Filter, add it to the list, rerender the list of filters
-    console.log(this.filters)
     let key = this.totalNumberAdded += 1
     let newItem = FilterComponent(key, this)
     this.filters.unshift(newItem)
@@ -57,7 +146,6 @@ class FilterList extends React.Component {
   }
 
   render() {
-    console.log(this.filters)
     return React.createElement('ul',   {style: {listStyle: "none"}}, this.filters )
   }
 }
@@ -82,3 +170,4 @@ function FilterComponent(key, parent) {
   </li>
 }
 
+export { DataTable, Sidebar };
