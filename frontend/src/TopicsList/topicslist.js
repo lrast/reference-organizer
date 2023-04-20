@@ -1,19 +1,27 @@
 import React, {useState, useEffect} from 'react'
-import {Sidebar, DataTable} from '../TableComponents'
+import {Sidebar, TableBody} from '../TableComponents'
 
 
 function TopicsList() {
-  const [tableData, setData] = useState(null);
+  const [tableData, setData] = useState([]);
+  const [tableColumns, setColumns] = useState([]);
 
-  console.log('here')
-  useEffect( () =>{
-    fetch( '/api/topic')
-    .then( (response) => console.log(response.json()) )
-  })
+  useEffect( () => {
+    fetch( '/api/topic/')
+    .then( (response) => response.json())
+    .then( (rawList) => rawList.map( (row) => 
+          { return {'link': <a href={'/topic/' + row.id}> {row.name} </a> } }
+        ))
+    .then( (tableData) => {
+          setData(tableData);
+          setColumns( [{ Header: 'Topics', accessor: 'link'}] )
+        })
+  }, [])
+
 
   return (
       <div className="table-wrapper">
-          <DataTable/>
+          <TableBody data={tableData} columns={tableColumns}/>
           <Sidebar/>
       </div>
 )
