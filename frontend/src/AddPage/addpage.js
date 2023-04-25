@@ -1,49 +1,45 @@
 import React, {useState, useEffect} from 'react'
-import { FormControl, TextField, Button, Autocomplete } from '@mui/material';
+import { FormControl, TextField, Button} from '@mui/material';
 
 import {AutofillField} from '../myComponents'
 
 function AddPage() {
   const [urlValue, setUrlValue] = useState("")
-  const [nameField, setNameField] = useState("")
-  const [topicField, setTopicField] = useState([])
 
-  useEffect( () =>{
+  const formFieldsDefaults = {url:"", name:"", topics:[]}
+  const [formFields, setFormFields] = useState(formFieldsDefaults)
+
+  useEffect( () => {
     if (urlValue != ""){
-      fetch('api/getWebpageTitle',
-        {method: 'POST',
-         body: urlValue}
-       )
-      .then((x)=>x.text())
-      .then( (response) => {
-        if (nameField==""){setNameField(response)}
-      })
+      fetch('api/getWebpageTitle', {method: 'POST', body: urlValue})
+      .then((response)=>response.text())
+      .then( (title) => { if (formFields.name==""){setFormFields( {...formFields, name: title } )} })
     }
   }, [urlValue])
 
   const inputStyling = {mb:"10pt", width:"80%"}
 
-
   return (
     <>
-    <div style={{"textAlign":"center", "width":"100%"}}>
+    <div style={{"textAlign":"center", "width":"100%", "cursor":"pointer", "react-tappable":true}}>
       <h1> Add a new page </h1>
-        <form onSubmit={()=>
-          fetch('/api/addentries', {
-            method: 'POST',
-            body: JSON.stringify({
-              url: urlValue,
-              name: nameField,
-              topics: topicField
-            })
-          }) }
+        <form
+          onSubmit={(e)=> {
+              e.preventDefault();
+              fetch('/api/addentries', { method: 'POST', body: JSON.stringify( formFields )})
+              setFormFields( formFieldsDefaults )
+          } }
         >
           <FormControl sx={inputStyling} >
             <TextField 
             label="Page URL"
+            value={formFields.url}
             inputProps = {{
               onBlur: (event) => {
                 setUrlValue(event.target.value)
+              },
+              onChange: (event) => {
+                setFormFields( {...formFields, url: event.target.value } )
               }
             }}>
             </TextField>
@@ -51,25 +47,27 @@ function AddPage() {
           <FormControl sx={inputStyling} >
             <TextField
               label="Page Name"
+              value={formFields.name}
               inputProps = {{
                 onChange: (event) => {
-                  setNameField( event.target.value )
+                  setFormFields( {...formFields, name: event.target.value } )
                 }
-              }}
-              id="nameField"
-              value={nameField}>
+              }}>
             </TextField>
           </FormControl>
           <FormControl sx={inputStyling} >
-            <AutofillField toFetch="/api/topic"
+            <AutofillField toFetch="/api/topic/"
               autocompleteProps={{
               label:"Topics", multiple:true, freeSolo:true, autoSelect:true,
-              value: topicField, onChange: (event, newValue) => { setTopicField(newValue) },
-              onBlur: () => console.log( topicField)
+              value: formFields.topics,
+              onChange: (event, newValue) => setFormFields( {...formFields, topics: newValue} )
             }}/>
           </FormControl>
           <FormControl sx={{mb:"10pt", width:"60%", height:"40pt"}} >
-            <Button type="submit"> Submit </Button>
+            <Button type="submit"
+            variant="contained"
+            style={{"cursor":"pointer", "react-tappable":true}}
+            > Submit </Button>
           </FormControl>
         </form>
     </div>
