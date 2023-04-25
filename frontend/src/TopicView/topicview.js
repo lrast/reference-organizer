@@ -1,10 +1,10 @@
 import React, {useState, useEffect} from 'react'
 import { useParams } from 'react-router-dom';
 
-import {Sidebar, TableBody} from '../TableComponents'
-
 import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 
+import {Sidebar, TableBody} from '../TableComponents'
+import {EditPanel} from '../myComponents';
 
 function TopicView() {
   let {topicId} = useParams()
@@ -56,14 +56,7 @@ function TopicView() {
       </AccordionDetails>
     </Accordion>
 
-    <Accordion>
-      <AccordionSummary>
-        Edit page
-      </AccordionSummary>
-      <AccordionDetails>
-        MORE!
-      </AccordionDetails>
-    </Accordion>
+    <EditPanel rootType="topic" rootId={topicId}/>
     </>
   )
 }

@@ -29,11 +29,13 @@ def all_topics():
             inserted = db.execute("INSERT INTO Topic(name) VALUES (?) RETURNING id", (name,))
             response = packageRows(inserted.fetchone())
             db.commit()
+            return response
+
         except sqlite3.IntegrityError:
             existing = db.execute("SELECT id FROM Topic WHERE name=(?);", (name,))
             response = packageRows(existing.fetchone())
+            return response, 303
 
-        return response
 
 
 @topic.route('/<int:topicid>', methods=['GET', 'PUT', 'DELETE'])

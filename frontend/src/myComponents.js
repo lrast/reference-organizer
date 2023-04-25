@@ -1,7 +1,8 @@
 // General use components
 
-import React from 'react'
-import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import React, {useState, useEffect} from 'react'
+import { Accordion, AccordionSummary, AccordionDetails,
+        Autocomplete, TextField, Chip} from '@mui/material';
 
 
 function EditPanel ({rootType, rootId}){
@@ -19,17 +20,49 @@ function EditPanel ({rootType, rootId}){
     )
 }
 
+function AutofillField( {toFetch, preLoaded, autocompleteProps} ){
+  const [options, setOptions] = useState([])
+
+  useEffect( () => {
+    if (preLoaded){
+      setOptions(preLoaded)
+    }
+    else {
+      fetch( toFetch )
+      .then( (response) => response.json())
+      .then( (options) => options.map( 
+        (propertiesDict) => {
+          propertiesDict['label'] = propertiesDict['name']
+          return propertiesDict 
+        } ) )
+      .then( (options) => options.sort( (a,b) => (a.label.toLowerCase() > b.label.toLowerCase())-0.5 ) )
+      .then( (options) => setOptions(options)  )
+    }
+  }, [])
+
+  return(
+  <Autocomplete
+    {...autocompleteProps}
+    options={options}
+    renderTags={(value, getTagProps) => 
+      value.map((option, index) => {
+        let chipLabel = option.label
+        if (typeof(option) === 'string'){
+          chipLabel = option
+        }
+        return <Chip variant="outlined" label={chipLabel} {...getTagProps({ index })} />
+      }
+      )
+    }
+    renderInput={(params) => <TextField multiple {...params} label={autocompleteProps.label} />} >
+  </Autocomplete>
+  )
+}
 
 
 
 
-
-
-
-
-
-
-export {EditPanel};
+export {EditPanel, AutofillField};
 
 
 /* autofilling forms

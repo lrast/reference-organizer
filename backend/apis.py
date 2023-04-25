@@ -47,3 +47,42 @@ def getWebpageTitle():
         return Response('', status=200)
 
 
+@api.route('/addentries', methods=['POST'])
+def addEntries():
+    """Form handling for add page form"""
+    formData = json.loads( request.data )
+    print(formData)
+
+    pageAdded = False
+
+    if formData['url'] != '':
+        response = requests.post(
+            url_for('api.page.all_pages', _external=True), 
+            {'url': formData['url'], 'name': formData['name']}
+            )
+
+        pageid = json.loads(response.content)['id']
+        pageAdded = True
+
+    if len( formData['topics'] ) > 0:
+        for topic in formData['topics']:
+            if type(topic) is str: # treat it as a new topic
+                response = requests.post( url_for('api.topic.all_topics', _external=True), {'name': topic})
+                topicid = json.loads(response.content)['id']
+            else:
+                topicid = topic['id']
+
+            if pageAdded:
+                requests.post( url_for('api.page.related_topics', pageid=pageid, _external=True ), {
+                    'topicid': topicid
+                    }  )
+
+    return Response('', status=200)
+
+
+
+
+
+
+
+

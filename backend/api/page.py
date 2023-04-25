@@ -34,10 +34,12 @@ def all_pages():
                 VALUES (?,?, ?) RETURNING id;""", (name, url, date))
             response = packageRows(inserted.fetchone())
             db.commit()
+            return response
+
         except sqlite3.IntegrityError:
             existing = db.execute("""SELECT id FROM Page WHERE url=(?)""", (url,))
             response = packageRows(existing.fetchone())
-        return response
+            return response, 303
 
 
 

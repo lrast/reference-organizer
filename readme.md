@@ -52,11 +52,8 @@ Majory priorities:
 
 
 ### Short term:
-- find basic set of components
-    * table: https://react-table-v7.tanstack.com/
-    * searching
-    * forms, etc
 - port fully to react app
+
 - replace favicon
 
 - tables view: filtering and sorting
