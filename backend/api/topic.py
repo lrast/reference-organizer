@@ -55,8 +55,10 @@ def info(topicid):
         return execute_gql_query(gql_query, lambda x:x['topics'][0])
 
     if request.method == 'PUT':
-        if 'name' in request.form.keys():
-            db.execute("UPDATE Topic SET name=(?) WHERE id=(?);", (request.form['name'], topicid) )
+        receivedData = getPOSTData(request)
+
+        if 'name' in receivedData.keys():
+            db.execute("UPDATE Topic SET name=(?) WHERE id=(?);", (receivedData['name'], topicid) )
         db.commit()
         return Response(status=200)
 

@@ -28,6 +28,7 @@ function AddPage() {
               e.preventDefault();
               fetch('/api/addentries', { method: 'POST', body: JSON.stringify( formFields )})
               setFormFields( formFieldsDefaults )
+              setUrlValue("")
           } }
         >
           <FormControl sx={inputStyling} >

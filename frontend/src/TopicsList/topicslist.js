@@ -9,6 +9,7 @@ function TopicsList() {
   useEffect( () => {
     fetch( '/api/topic/')
     .then( (response) => response.json())
+    .then( (rawData) => rawData.sort( (a,b) => ((a.name.toLowerCase() > b.name.toLowerCase()) - 0.5) ) )
     .then( (rawList) => rawList.map( (row) => 
           { return {'link': <a href={'/topic/' + row.id}> {row.name} </a> } }
         ))
@@ -22,7 +23,7 @@ function TopicsList() {
   return (
       <div className="table-wrapper">
           <TableBody data={tableData} columns={tableColumns}/>
-          <Sidebar/>
+          <Sidebar tableData={tableData}/>
       </div>
 )
 }

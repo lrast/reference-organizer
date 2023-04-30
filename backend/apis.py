@@ -51,7 +51,6 @@ def getWebpageTitle():
 def addEntries():
     """Form handling for add page form"""
     formData = json.loads( request.data )
-    print(formData)
 
     pageAdded = False
 

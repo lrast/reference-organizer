@@ -53,18 +53,19 @@ Majory priorities:
 
 ### Short term:
 - port fully to react app
-
-- replace favicon
+    - tables, remove relationships
 
 - tables view: filtering and sorting
+- quick start
+- replace favicon
 - multiple entries for page, topic entry
-- visual interface to relationships
-    * topic and citation graph visualization
 - local files: opening jupyter notebooks
 - ability to abbreviate column values
 
 
 ### Long term:
+- visual interface to relationships
+    * topic and citation graph visualization
 - table view for pages including title, authors, journal, year
 - dockerize to a local application
 - improve URL origin testing

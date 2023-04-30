@@ -36,7 +36,7 @@ function PageView() {
       </AccordionDetails>
     </Accordion>
 
-    <EditPanel rootType="page" rootId={pageId} />
+    <EditPanel parentType="page" parentData={pageData} />
 
     </>
     )

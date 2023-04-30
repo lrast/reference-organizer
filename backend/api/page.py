@@ -62,10 +62,13 @@ def info(pageid):
 
     if request.method == 'PUT':
         # over write the contents of the entry
-        if 'name' in request.form.keys():
-            db.execute("UPDATE Page SET name=(?) WHERE id=(?);", (request.form['name'], pageid) )
-        if 'url' in request.form.keys():
-            db.execute("UPDATE Page SET url=(?) WHERE id=(?);", (request.form['url'], pageid) )
+        receivedData = getPOSTData(request)
+
+        if 'name' in receivedData.keys():
+            db.execute("UPDATE Page SET name=(?) WHERE id=(?);", (receivedData['name'], pageid) )
+        if 'url' in receivedData.keys():
+            db.execute("UPDATE Page SET url=(?) WHERE id=(?);", (receivedData['url'], pageid) )
+
         db.commit()
         return Response(status=200)
 

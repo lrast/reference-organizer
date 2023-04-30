@@ -9,6 +9,7 @@ function PagesList() {
   useEffect( () => {
     fetch( '/api/page/')
     .then( (response) => response.json())
+    .then( (rawData) => rawData.sort( (a,b) => ((a.name.toLowerCase() > b.name.toLowerCase()) - 0.5) ) )
     .then( (rawList) => rawList.map( (row) => 
           { return {'link': <a href={'/page/' + row.id}> {row.name} </a> } }
         ))

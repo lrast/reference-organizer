@@ -56,7 +56,7 @@ function TopicView() {
       </AccordionDetails>
     </Accordion>
 
-    <EditPanel rootType="topic" rootId={topicId}/>
+    <EditPanel parentType="topic" parentData={topicData}/>
     </>
   )
 }

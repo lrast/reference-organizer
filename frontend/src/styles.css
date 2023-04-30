@@ -71,17 +71,15 @@ body {
   text-align: right;
 }
 
-.sidebar-filter-item {
-  width: 100%;
-  margin-bottom: 10px;
-  display: inline-block;
-  text-align: left;
-}
 
 .sidebar-filter-body {
   border-radius: 10px;
   width: 100%;
   background-color: #E5E4E2;
+  margin-bottom: 10px;
+  display: inline-block;
+  text-align: left;
+
 }
 
 
