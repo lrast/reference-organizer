@@ -1,25 +1,46 @@
-import React, {useState, useEffect, useRef} from 'react';
-
-import {useTable} from 'react-table'
+import React, {useState, useEffect, useRef, useMemo} from 'react';
 
 import {AutofillField} from './myComponents'
-
 import {TextField, Button} from '@mui/material';
 
+import {useTable, useFilters, useGlobalFilter} from 'react-table'
+import {matchSorter} from 'match-sorter'
+
+
+
 // table component
-function TableBody({data, columns}) {
-    data = React.useMemo( () => data, [data])
-    columns = React.useMemo( () => columns, [columns] )
+function TableBody({data, columns, filterValues, searchString, hiddenColumns=[]}) {
+  data = useMemo( () => data, [data])
+  columns = useMemo( () => columns, [columns] )
 
-    const tableInstance = useTable({ columns, data })
+  const defaultColumn = React.useMemo(
+    () => ({
+      Filter: () => [],
+    }),
+    []
+  )
 
-    const {
-      getTableProps,
-      getTableBodyProps,
-      headerGroups,
-      rows,
-      prepareRow,
-    } = tableInstance
+  const instance = useTable({ columns, data, defaultColumn, 
+      initialState: {hiddenColumns: hiddenColumns},
+      globalFilter: (rows, id, filterValue) => matchSorter(rows, filterValue, { keys: ['original.name'] })
+      },
+      useFilters, useGlobalFilter)
+
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+    setFilter,
+    setAllFilters,
+    state,
+    setGlobalFilter
+  } = instance
+
+  useEffect ( () => {
+    setGlobalFilter(searchString)
+  }, [searchString])
 
 
     return (
@@ -28,11 +49,11 @@ function TableBody({data, columns}) {
          <thead>
            {headerGroups.map(headerGroup => (
              <tr {...headerGroup.getHeaderGroupProps()}>
-               {headerGroup.headers.map(column => (
-                 <th {...column.getHeaderProps()}>
-                   {column.render('Header')}
-                 </th>
-               ))}
+               {headerGroup.headers.map(column => {
+                //console.log(column)
+                return <th {...column.getHeaderProps()}> {column.render('Header')} </th>
+               }
+              )}
              </tr>
            ))}
          </thead>
@@ -55,25 +76,29 @@ function TableBody({data, columns}) {
         </table>
       </div>
    )
-
-
-
 }
 
 
+
+
+
 // table sidebar
-function Sidebar() {
-  const [tableFilters, setTableFilters] = useState([])
-  const [allTopics, setTopics] = useState([])
+function Sidebar({searchString, setSearchString} ) {
+  // In the future, we going to want the set the values of all filters in one state
+
+  // state of the sidebar of filters
+  const [tableOfFilters, setTableOfFilters] = useState([])
 
   const stateRef = useRef()
-  stateRef.current = tableFilters;
+  stateRef.current = tableOfFilters;
 
   const removeFilterByKey = (key) => {
-    setTableFilters( stateRef.current.filter( (item) => (item.key != key) ) )
+    setTableOfFilters( stateRef.current.filter( (item) => (item.key != key) ) )
   }
 
-  // load data and and relationships
+  // state containin data and relationships
+  const [allTopics, setTopics] = useState([])
+
   useEffect( () => {
     fetch('/api/topic/')
     .then( (response) => response.json())
@@ -86,17 +111,28 @@ function Sidebar() {
     .then( (options) => setTopics(options)  )
   }, [])
 
+  // state of the filters themselves
+
+
+
 
 
   return (
     <div className="table-sidebar">
-        <TextField type="text" name="test" label="Search" className="sidebar-filter-body" />
+        <TextField type="text" name="test" label="Search" className="sidebar-filter-body"
+          value={searchString}
+          InputProps = {{
+            onChange: (event) => {
+              setSearchString( event.target.value )
+            }
+          }}
+         />
         <ul style={{listStyle: "none"}}>
-          {tableFilters}
+          {tableOfFilters}
         </ul>
         <Button variant="contained" onClick={() => {
-          setTableFilters( [...tableFilters,
-            FilterComponent({myKey:(Math.max( ...tableFilters.map( (item) =>(item.key) ), 0 ) + 1 + ''),
+          setTableOfFilters( [...tableOfFilters,
+            FilterComponent({myKey:(Math.max( ...tableOfFilters.map( (item) =>(item.key) ), 0 ) + 1 + ''),
               removeByKey:removeFilterByKey, loadedTopics:allTopics}
               ) ] )
         }} > New Filter</Button>
@@ -109,7 +145,6 @@ function Sidebar() {
 
 function FilterComponent({myKey, removeByKey, loadedTopics}) {
   // sets up blank filter element
-
 
   return <li className="sidebar-filter-item" key={myKey}>
     <div className="sidebar-filter-body">
@@ -133,60 +168,6 @@ function FilterComponent({myKey, removeByKey, loadedTopics}) {
   </li>
 }
 
-
-
-
-
-
-
-class FilterList extends React.Component {
-  // component representing the list of different filters
-  constructor() {
-    super()
-    this.filters = [
-        <SearchBar key="0" />,
-        <li key="1">
-          <a onClick={this.makeNewFilter.bind(this)} className="sidebar-filter-body">New Filter</a>
-        </li>
-      ]
-    this.state = {filters: this.filters}
-    this.totalNumberAdded = 2
-  }
-
-  makeNewFilter() {
-    let key = this.totalNumberAdded += 1
-    let newItem = FilterComponent(key, this)
-    this.filters.splice(-1,0,newItem)
-    this.setState( {filters: this.filters} )
-  }
-
-  removeFilter(key) {
-    for (let i = 0; i<this.filters.length; i++){
-      if (this.filters[i].key == key) {
-        this.filters.splice(i, 1)
-      }
-    }
-    this.setState( {filters: this.filters} )
-  }
-
-  render() {
-    return React.createElement('ul',   {style: {listStyle: "none"}}, this.filters )
-  }
-}
-
-
-function SearchBar(key) {
-  return (
-    <>
-      <li className="sidebar-filter-item" key={key}>
-        <div className="sidebar-filter-body">
-            Search:
-            <input type="text" name="test" style={{width: '30%'}} />
-        </div>
-      </li>
-    </>
-    )
-}
 
 
 

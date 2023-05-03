@@ -54,11 +54,9 @@ Majory priorities:
 ### Short term:
 - port fully to react app
     - tables, remove relationships
-
 - tables view: filtering and sorting
-- quick start
+- move data fetching to global, so it only has to load once
 - replace favicon
-- multiple entries for page, topic entry
 - local files: opening jupyter notebooks
 - ability to abbreviate column values
 
@@ -76,6 +74,7 @@ Majory priorities:
     * importing from mendeley and session buddy records
         > important for populating the database
 - store page favicons
+- multiple entries for page, topic entry
 
 ### bugs:
 - 'maximum recursion depth' when there are subtopic loops
