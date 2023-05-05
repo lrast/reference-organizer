@@ -3,9 +3,6 @@ import {Sidebar, TableBody} from './TableComponents'
 
 function PagesTable() {
   // table columns and data
-  const [tableData, setData] = useState([]);
-  const [tableColumns, setColumns] = useState([]);
-
   const columns = [
     { Header: 'Pages', 
       accessor: 'link',
@@ -23,6 +20,9 @@ function PagesTable() {
       return rows }
     } 
   ]
+
+  const [tableData, setData] = useState([]);
+  const [tableColumns, setColumns] = useState([]);
 
   const hiddenColumns = ['name', 'id']
 

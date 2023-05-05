@@ -3,9 +3,6 @@ import {Sidebar, TableBody} from './TableComponents'
 
 function TopicsTable() {
   //  Table columns and data
-  const [tableData, setData] = useState([]);
-  const [tableColumns, setColumns] = useState([]);
-
   const columns = [
     { Header: 'Topics', 
       accessor: 'link',
@@ -22,23 +19,26 @@ function TopicsTable() {
       id: 'id',
       Filter: () => {},
       filter: React.useCallback( (rows, id, filterValue) => {
-        //console.log('in filter', filterValue, rows)
+        //console.log('in filter', rows)
         if (filterValue.length == 0) { return rows}
         return rows.filter( (row) => ( filterValue.includes( row.original.id ) ) )
       }, [])
     }
   ]
 
+  const [tableData, setData] = useState([]);
+  const [tableColumns, setColumns] = useState(columns);
+
   const hiddenColumns = ['name', 'id']
 
   // to do: use data that was passed to me
   useEffect( () => {
+    console.log('columns', tableColumns)
     fetch( '/api/topic/')
     .then( (response) => response.json())
     .then( (rawData) => rawData.sort( (a,b) => ((a.name.toLowerCase() > b.name.toLowerCase()) - 0.5) ) )
     .then( (tableData) => {
-          setData(tableData);
-          setColumns( columns )
+          setData(tableData)
         })
   }, [])
 
@@ -55,7 +55,6 @@ function TopicsTable() {
     if (filtersFromSidebar.topic.in.length != 0) { includedTopics = filtersFromSidebar.topic.in}
     includedTopics = includedTopics.filter( (x) => (! filtersFromSidebar.topic.out.includes(x) ) )
 
-    console.log( 'parent effect', [{id:'id', value:includedTopics}] )
     setFiltersToTable( [{id:'id', value:includedTopics}] )
   }, [filtersFromSidebar])
 

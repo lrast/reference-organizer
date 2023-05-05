@@ -18,7 +18,7 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
 
   const defaultColumn = useMemo(
     () => ({
-      Filter: () => []
+      Filter: () => {}
     }),
     []
   )
@@ -48,23 +48,18 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
   useFilters, useGlobalFilter)
 
 
+
   useEffect( () => {
     setGlobalFilter(searchString)
   }, [searchString])
 
   useEffect( () => {
-    console.log('effect', allFilters)
-    if (allFilters) { setAllFilters(allFilters) }
-
+      setAllFilters(allFilters)
   }, [allFilters])
 
 
     return (
       <div className="table-body">
-        <Button onClick={() => { 
-          console.log( allFilters )
-          setAllFilters( [{id:"id", value:[]}] )
-        } } > test </Button>
         <table {...getTableProps()} className="reference-table">
          <thead>
            {headerGroups.map(headerGroup => (
