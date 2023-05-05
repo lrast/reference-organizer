@@ -1,7 +1,8 @@
-import React, {useState, useEffect, useRef, useMemo} from 'react';
+import {useState, useEffect, useRef, useMemo} from 'react';
 
 import {AutofillField} from './myComponents'
-import {TextField, Button} from '@mui/material';
+import {TextField, Button, Checkbox, IconButton, Box, Grid, Switch,FormControlLabel} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 import {useTable, useFilters, useGlobalFilter} from 'react-table'
 import {matchSorter} from 'match-sorter'
@@ -9,22 +10,18 @@ import {matchSorter} from 'match-sorter'
 
 
 // table component
-function TableBody({data, columns, filterValues, searchString, hiddenColumns=[]}) {
+function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) {
+  // Responsible for rendering a table
+
   data = useMemo( () => data, [data])
   columns = useMemo( () => columns, [columns] )
 
-  const defaultColumn = React.useMemo(
+  const defaultColumn = useMemo(
     () => ({
-      Filter: () => [],
+      Filter: () => []
     }),
     []
   )
-
-  const instance = useTable({ columns, data, defaultColumn, 
-      initialState: {hiddenColumns: hiddenColumns},
-      globalFilter: (rows, id, filterValue) => matchSorter(rows, filterValue, { keys: ['original.name'] })
-      },
-      useFilters, useGlobalFilter)
 
   const {
     getTableProps,
@@ -36,15 +33,38 @@ function TableBody({data, columns, filterValues, searchString, hiddenColumns=[]}
     setAllFilters,
     state,
     setGlobalFilter
-  } = instance
+  } = useTable({ columns, data, defaultColumn, 
+      initialState: {
+        hiddenColumns: hiddenColumns,
+        filters: [
+            {
+              id: 'id',
+              value: []
+            }
+          ],
+      },
+      globalFilter: (rows, id, searchString) => matchSorter(rows, searchString, { keys: ['original.name'] })
+      },
+  useFilters, useGlobalFilter)
 
-  useEffect ( () => {
+
+  useEffect( () => {
     setGlobalFilter(searchString)
   }, [searchString])
+
+  useEffect( () => {
+    console.log('effect', allFilters)
+    if (allFilters) { setAllFilters(allFilters) }
+
+  }, [allFilters])
 
 
     return (
       <div className="table-body">
+        <Button onClick={() => { 
+          console.log( allFilters )
+          setAllFilters( [{id:"id", value:[]}] )
+        } } > test </Button>
         <table {...getTableProps()} className="reference-table">
          <thead>
            {headerGroups.map(headerGroup => (
@@ -81,23 +101,13 @@ function TableBody({data, columns, filterValues, searchString, hiddenColumns=[]}
 
 
 
-
 // table sidebar
-function Sidebar({searchString, setSearchString} ) {
-  // In the future, we going to want the set the values of all filters in one state
+function Sidebar({searchString, setSearchString, setFilterValues} ) {
+  // Responsible for rendering and updating the values of the filters
 
-  // state of the sidebar of filters
-  const [tableOfFilters, setTableOfFilters] = useState([])
-
-  const stateRef = useRef()
-  stateRef.current = tableOfFilters;
-
-  const removeFilterByKey = (key) => {
-    setTableOfFilters( stateRef.current.filter( (item) => (item.key != key) ) )
-  }
-
-  // state containin data and relationships
+  // preload topic data
   const [allTopics, setTopics] = useState([])
+  const [allPages, setPages] = useState([])
 
   useEffect( () => {
     fetch('/api/topic/')
@@ -111,31 +121,73 @@ function Sidebar({searchString, setSearchString} ) {
     .then( (options) => setTopics(options)  )
   }, [])
 
-  // state of the filters themselves
+  // state of the sidebar of filters
+  const [filterComponents, setFilterComponents] = useState([])
+  const [filterBank, setFilterBank] = useState([])
+
+  // state references
+  const filterComponentsRef = useRef()
+  filterComponentsRef.current = filterComponents;
+
+  const filterBankRef = useRef()
+  filterBankRef.current = filterBank
+
+  const removeFilterByKey = (key) => {
+    setFilterComponents( filterComponentsRef.current.filter( (item) => (item.key != key) ) )
+    setFilterBank( filterBankRef.current.filter( (i) => (i.filterId != key) ) )
+  }
+
+  const updateFilterBank = (filterElement) => {
+    setFilterBank( 
+      [...filterBankRef.current.filter( (i) => (i.filterId != filterElement.filterId) ), 
+        filterElement ] 
+    )
+  }
+
+  function computeInclusionExclusion( filters ){
+    const appendQuery = (acc, ele) => {acc.push(...ele.filterQuery); return acc}
+
+    let inIds = [... new Set( filters.filter( (x) => (x.filterIn) ).reduce(appendQuery, []) )]
+    let outIds = [... new Set( filters.filter( (x) => (! x.filterIn) ).reduce(appendQuery, []) )]
+
+    return {in: inIds, out:outIds}
+  }
 
 
+  // collate the filter bank to produce a single output
+  useEffect( () => {
+    let collatedFilter = {
+      topic: computeInclusionExclusion(filterBank.filter( (x) => (x.filterOn == "topic") ) ),
+      page: computeInclusionExclusion(filterBank.filter( (x) => (x.filterOn == "page") ) )
+    }
+    setFilterValues(collatedFilter)
 
+  }, [filterBank])
 
 
   return (
     <div className="table-sidebar">
-        <TextField type="text" name="test" label="Search" className="sidebar-filter-body"
-          value={searchString}
-          InputProps = {{
-            onChange: (event) => {
-              setSearchString( event.target.value )
-            }
-          }}
-         />
-        <ul style={{listStyle: "none"}}>
-          {tableOfFilters}
-        </ul>
-        <Button variant="contained" onClick={() => {
-          setTableOfFilters( [...tableOfFilters,
-            FilterComponent({myKey:(Math.max( ...tableOfFilters.map( (item) =>(item.key) ), 0 ) + 1 + ''),
-              removeByKey:removeFilterByKey, loadedTopics:allTopics}
-              ) ] )
-        }} > New Filter</Button>
+      <TextField type="text" name="test" label="Search" className="sidebar-filter-body"
+        value={searchString}
+        InputProps = {{
+          onChange: (event) => {
+            setSearchString( event.target.value )
+          }
+        }}
+       />
+      <ul style={{listStyle: "none"}}>
+        {filterComponents}
+      </ul>
+      <Button variant="contained" onClick={() => {
+        let thisKey = Math.max( ...filterComponents.map( (item) =>(item.key) ), 0 ) + 1 + ''
+        setFilterComponents( [...filterComponents,
+          <FilterComponentBody 
+            key={thisKey} myKey={thisKey}
+            removeSelf={()=> removeFilterByKey(thisKey)} updateFilter={updateFilterBank}
+            loadedTopics={allTopics} 
+          />
+        ])
+      }} > New Filter</Button>
     </div>
   )
 }
@@ -143,34 +195,60 @@ function Sidebar({searchString, setSearchString} ) {
 
 
 
-function FilterComponent({myKey, removeByKey, loadedTopics}) {
+
+
+function FilterComponentBody({myKey, removeSelf, updateFilter, loadedTopics}) {
   // sets up blank filter element
+  const [ uiState, setUiState ] = useState(
+    { filterIn: true, subtopics: false, filterQuery: [],
+      filterOn: "topic", filterId: myKey,
+      inputLabel:"Filter In"
+    }
+  )
 
-  return <li className="sidebar-filter-item" key={myKey}>
-    <div className="sidebar-filter-body">
-      <div className="sidebar-filter-exit">
-          <a onClick={() => {removeByKey(myKey)} }> X </a>
-      </div>
+  // need to update the filter state when the ui state changes
+  useEffect( () => {
+    updateFilter( uiState )
+  }, [uiState] )
 
-      <form action="">
-        <label htmlFor="filter-on"> On: </label>
-        <select id="filter-on">
-          <option > Name </option>
-          <option > Relationship </option>
-        </select>
-        <input type="text" name="test" style={{width: '30%'}} />
-        <AutofillField preLoaded={loadedTopics}
-              autocompleteProps={{
-              label:"Filter in", multiple:true
-        }}/>
-      </form>
+  return (
+    <li className="sidebar-filter-item" key='test'>
+    <div className="sidebar-filter-body" key='test'>
+      <IconButton onClick={removeSelf} >
+        <CloseIcon />
+      </IconButton>
+
+      <Grid component="label" container alignItems="center" spacing={0}>
+        <Grid item>Out</Grid>
+        <Grid item>
+          <Switch
+            onChange={ (e) => {
+              let labelValue = "Filter Out"
+              if (e.target.checked) {labelValue = "Filter In"}
+              setUiState( {...uiState, filterIn:e.target.checked, inputLabel:labelValue} )
+            }}
+            defaultChecked
+          />
+        </Grid>
+        <Grid item>In</Grid>
+      </Grid>
+
+      <FormControlLabel 
+        control={<Checkbox 
+          onChange={ (e) => { setUiState( {...uiState, subtopics:e.target.checked }) }}
+        />}
+        label="Include Subtopics"
+      />
+      <AutofillField preLoaded={loadedTopics}
+            autocompleteProps={{
+            label:uiState.inputLabel,
+            multiple:true,
+            onChange: (e, value) => {setUiState({...uiState, filterQuery:value.map( (x) => x.id ) }) } 
+        }}
+      />
     </div>
-  </li>
+    </li> )
 }
-
-
-
-
 
 
 export {TableBody, Sidebar };
