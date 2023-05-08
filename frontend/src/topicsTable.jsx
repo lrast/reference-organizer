@@ -1,9 +1,14 @@
-import React, {useState, useEffect, useRef, useMemo} from 'react'
-import {Sidebar, TableBody} from './TableComponents'
+import React, {useState, useEffect, useRef, useMemo, useContext} from 'react'
+
+import {Sidebar, TableBody, computeInclusionExclusion} from './TableComponents'
+
+import {TopicContext} from './DataContext'
 
 function TopicsTable() {
   //  Table columns and data
-  const columns = [
+  const tableData = useContext(TopicContext)
+
+  const tableColumns = [
     { Header: 'Topics', 
       accessor: 'link',
       Cell: ({row: {original: {id, name } } }) => <a href={'/topic/' + id}> {name} </a>,
@@ -19,28 +24,13 @@ function TopicsTable() {
       id: 'id',
       Filter: () => {},
       filter: React.useCallback( (rows, id, filterValue) => {
-        //console.log('in filter', rows)
         if (filterValue.length == 0) { return rows}
         return rows.filter( (row) => ( filterValue.includes( row.original.id ) ) )
       }, [])
     }
   ]
-
-  const [tableData, setData] = useState([]);
-  const [tableColumns, setColumns] = useState(columns);
-
   const hiddenColumns = ['name', 'id']
 
-  // to do: use data that was passed to me
-  useEffect( () => {
-    console.log('columns', tableColumns)
-    fetch( '/api/topic/')
-    .then( (response) => response.json())
-    .then( (rawData) => rawData.sort( (a,b) => ((a.name.toLowerCase() > b.name.toLowerCase()) - 0.5) ) )
-    .then( (tableData) => {
-          setData(tableData)
-        })
-  }, [])
 
 
   // Table filters
@@ -50,10 +40,12 @@ function TopicsTable() {
 
 
   useEffect( () =>{
-    // send filters from sidebar to table
+    // collate the filters from sidebar and send them to table
     let includedTopics = tableData.map( (x) => x.id )
     if (filtersFromSidebar.topic.in.length != 0) { includedTopics = filtersFromSidebar.topic.in}
+
     includedTopics = includedTopics.filter( (x) => (! filtersFromSidebar.topic.out.includes(x) ) )
+
 
     setFiltersToTable( [{id:'id', value:includedTopics}] )
   }, [filtersFromSidebar])

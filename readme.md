@@ -65,6 +65,7 @@ Majory priorities:
 - visual interface to relationships
     * topic and citation graph visualization
 - table view for pages including title, authors, journal, year
+- easy tools for moving / merging topics
 - dockerize to a local application
 - improve URL origin testing
 - Far future: shareability, searchability of remote libraries

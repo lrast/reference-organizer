@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef, useMemo} from 'react';
+import {useState, useEffect, useRef, useMemo, useContext} from 'react';
 
 import {AutofillField} from './myComponents'
 import {TextField, Button, Checkbox, IconButton, Box, Grid, Switch,FormControlLabel} from '@mui/material';
@@ -7,6 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import {useTable, useFilters, useGlobalFilter} from 'react-table'
 import {matchSorter} from 'match-sorter'
 
+import {TopicContext, PageContext} from './DataContext'
 
 
 // table component
@@ -48,13 +49,12 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
   useFilters, useGlobalFilter)
 
 
-
   useEffect( () => {
     setGlobalFilter(searchString)
   }, [searchString])
 
   useEffect( () => {
-      setAllFilters(allFilters)
+    setAllFilters(allFilters)
   }, [allFilters])
 
 
@@ -100,21 +100,9 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
 function Sidebar({searchString, setSearchString, setFilterValues} ) {
   // Responsible for rendering and updating the values of the filters
 
-  // preload topic data
-  const [allTopics, setTopics] = useState([])
-  const [allPages, setPages] = useState([])
+  const allTopics = useContext(TopicContext)
+  const allPages = useContext(PageContext)
 
-  useEffect( () => {
-    fetch('/api/topic/')
-    .then( (response) => response.json())
-    .then( (options) => options.map( 
-      (propertiesDict) => {
-        propertiesDict['label'] = propertiesDict['name']
-        return propertiesDict 
-      } ) )
-    .then( (options) => options.sort( (a,b) => (a.label.toLowerCase() > b.label.toLowerCase())-0.5 ) )
-    .then( (options) => setTopics(options)  )
-  }, [])
 
   // state of the sidebar of filters
   const [filterComponents, setFilterComponents] = useState([])
@@ -179,7 +167,6 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
           <FilterComponentBody 
             key={thisKey} myKey={thisKey}
             removeSelf={()=> removeFilterByKey(thisKey)} updateFilter={updateFilterBank}
-            loadedTopics={allTopics} 
           />
         ])
       }} > New Filter</Button>
@@ -190,9 +177,7 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
 
 
 
-
-
-function FilterComponentBody({myKey, removeSelf, updateFilter, loadedTopics}) {
+function FilterComponentBody({myKey, removeSelf, updateFilter}) {
   // sets up blank filter element
   const [ uiState, setUiState ] = useState(
     { filterIn: true, subtopics: false, filterQuery: [],
@@ -200,6 +185,10 @@ function FilterComponentBody({myKey, removeSelf, updateFilter, loadedTopics}) {
       inputLabel:"Filter In"
     }
   )
+
+  const autocompleteTopics = useContext(TopicContext).map( (obj) => {return {...obj, label:obj.name} } )
+  const autocompletePages = useContext(PageContext).map( (obj) => {return {...obj, label:obj.name} } )
+
 
   // need to update the filter state when the ui state changes
   useEffect( () => {
@@ -234,7 +223,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter, loadedTopics}) {
         />}
         label="Include Subtopics"
       />
-      <AutofillField preLoaded={loadedTopics}
+      <AutofillField preLoaded={autocompleteTopics}
             autocompleteProps={{
             label:uiState.inputLabel,
             multiple:true,
@@ -245,5 +234,16 @@ function FilterComponentBody({myKey, removeSelf, updateFilter, loadedTopics}) {
     </li> )
 }
 
+function computeInclusionExclusion( baseData, filters ){
+  // collate the filters
+  const appendQuery = (acc, ele) => {acc.push(...ele.filterQuery); return acc}
 
-export {TableBody, Sidebar };
+  let inIds = [... new Set( filters.filter( (x) => (x.filterIn) ).reduce(appendQuery, []) )]
+  let outIds = [... new Set( filters.filter( (x) => (! x.filterIn) ).reduce(appendQuery, []) )]
+
+    return {in: inIds, out:outIds}
+}
+
+
+
+export {TableBody, Sidebar, computeInclusionExclusion };

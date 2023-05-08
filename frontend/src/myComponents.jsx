@@ -9,11 +9,8 @@ import { Accordion, AccordionSummary, AccordionDetails,
 
 
 function EditPanel ({parentType, parentData}){
-  const [formState, setFormState] = useState({})
 
-  useEffect( () => {
-    setFormState({name:parentData.name, url:parentData.url})
-  }, [parentData])
+  // to do: trigger reload when the edit is submitted
 
   let formFieldNames = [""]
   let endpoint = ""
@@ -27,6 +24,13 @@ function EditPanel ({parentType, parentData}){
     endpoint = '/api/topic/' + parentData.id
   }
 
+  const [formState, setFormState] = useState({name:parentData.name, url:parentData.url})
+
+  useEffect( () => {
+    setFormState({name:parentData.name, url:parentData.url})
+  }, [parentData])
+
+
   let redirect = useNavigate()
 
   return (
@@ -35,25 +39,26 @@ function EditPanel ({parentType, parentData}){
         Edit {parentType}
       </AccordionSummary>
       <AccordionDetails>
-        <form >
-          { formFieldNames.map( (fieldName) => <TextField required label={fieldName} value={formState[fieldName]} sx={{width:'100%', mb:'10pt'}}
-          InputProps = {{
-            onChange: (event) => {
-              setFormState( {...formState, [fieldName]: event.target.value } )
-            }
-          }}
-          InputLabelProps = {{
-            shrink:true
-          }}
+        { formFieldNames.map( (fieldName) => 
+          <TextField required sx={{width:'100%', mb:'10pt'}}
+            label={fieldName} key={fieldName}
+            value={formState[fieldName]} 
+            InputProps = {{
+              onChange: (event) => {
+                setFormState( {...formState, [fieldName]: event.target.value } )
+              }
+            }}
+            InputLabelProps = {{
+              shrink:true
+            }}
           />
-          )}
-          <Button type="submit" variant="contained" onClick={
-            () => { fetch(endpoint, {method: 'PUT', body:JSON.stringify(formState) }) }
-          }> Save edits </Button>
-          <Button type="submit" variant="contained" color='error' sx={{float:'right'}} onClick={
-            () => {fetch(endpoint, {method:'DELETE'}); redirect("/" + parentType)}
-          }> Delete {parentType}</Button>
-        </form>
+        )}
+        <Button type="submit" variant="contained" onClick={
+          () => { fetch(endpoint, {method: 'PUT', body:JSON.stringify(formState) }) }
+        }> Save edits </Button>
+        <Button type="submit" variant="contained" color='error' sx={{float:'right'}} onClick={
+          () => {fetch(endpoint, {method:'DELETE'}); redirect("/" + parentType)}
+        }> Delete {parentType}</Button>
       </AccordionDetails>
     </Accordion>
   )
@@ -88,9 +93,7 @@ function AutofillField( {toFetch, preLoaded, autocompleteProps} ){
     renderTags={(value, getTagProps) => 
       value.map((option, index) => {
         let chipLabel = option.label
-        if (typeof(option) === 'string'){
-          chipLabel = option
-        }
+        if (typeof(option) === 'string') {chipLabel = option}
         return <Chip variant="outlined" label={chipLabel} {...getTagProps({ index })} />
       }
       )

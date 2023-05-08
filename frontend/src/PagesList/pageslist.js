@@ -1,6 +1,6 @@
 import React from 'react'
-import PagesTable from '../pagesTable'
 
+import PagesTable from '../pagesTable'
 
 function PagesList() {
   return <PagesTable />

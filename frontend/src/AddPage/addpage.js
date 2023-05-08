@@ -21,7 +21,7 @@ function AddPage() {
 
   return (
     <>
-    <div style={{"textAlign":"center", "width":"100%", "cursor":"pointer", "react-tappable":true}}>
+    <div style={{"textAlign":"center", "width":"100%", "cursor":"pointer"}}> 
       <h1> Add a new page </h1>
         <form
           onSubmit={(e)=> {
@@ -67,7 +67,7 @@ function AddPage() {
           <FormControl sx={{mb:"10pt", width:"60%", height:"40pt"}} >
             <Button type="submit"
             variant="contained"
-            style={{"cursor":"pointer", "react-tappable":true}}
+            style={{"cursor":"pointer"}}
             > Submit </Button>
           </FormControl>
         </form>

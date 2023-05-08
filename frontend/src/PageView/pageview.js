@@ -5,39 +5,49 @@ import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 
 import {EditPanel} from '../myComponents';
 
+import TopicsTable from '../topicsTable'
+import PagesTable from '../pagesTable'
+
+import {TopicContext, PageContext} from '../DataContext'
+
 function PageView() {
   let {pageId} = useParams()
-  const [pageData, setData] = useState({})
+  const [pageData, setData] = useState(
+    {id:"", url:"", name:"", dateadded:"", topics:[], leftPages:[], rightPages:[] }
+  )
 
   useEffect( () => {
       fetch('/api/page/'+ pageId )
       .then( (response) => response.json() )
-      .then( (data) => setData(data) )
+      .then( (data) => {setData(data) })
     }, [])
 
   return (
     <>
     <center> <h1> <a href={pageData.url}> {pageData.name } </a> </h1> </center>
-    <Accordion defaultExpanded="true">
+    <Accordion defaultExpanded={true}>
       <AccordionSummary>
         <h2> Topics </h2>
       </AccordionSummary>
       <AccordionDetails>
-        MORE!
+        <TopicContext.Provider value={pageData.topics}>
+          <TopicsTable />
+        </TopicContext.Provider>
       </AccordionDetails>
     </Accordion>
 
-    <Accordion defaultExpanded="true">
+    <Accordion defaultExpanded={true}>
       <AccordionSummary>
         <h2> Related Pages </h2>
       </AccordionSummary>
       <AccordionDetails>
-        MORE!
+        <PageContext.Provider value={pageData.leftPages}>
+          <PagesTable />
+        </PageContext.Provider>
       </AccordionDetails>
     </Accordion>
 
     <EditPanel parentType="page" parentData={pageData} />
-
     </>
     )
 }

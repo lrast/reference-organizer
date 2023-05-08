@@ -3,56 +3,49 @@ import { useParams } from 'react-router-dom';
 
 import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 
-import {Sidebar, TableBody} from '../TableComponents'
+import PagesTable from '../pagesTable'
+import TopicsTable from '../topicsTable'
+
 import {EditPanel} from '../myComponents';
+
+import {TopicContext, PageContext} from '../DataContext'
 
 function TopicView() {
   let {topicId} = useParams()
-  const [topicData, setData] = useState({})
-
-  const [pageTableData, setPageTableData] = useState([])
-  const [pageCols, setPageCols] = useState([])
-
+  const [topicData, setTopicData] = useState(
+    {id:"", name:"", pages:[], leftTopics:[], rightTopics:[] }
+  )
 
   useEffect( () => {
   fetch( '/api/topic/' + topicId )
   .then( (response) => response.json() )
-  .then( (data) => {
-    setData(data);
-    setPageTableData( data.pages.map( (row) => { return {
-      'link': <a> {row.name} </a>,
-      'info': <a href={'/page/'+row.id}> info </a>,
-      'remove': <a> Remove from topic </a>
-    }}) );
-    setPageCols([
-      { Header: '', accessor: 'link'},
-      {Header: '', accessor: 'info'},
-      { Header: '', accessor: 'remove'}
-      ])
-  })
+  .then( (data) => {setTopicData(data)} )
   }, [])
+
+
 
   return (
     <>
     <center> <h1> {topicData.name} </h1> </center>
-    <Accordion defaultExpanded="true">
+    <Accordion defaultExpanded={true}>
       <AccordionSummary>
         <h2> Pages </h2>
       </AccordionSummary>
       <AccordionDetails>
-        <div className="table-wrapper">
-          <TableBody data={pageTableData} columns={pageCols}/>
-          <Sidebar/>
-        </div>
+        <PageContext.Provider value={topicData.pages}>
+          <PagesTable />
+        </PageContext.Provider>
       </AccordionDetails>
     </Accordion>
 
-   <Accordion defaultExpanded="true">
+   <Accordion defaultExpanded={true}>
       <AccordionSummary>
         <h2> Related Topics </h2>
       </AccordionSummary>
       <AccordionDetails>
-        MORE!
+        <TopicContext.Provider value={topicData.leftTopics}>
+          <TopicsTable />
+        </TopicContext.Provider>
       </AccordionDetails>
     </Accordion>
 
