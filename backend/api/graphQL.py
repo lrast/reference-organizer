@@ -80,22 +80,29 @@ class RelationshipType(SQLAlchemyObjectType):
 
 
 class Query(graphene.ObjectType):
-    topics = graphene.List(TopicType, id=graphene.Int(), name=graphene.String())
-    pages = graphene.List(PageType, id=graphene.Int(), name=graphene.String())
+    topics = graphene.List(TopicType, id=graphene.Int(), name=graphene.String(), ids=graphene.List(graphene.Int) )
+    pages = graphene.List(PageType, id=graphene.Int(), name=graphene.String(), ids=graphene.List(graphene.Int) )
     relationships = graphene.List(RelationshipType)
 
-    def resolve_topics(self, info, id=None, name=None):
+    def resolve_topics(self, info, id=None, name=None, ids=[]):
         query = TopicType.get_query(info)
+
         if id is not None:
             query = query.filter(Topic.id == id)
+        elif len(ids) != 0:
+            query = query.filter( Topic.id.in_(ids) )
+            print(query)
         if name is not None:
             query = query.filter(Topic.name == name)
         return query.all()
 
-    def resolve_pages(self, info, id=None, name=None):
+    def resolve_pages(self, info, id=None, name=None, ids=[]):
         query = PageType.get_query(info)
         if id is not None:
             query = query.filter(Page.id == id)
+        elif len(ids) != 0:
+            query = query.filter(Page.id.in_(ids) )
+            print(ids)
         if name is not None:
             query = query.filter(Page.name == name)
         return query.all()

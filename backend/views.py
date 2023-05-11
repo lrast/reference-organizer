@@ -10,6 +10,36 @@ from backend.utilities import isURLWebOrLocal, sortbyname
 
 from database.oldInterface import get_db, addPageTopic
 
+
+
+@app.route('/openpage/<int:pageid>', methods=['GET'])
+def servePage(pageid):
+    """Redirect to the URL of the requested page""" 
+    db = get_db()
+    url = db.execute("SELECT url FROM Page WHERE id=(?)", (pageid,)).fetchone()['url']
+
+    URLsource, formattedURL = isURLWebOrLocal(url)
+    if URLsource == 'web':
+        return redirect(formattedURL)
+    elif URLsource == 'local':
+        return send_file(formattedURL)
+
+
+# graph ql fiddle
+from backend.api.graphQL import schema
+from flask_graphql import GraphQLView
+app.add_url_rule(
+    '/graphiql',
+    view_func=GraphQLView.as_view(
+        'graphiql',
+        schema=schema,
+        graphiql=True
+    )
+)
+
+
+
+
 ######################################## Webpages ########################################
 
 
@@ -43,20 +73,6 @@ def newPage():
 
         flash("ok")
         return redirect( url_for('home'))
-
-
-@app.route('/openpage/<int:pageid>', methods=['GET'])
-def servePage(pageid):
-    """Redirect to the URL of the requested page""" 
-    db = get_db()
-    url = db.execute("SELECT url FROM Page WHERE id=(?)", (pageid,)).fetchone()['url']
-
-    URLsource, formattedURL = isURLWebOrLocal(url)
-    if URLsource == 'web':
-        return redirect(formattedURL)
-    elif URLsource == 'local':
-        return send_file(formattedURL)
-
 
 
 @app.route('/view', methods=['GET'])
@@ -185,17 +201,6 @@ def viewRelationship(relationshipid):
 
 # work in progress / testing
 
-# graph ql fiddle
-from backend.api.graphQL import schema
-from flask_graphql import GraphQLView
-app.add_url_rule(
-    '/graphiql',
-    view_func=GraphQLView.as_view(
-        'graphiql',
-        schema=schema,
-        graphiql=True
-    )
-)
 
 
 @app.route('/table', methods=['GET'])

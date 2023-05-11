@@ -54,10 +54,11 @@ function EditPanel ({parentType, parentData}){
           />
         )}
         <Button type="submit" variant="contained" onClick={
-          () => { fetch(endpoint, {method: 'PUT', body:JSON.stringify(formState) }) }
+          () => { fetch(endpoint, {method: 'PUT', body:JSON.stringify(formState) }); 
+            window.location.reload(false) }
         }> Save edits </Button>
         <Button type="submit" variant="contained" color='error' sx={{float:'right'}} onClick={
-          () => {fetch(endpoint, {method:'DELETE'}); redirect("/" + parentType)}
+          () => {fetch(endpoint, {method:'DELETE'}); redirect("/" + parentType); window.location.reload(false) }
         }> Delete {parentType}</Button>
       </AccordionDetails>
     </Accordion>

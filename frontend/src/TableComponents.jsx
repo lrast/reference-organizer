@@ -7,7 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import {useTable, useFilters, useGlobalFilter} from 'react-table'
 import {matchSorter} from 'match-sorter'
 
-import {TopicContext, PageContext} from './DataContext'
+import {AllTopics, AllPages, TableType} from './DataContext'
 
 
 // table component
@@ -40,7 +40,7 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
         filters: [
             {
               id: 'id',
-              value: []
+              value: {in: null, out:null}
             }
           ],
       },
@@ -54,7 +54,7 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
   }, [searchString])
 
   useEffect( () => {
-    setAllFilters(allFilters)
+    setAllFilters( [{id:'id', value: allFilters }])
   }, [allFilters])
 
 
@@ -65,7 +65,6 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
            {headerGroups.map(headerGroup => (
              <tr {...headerGroup.getHeaderGroupProps()}>
                {headerGroup.headers.map(column => {
-                //console.log(column)
                 return <th {...column.getHeaderProps()}> {column.render('Header')} </th>
                }
               )}
@@ -100,10 +99,6 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
 function Sidebar({searchString, setSearchString, setFilterValues} ) {
   // Responsible for rendering and updating the values of the filters
 
-  const allTopics = useContext(TopicContext)
-  const allPages = useContext(PageContext)
-
-
   // state of the sidebar of filters
   const [filterComponents, setFilterComponents] = useState([])
   const [filterBank, setFilterBank] = useState([])
@@ -127,24 +122,25 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
     )
   }
 
-  function computeInclusionExclusion( filters ){
-    const appendQuery = (acc, ele) => {acc.push(...ele.filterQuery); return acc}
-
-    let inIds = [... new Set( filters.filter( (x) => (x.filterIn) ).reduce(appendQuery, []) )]
-    let outIds = [... new Set( filters.filter( (x) => (! x.filterIn) ).reduce(appendQuery, []) )]
-
-    return {in: inIds, out:outIds}
-  }
-
-
   // collate the filter bank to produce a single output
   useEffect( () => {
-    let collatedFilter = {
-      topic: computeInclusionExclusion(filterBank.filter( (x) => (x.filterOn == "topic") ) ),
-      page: computeInclusionExclusion(filterBank.filter( (x) => (x.filterOn == "page") ) )
-    }
-    setFilterValues(collatedFilter)
+    let collatedFilter = {in: null, out:null}
 
+    for (const individualFilter of filterBank.filter(f => (!(f.payload === null )) ) )
+    {
+      const filterData = individualFilter.payload
+
+      if (filterData.in){
+        if (collatedFilter.in === null) {collatedFilter.in=[]}
+        collatedFilter.in = [...collatedFilter.in, ...filterData.in]
+      }
+      if (filterData.out){
+        if (collatedFilter.out === null) {collatedFilter.out=[]}
+        collatedFilter.out = [...collatedFilter.out, ...filterData.out]
+      }
+    }
+
+    setFilterValues(collatedFilter)
   }, [filterBank])
 
 
@@ -178,22 +174,76 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
 
 
 function FilterComponentBody({myKey, removeSelf, updateFilter}) {
-  // sets up blank filter element
+
+  // pull context information
+  const tableType = useContext(TableType)
+  const autocompleteTopics = useContext(AllTopics).map( (obj) => {return {...obj, label:obj.name} } )
+  const autocompletePages = useContext(AllPages).map( (obj) => {return {...obj, label:obj.name} } )
+
+
+  // set up filter state
   const [ uiState, setUiState ] = useState(
     { filterIn: true, subtopics: false, filterQuery: [],
-      filterOn: "topic", filterId: myKey,
-      inputLabel:"Filter In"
+      filterOn: "topics", inputLabel:"Filter In"
     }
   )
 
-  const autocompleteTopics = useContext(TopicContext).map( (obj) => {return {...obj, label:obj.name} } )
-  const autocompletePages = useContext(PageContext).map( (obj) => {return {...obj, label:obj.name} } )
+  // filter parser function
+  const [loadedData, setLoadedData] = useState( null )
+  function parseFilter( form ) {
+    let outputKey = 'out'
+    if (form.filterIn) {outputKey='in'}
+
+    function unpackGQL(data) {
+      // unpack graphql results
+      let listsOfResults = data[form.filterOn].map( x => x[tableType].map( x => x.id) )
+      let allResults = listsOfResults[0]
+
+      for (let currentResults of listsOfResults.slice(1)){
+        allResults = allResults.filter( x => currentResults.includes(x) )
+      }
+      return allResults
+    }
+
+    // begin
+    if (form.filterQuery.length == 0) { setLoadedData(null); return }
+
+    if (form.filterOn == tableType) {
+      // same table type
+      if (form.subtopics) {
+        // fetch subtopic data
+      }
+      else {
+        setLoadedData( {[outputKey]: form.filterQuery} )
+      }
+    }
+    else {
+      // opposite table type
+      if (form.subtopics) {
+        // fetch subtopic data
+      }
+      else {
+        fetch('/api/gql?' + new URLSearchParams(
+          {query: `{ ${form.filterOn} (ids: [${form.filterQuery}] ) { ${tableType} { id} }}` }) )
+        .then( (resp) => resp.json())
+        .then( (data) => unpackGQL(data) )
+        .then( (ids) => setLoadedData( {[outputKey]: ids} ) )
+      }
+    }
+  }
 
 
   // need to update the filter state when the ui state changes
   useEffect( () => {
-    updateFilter( uiState )
+    parseFilter(uiState)
   }, [uiState] )
+
+  useEffect( () => {
+    console.log('l', loadedData)
+    updateFilter({filterId: myKey, payload:loadedData} )
+  }, [loadedData])
+
+
 
   return (
     <li className="sidebar-filter-item" key='test'>
@@ -234,16 +284,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
     </li> )
 }
 
-function computeInclusionExclusion( baseData, filters ){
-  // collate the filters
-  const appendQuery = (acc, ele) => {acc.push(...ele.filterQuery); return acc}
-
-  let inIds = [... new Set( filters.filter( (x) => (x.filterIn) ).reduce(appendQuery, []) )]
-  let outIds = [... new Set( filters.filter( (x) => (! x.filterIn) ).reduce(appendQuery, []) )]
-
-    return {in: inIds, out:outIds}
-}
 
 
 
-export {TableBody, Sidebar, computeInclusionExclusion };
+export {TableBody, Sidebar};

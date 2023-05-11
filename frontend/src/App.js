@@ -12,24 +12,24 @@ import PageView from './PageView/pageview'
 import TopicView from './TopicView/topicview'
 import AddPage from './AddPage/addpage'
 
-import {TopicContext, PageContext} from './DataContext'
+import {TopicContext, PageContext, AllTopics, AllPages} from './DataContext'
 
 function App() {
-  const [allTopics, setAllTopics] = useState([])
-  const [allPages, setAllPages] = useState([])
+  const [topicsData, setTopicsData] = useState([])
+  const [pagesData, setPagesData] = useState([])
 
   useEffect( () => {
     fetch( '/api/topic/')
     .then( (response) => response.json())
     .then( (rawData) => rawData.sort( (a,b) => ((a.name.toLowerCase() > b.name.toLowerCase()) - 0.5) ) )
-    .then( (tableData) => setAllTopics(tableData) )
+    .then( (tableData) => setTopicsData(tableData) )
   }, [])
 
   useEffect( () => {
     fetch( '/api/page/')
     .then( (response) => response.json())
     .then( (rawData) => rawData.sort( (a,b) => ((a.name.toLowerCase() > b.name.toLowerCase()) - 0.5) ) )
-    .then( (tableData) => setAllPages(tableData) )
+    .then( (tableData) => setPagesData(tableData) )
   }, [])
 
 
@@ -42,8 +42,10 @@ function App() {
         <li className="navheader"> <Link to="/relationship">Relationships</Link> </li>
       </nav>
 
-      <TopicContext.Provider value={allTopics}>
-      <PageContext.Provider value={allPages}>
+      <AllTopics.Provider value={topicsData}>
+      <AllPages.Provider value={pagesData}>
+      <TopicContext.Provider value={topicsData}>
+      <PageContext.Provider value={pagesData}>
         <Routes>
           <Route index element={<Home />} />
           <Route path="home" element={<Home />} />
@@ -56,6 +58,8 @@ function App() {
         </Routes>
       </PageContext.Provider>
       </TopicContext.Provider>
+      </AllPages.Provider>
+      </AllTopics.Provider>
     </>
   );
 }

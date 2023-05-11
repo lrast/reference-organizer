@@ -30,7 +30,6 @@ npm install package.json
 
 
 
-
 ## organization scheme:
 1. track a database of webpages and local resources
 2. resources are organized by tagging them with topic labels
@@ -54,11 +53,11 @@ Majory priorities:
 ### Short term:
 - port fully to react app
     - tables, remove relationships
+- debounce things that are very slow moving
 - tables view: filtering and sorting
-- move data fetching to global, so it only has to load once
 - replace favicon
 - local files: opening jupyter notebooks
-- ability to abbreviate column values
+
 
 
 ### Long term:
@@ -67,19 +66,24 @@ Majory priorities:
 - table view for pages including title, authors, journal, year
 - easy tools for moving / merging topics
 - dockerize to a local application
-- improve URL origin testing
 - Far future: shareability, searchability of remote libraries
 - improve input interface
-    * local file dialog -- difficult because the browser is explicitly sandboxed to hide local file locations
     * pdf ingestion: title, authors, references
     * importing from mendeley and session buddy records
         > important for populating the database
 - store page favicons
 - multiple entries for page, topic entry
 
+
+
 ### bugs:
 - 'maximum recursion depth' when there are subtopic loops
     * replace all recursive calls by graphql queries
 - pages that are tagged more than once are listed multiple times in the tables
+
+### minor improvements:
+- improve URL origin testing
+- improve local file dialog -- difficult because the browser is explicitly sandboxed to hide local file locations
+- ability to abbreviate column values?
 
 

@@ -1,8 +1,8 @@
-import React, {useState, useEffect, useRef, useMemo, useContext} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 
-import {Sidebar, TableBody, computeInclusionExclusion} from './TableComponents'
+import {Sidebar, TableBody} from './TableComponents'
 
-import {TopicContext} from './DataContext'
+import {TopicContext, TableType} from './DataContext'
 
 function TopicsTable() {
   //  Table columns and data
@@ -24,44 +24,38 @@ function TopicsTable() {
       id: 'id',
       Filter: () => {},
       filter: React.useCallback( (rows, id, filterValue) => {
-        if (filterValue.length == 0) { return rows}
-        return rows.filter( (row) => ( filterValue.includes( row.original.id ) ) )
+        let toDisplay = rows
+        if (filterValue.in != null) { 
+          toDisplay = toDisplay.filter( (r) => filterValue.in.includes(r.original.id) ) 
+        }
+        if (filterValue.out != null) {
+          toDisplay = toDisplay.filter( r => !filterValue.out.includes(r.original.id)  )
+        }
+        return toDisplay
       }, [])
     }
   ]
   const hiddenColumns = ['name', 'id']
 
 
-
   // Table filters
   const [searchString, setSearchString] = useState('')
-  const [filtersFromSidebar, setFiltersFromSidebar] = useState( {topic: {in: [], out:[]}, page:{ in:[], out:[]} } )
-  const [filtersToTable, setFiltersToTable] = useState([{id:"id", value:[]}])
-
-
-  useEffect( () =>{
-    // collate the filters from sidebar and send them to table
-    let includedTopics = tableData.map( (x) => x.id )
-    if (filtersFromSidebar.topic.in.length != 0) { includedTopics = filtersFromSidebar.topic.in}
-
-    includedTopics = includedTopics.filter( (x) => (! filtersFromSidebar.topic.out.includes(x) ) )
-
-
-    setFiltersToTable( [{id:'id', value:includedTopics}] )
-  }, [filtersFromSidebar])
+  const [tableFilters, setTableFilters] = useState( {in:null, out:null} )
 
 
   return (
       <div className="table-wrapper">
+        <TableType.Provider value="topics">
           <TableBody
             data={tableData} columns={tableColumns}
-            searchString={searchString} allFilters={filtersToTable}
+            searchString={searchString} allFilters={tableFilters}
             hiddenColumns={hiddenColumns}
           />
           <Sidebar
             searchString={searchString} setSearchString={setSearchString}
-            setFilterValues={setFiltersFromSidebar}
+            setFilterValues={setTableFilters}
           />
+        </TableType.Provider>
       </div>
 )
 }

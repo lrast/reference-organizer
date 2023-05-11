@@ -10,6 +10,10 @@ import PagesTable from '../pagesTable'
 
 import {TopicContext, PageContext} from '../DataContext'
 
+import { Link } from "react-router-dom";
+
+import {backendURL} from '../config'
+
 function PageView() {
   let {pageId} = useParams()
   const [pageData, setData] = useState(
@@ -22,9 +26,10 @@ function PageView() {
       .then( (data) => {setData(data) })
     }, [])
 
+
   return (
     <>
-    <center> <h1> <a href={pageData.url}> {pageData.name } </a> </h1> </center>
+    <center> <h1> <Link to={backendURL+ '/openpage/' + pageId }> {pageData.name } </Link> </h1> </center>
     <Accordion defaultExpanded={true}>
       <AccordionSummary>
         <h2> Topics </h2>
