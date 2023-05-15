@@ -1,11 +1,13 @@
 # setup for graph QL interface
-import graphene
-
 import sqlalchemy as sa
+from sqlalchemy.orm import aliased
 
+import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
+
 from database.model import *
 
+from flask import Blueprint, request, jsonify
 
 
 class TopicTopicEdgeType(SQLAlchemyObjectType):
@@ -53,6 +55,24 @@ class TopicType(SQLAlchemyObjectType):
     rightEdges = graphene.List( TopicTopicEdgeType, relationshipid=graphene.Int(), remoteid=graphene.Int())
     leftEdges = graphene.List( TopicTopicEdgeType, relationshipid=graphene.Int(), remoteid=graphene.Int())
 
+    allSubTopics = graphene.List(lambda: TopicType)
+
+
+    def resolve_allSubTopics(self, info):
+        from backend import sqlaDB as db
+
+        topicAlias = aliased(Topic)
+
+        subtopicsQuery = db.session.query(Topic.id).filter(Topic.id==self.id).cte(name='subtopicsQuery', recursive=True)
+        subtopicsQuery = subtopicsQuery.union( db.session.query(topicAlias.id).join(subtopicsQuery, topicAlias.rightTopics) )
+
+        subtopicIds = map( lambda x: x[0], db.session.query(subtopicsQuery).all() )
+
+        grapheneQuery = TopicType.get_query(info).filter( Topic.id.in_(subtopicIds) )
+
+        return grapheneQuery.all()
+
+
     def resolve_rightEdges(self, info, relationshipid=None, remoteid=None):
         query = TopicTopicEdgeType.get_query(info).filter(TopicTopicAssociation.lefttopicid == self.id)
 
@@ -77,6 +97,8 @@ class TopicType(SQLAlchemyObjectType):
 class RelationshipType(SQLAlchemyObjectType):
     class Meta:
         model = Relationship
+
+
 
 
 class Query(graphene.ObjectType):
@@ -112,8 +134,10 @@ class Query(graphene.ObjectType):
         return query.all()
 
 
-schema = graphene.Schema(query=Query)
 
+########################################### Utilities ###########################################
+
+schema = graphene.Schema(query=Query)
 
 def execute_gql_query(query, unpackage=lambda x:x):
     """ run the query. unpackage is a function on the result """
@@ -126,9 +150,6 @@ def execute_gql_query(query, unpackage=lambda x:x):
 
 
 # endpoint
-import json
-from flask import Blueprint, request, Response, jsonify
-
 GQLendpoint = Blueprint('gql', __name__)
 
 @GQLendpoint.route('/', methods=['GET'])
@@ -144,4 +165,3 @@ def acceptQuery():
         return query_result.errors[0].message, 400
 
     return jsonify( query_result.data )
-

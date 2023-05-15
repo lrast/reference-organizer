@@ -1,7 +1,7 @@
 import {useState, useEffect, useRef, useMemo, useContext} from 'react';
 
 import {AutofillField} from './myComponents'
-import {TextField, Button, Checkbox, IconButton, Box, Grid, Switch,FormControlLabel} from '@mui/material';
+import {TextField, Button, Checkbox, IconButton, Grid, Switch,FormControlLabel} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 import {useTable, useFilters, useGlobalFilter} from 'react-table'
@@ -30,7 +30,6 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
     headerGroups,
     rows,
     prepareRow,
-    setFilter,
     setAllFilters,
     state,
     setGlobalFilter
@@ -183,7 +182,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
 
   // set up filter state
   const [ uiState, setUiState ] = useState(
-    { filterIn: true, subtopics: false, filterQuery: [],
+    { filterIn: true, subtopics: true, filterQuery: [],
       filterOn: "topics", inputLabel:"Filter In"
     }
   )
@@ -194,15 +193,15 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
     let outputKey = 'out'
     if (form.filterIn) {outputKey='in'}
 
-    function unpackGQL(data) {
+    function unpackGQL(data, model) {
       // unpack graphql results
-      let listsOfResults = data[form.filterOn].map( x => x[tableType].map( x => x.id) )
-      let allResults = listsOfResults[0]
-
-      for (let currentResults of listsOfResults.slice(1)){
-        allResults = allResults.filter( x => currentResults.includes(x) )
+      if (model.length ==0) {
+        return [data.id]
       }
-      return allResults
+
+      let dataList = data[ model[0] ]
+      let unpackedList = dataList.map( (obj) => unpackGQL( obj, model.slice(1) ) )
+      return unpackedList.reduce( (acc, li) => [...acc, ...li] )
     }
 
     // begin
@@ -212,6 +211,11 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
       // same table type
       if (form.subtopics) {
         // fetch subtopic data
+        fetch('/api/gql?' + new URLSearchParams(
+          {query: `{ ${form.filterOn} (ids: [${form.filterQuery}] ) { allSubTopics { id, name }} }` }) )
+        .then( (resp) => resp.json())
+        .then( (data) => unpackGQL(data, [form.filterOn, 'allSubTopics']) )
+        .then( (ids) => setLoadedData( {[outputKey]: ids} ) )
       }
       else {
         setLoadedData( {[outputKey]: form.filterQuery} )
@@ -221,12 +225,17 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
       // opposite table type
       if (form.subtopics) {
         // fetch subtopic data
+        fetch('/api/gql?' + new URLSearchParams(
+          {query: `{ ${form.filterOn} (ids: [${form.filterQuery}] ) { allSubTopics { ${tableType} { id} }} }` }) )
+        .then( (resp) => resp.json())
+        .then( (data) => unpackGQL(data, [form.filterOn, 'allSubTopics', tableType]) )
+        .then( (ids) => setLoadedData( {[outputKey]: ids} ) )
       }
       else {
         fetch('/api/gql?' + new URLSearchParams(
           {query: `{ ${form.filterOn} (ids: [${form.filterQuery}] ) { ${tableType} { id} }}` }) )
         .then( (resp) => resp.json())
-        .then( (data) => unpackGQL(data) )
+        .then( (data) => unpackGQL(data, [form.filterOn, tableType]) )
         .then( (ids) => setLoadedData( {[outputKey]: ids} ) )
       }
     }
@@ -268,7 +277,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
       </Grid>
 
       <FormControlLabel 
-        control={<Checkbox 
+        control={<Checkbox defaultChecked
           onChange={ (e) => { setUiState( {...uiState, subtopics:e.target.checked }) }}
         />}
         label="Include Subtopics"
