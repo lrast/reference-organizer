@@ -1,7 +1,9 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect,useContext} from 'react'
 import { FormControl, TextField, Button} from '@mui/material';
 
 import {AutofillField} from '../myComponents'
+
+import {TopicContext, PageContext} from '../DataContext'
 
 function AddPage() {
   const [urlValue, setUrlValue] = useState("")
@@ -57,7 +59,7 @@ function AddPage() {
             </TextField>
           </FormControl>
           <FormControl sx={inputStyling} >
-            <AutofillField toFetch="/api/topic/"
+            <AutofillField options={useContext(TopicContext).map((obj) => ({...obj, label:obj.name})) }
               autocompleteProps={{
               label:"Topics", multiple:true, freeSolo:true, autoSelect:true,
               value: formFields.topics,

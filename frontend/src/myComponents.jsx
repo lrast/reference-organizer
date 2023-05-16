@@ -67,29 +67,12 @@ function EditPanel ({parentType, parentData}){
 
 
 
-function AutofillField( {toFetch, preLoaded, autocompleteProps} ){
-  const [options, setOptions] = useState([])
-
-  useEffect( () => {
-    if (preLoaded){
-      setOptions(preLoaded)
-    }
-    else {
-      fetch( toFetch )
-      .then( (response) => response.json())
-      .then( (options) => options.map( 
-        (propertiesDict) => {
-          propertiesDict['label'] = propertiesDict['name']
-          return propertiesDict 
-        } ) )
-      .then( (options) => options.sort( (a,b) => (a.label.toLowerCase() > b.label.toLowerCase())-0.5 ) )
-      .then( (options) => setOptions(options)  )
-    }
-  }, [])
+function AutofillField( {options, autocompleteProps} ){
 
   return(
   <Autocomplete
     {...autocompleteProps}
+    isOptionEqualToValue={(option, value) => option.id === value.id} // hack!
     options={options}
     renderTags={(value, getTagProps) => 
       value.map((option, index) => {

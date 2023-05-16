@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import { useParams } from 'react-router-dom';
 
-import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Button } from '@mui/material';
 
-import {EditPanel} from '../myComponents';
+import {EditPanel, AutofillField} from '../myComponents';
 
 import TopicsTable from '../topicsTable'
 import PagesTable from '../pagesTable'
@@ -13,6 +13,7 @@ import {TopicContext, PageContext} from '../DataContext'
 import { Link } from "react-router-dom";
 
 import {backendURL} from '../config'
+
 
 function PageView() {
   let {pageId} = useParams()
@@ -27,6 +28,9 @@ function PageView() {
     }, [])
 
 
+  const [fieldState, setFieldState] = useState( {add:'', remove:''})
+
+
   return (
     <>
     <center> <h1> <Link to={backendURL+ '/openpage/' + pageId }> {pageData.name } </Link> </h1> </center>
@@ -38,6 +42,38 @@ function PageView() {
         <TopicContext.Provider value={pageData.topics}>
           <TopicsTable />
         </TopicContext.Provider>
+
+        <AutofillField options={useContext(TopicContext).map((obj) => ({...obj, label:obj.name})) }
+        autocompleteProps={{
+          multiple: true,
+          label:'Add Topics',
+          onChange: (e, value) => setFieldState({...fieldState, add:value})
+        }}/>
+        <Button variant='contained'
+          onClick={(e)=>{
+            for (const topicToAdd of fieldState.add) {
+              fetch('/api/page/'+pageId+'/topic/'+topicToAdd.id, {method:'PUT'} )
+            }
+            window.location.reload(false)
+          }}
+        > Add </Button>
+        <AutofillField options={pageData.topics.map((obj) => ({...obj, label:obj.name}))}
+        autocompleteProps={{
+          multiple: true,
+          label:'Remove Topics',
+          onChange: (e, value) => setFieldState({...fieldState, remove:value})
+        }}/>
+        <Button variant='contained'
+          onClick={(e)=>{
+            for (const topicToAdd of fieldState.remove) {
+              fetch('/api/page/'+pageId+'/topic/'+topicToAdd.id, {method:'DELETE'} )
+            }
+            window.location.reload(false)
+          }}
+        > Remove </Button>
+
+
+
       </AccordionDetails>
     </Accordion>
 

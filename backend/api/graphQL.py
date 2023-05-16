@@ -113,7 +113,6 @@ class Query(graphene.ObjectType):
             query = query.filter(Topic.id == id)
         elif len(ids) != 0:
             query = query.filter( Topic.id.in_(ids) )
-            print(query)
         if name is not None:
             query = query.filter(Topic.name == name)
         return query.all()
@@ -124,7 +123,6 @@ class Query(graphene.ObjectType):
             query = query.filter(Page.id == id)
         elif len(ids) != 0:
             query = query.filter(Page.id.in_(ids) )
-            print(ids)
         if name is not None:
             query = query.filter(Page.name == name)
         return query.all()

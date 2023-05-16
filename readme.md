@@ -52,9 +52,18 @@ Majory priorities:
 
 ### Short term:
 - port fully to react app
-    - tables, remove relationships
-- debounce things that are very slow moving
-- tables view: filtering and sorting
+    - add and remove topics relationships
+        - inherit to parent?
+- table view for pages including title, authors, journal, year
+    - migrate pages database
+    - new author tables
+
+
+- move sorting into the table itself
+- on pageview, topicview, topics don't need to be in a table, don't need filter bar
+
+
+- debounce things that are slow moving
 - replace favicon
 - local files: opening jupyter notebooks
 
@@ -63,23 +72,20 @@ Majory priorities:
 ### Long term:
 - visual interface to relationships
     * topic and citation graph visualization
-- table view for pages including title, authors, journal, year
 - easy tools for moving / merging topics
 - dockerize to a local application
-- Far future: shareability, searchability of remote libraries
 - improve input interface
     * pdf ingestion: title, authors, references
     * importing from mendeley and session buddy records
         > important for populating the database
 - store page favicons
 - multiple entries for page, topic entry
-
+- Far future: shareability, searchability of remote libraries
 
 
 ### bugs:
 - 'maximum recursion depth' when there are subtopic loops
     * replace all recursive calls by graphql queries
-- pages that are tagged more than once are listed multiple times in the tables
 
 ### minor improvements:
 - improve URL origin testing

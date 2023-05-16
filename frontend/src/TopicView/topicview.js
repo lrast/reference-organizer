@@ -10,17 +10,46 @@ import {EditPanel} from '../myComponents';
 
 import {TopicContext, PageContext} from '../DataContext'
 
+import {unpackGQL} from '../utilities'
+
 function TopicView() {
   let {topicId} = useParams()
   const [topicData, setTopicData] = useState(
-    {id:"", name:"", pages:[], leftTopics:[], rightTopics:[] }
+    {id:"", name:"", pages:[], leftTopics:[], rightTopics:[], intersectingTopics:[] }
   )
 
   useEffect( () => {
-  fetch( '/api/topic/' + topicId )
-  .then( (response) => response.json() )
-  .then( (data) => {setTopicData(data)} )
-  }, [])
+    fetch( '/api/gql?' + new URLSearchParams(
+      {query:`{ topics(id: ${topicId})
+        {id, name, 
+        pages{id, name}, 
+        allSubTopics{id, name, pages{id, name, topics{id, name} }},
+        rightTopics{id, name},
+        leftTopics{id, name} 
+      }}`
+    }) )
+    .then( (resp) => resp.json() )
+    .then( (data) => data.topics[0] )
+    .then( (data) => {
+      let intersectingTopics = unpackGQL(data, ['allSubTopics', 'pages', 'topics'])
+      const intIDs = intersectingTopics.map( (e) =>e.id )
+
+      intersectingTopics = intersectingTopics.filter( 
+        (v,i) => intIDs.indexOf(v.id) == i 
+        ).sort( 
+        (a,b) => ((a.name.toLowerCase() > b.name.toLowerCase()) - 0.5)
+        )
+
+
+      setTopicData( {
+        id: data.id, name: data.name,
+        pages: unpackGQL(data, ['allSubTopics', 'pages']),
+        intersectingTopics: intersectingTopics,
+        leftTopics: data.leftTopics, rightTopics: data.rightTopics
+      })
+    })
+  }, [] )
+
 
 
 
@@ -33,7 +62,9 @@ function TopicView() {
       </AccordionSummary>
       <AccordionDetails>
         <PageContext.Provider value={topicData.pages}>
+        <TopicContext.Provider value={topicData.intersectingTopics}>
           <PagesTable />
+        </TopicContext.Provider>
         </PageContext.Provider>
       </AccordionDetails>
     </Accordion>

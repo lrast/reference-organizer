@@ -7,7 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import {useTable, useFilters, useGlobalFilter} from 'react-table'
 import {matchSorter} from 'match-sorter'
 
-import {AllTopics, AllPages, TableType} from './DataContext'
+import {TopicContext, PageContext, TableType} from './DataContext'
 
 
 // table component
@@ -176,8 +176,8 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
 
   // pull context information
   const tableType = useContext(TableType)
-  const autocompleteTopics = useContext(AllTopics).map( (obj) => {return {...obj, label:obj.name} } )
-  const autocompletePages = useContext(AllPages).map( (obj) => {return {...obj, label:obj.name} } )
+  const autocompleteTopics = useContext(TopicContext).map( (obj) => {return {...obj, label:obj.name} } )
+  const autocompletePages = useContext(PageContext).map( (obj) => {return {...obj, label:obj.name} } )
 
 
   // set up filter state
@@ -248,7 +248,6 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
   }, [uiState] )
 
   useEffect( () => {
-    console.log('l', loadedData)
     updateFilter({filterId: myKey, payload:loadedData} )
   }, [loadedData])
 
@@ -282,7 +281,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
         />}
         label="Include Subtopics"
       />
-      <AutofillField preLoaded={autocompleteTopics}
+      <AutofillField options={autocompleteTopics}
             autocompleteProps={{
             label:uiState.inputLabel,
             multiple:true,
