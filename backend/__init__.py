@@ -6,13 +6,10 @@ app.config.from_prefixed_env()
 
 import backend.views
 
-
 # url configuration
 from backend.apis import api
-from backend.buttons import button
 
 app.register_blueprint(api, url_prefix='/api')
-app.register_blueprint(button, url_prefix='/button')
 
 
 # database configuration

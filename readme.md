@@ -69,8 +69,6 @@ Majory priorities:
 
 
 ### Short term:
-- port fully to react app
-
 - table view for pages including title, authors, journal, year
     - migrate pages database
     - new author tables
