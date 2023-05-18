@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useContext} from 'react'
 import { useParams } from 'react-router-dom';
 
-import { Accordion, AccordionSummary, AccordionDetails, Button } from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Button, TextField} from '@mui/material';
 
 import {EditPanel, AutofillField} from '../myComponents';
 
@@ -28,12 +28,26 @@ function PageView() {
     }, [])
 
 
+  const [commentText, setCommentText] = useState('')
+
+  useEffect( () => {
+    fetch('/api/comment/page/' +pageId)
+    .then( (resp) => resp.json() )
+    .then( (data) => setCommentText(data[0].commentdata) )
+  }, [])
+
   const [fieldState, setFieldState] = useState( {add:'', remove:''})
 
 
   return (
     <>
     <center> <h1> <Link to={backendURL+ '/openpage/' + pageId }> {pageData.name } </Link> </h1> </center>
+    <TextField multiline value={commentText}
+      InputProps = {{ onChange: (event) => setCommentText( event.target.value )}}
+      onBlur={() => fetch('/api/comment/page/' +pageId +'?commentid=0', 
+        {method:'PUT', body: JSON.stringify( {commentdata: commentText } ) })}
+    />
+
     <Accordion defaultExpanded={true}>
       <AccordionSummary>
         <h2> Topics </h2>
@@ -71,9 +85,6 @@ function PageView() {
             window.location.reload(false)
           }}
         > Remove </Button>
-
-
-
       </AccordionDetails>
     </Accordion>
 

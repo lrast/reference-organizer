@@ -70,12 +70,13 @@ Majory priorities:
 
 ### Short term:
 - port fully to react app
-    - add and remove topics relationships
-    - comments 
+
 - table view for pages including title, authors, journal, year
     - migrate pages database
     - new author tables
 - move sorting into the table itself
+- clean up comments API and code.
+    * do I want multiple comments? Or is one enough?
 - handle duplicates
 - on pageview, topicview, topics don't need to be in a table, don't need filter bar
 - debounce things that are slow moving

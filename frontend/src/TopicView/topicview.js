@@ -1,12 +1,12 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import { useParams } from 'react-router-dom';
 
-import { Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Button, TextField} from '@mui/material';
 
 import PagesTable from '../pagesTable'
 import TopicsTable from '../topicsTable'
 
-import {EditPanel} from '../myComponents';
+import {EditPanel, AutofillField} from '../myComponents';
 
 import {TopicContext, PageContext} from '../DataContext'
 
@@ -14,6 +14,7 @@ import {unpackGQL} from '../utilities'
 
 function TopicView() {
   let {topicId} = useParams()
+
   const [topicData, setTopicData] = useState(
     {id:"", name:"", pages:[], leftTopics:[], rightTopics:[], intersectingTopics:[] }
   )
@@ -40,7 +41,6 @@ function TopicView() {
         (a,b) => ((a.name.toLowerCase() > b.name.toLowerCase()) - 0.5)
         )
 
-
       setTopicData( {
         id: data.id, name: data.name,
         pages: unpackGQL(data, ['allSubTopics', 'pages']),
@@ -51,11 +51,26 @@ function TopicView() {
   }, [] )
 
 
+  const [commentText, setCommentText] = useState('')
 
+  useEffect( () => {
+    fetch('/api/comment/topic/' +topicId)
+    .then( (resp) => resp.json() )
+    .then( (data) => setCommentText(data[0].commentdata) )
+  }, [])
+
+  const [fieldState, setFieldState] = useState( {add:'', remove:''})
 
   return (
     <>
     <center> <h1> {topicData.name} </h1> </center>
+
+    <TextField multiline value={commentText}
+      InputProps = {{ onChange: (event) => setCommentText( event.target.value )}}
+      onBlur={() => fetch('/api/comment/topic/' +topicId +'?commentid=0', 
+        {method:'PUT', body: JSON.stringify( {commentdata: commentText } ) })}
+    />
+
     <Accordion defaultExpanded={true}>
       <AccordionSummary>
         <h2> Pages </h2>
@@ -77,8 +92,38 @@ function TopicView() {
         <TopicContext.Provider value={topicData.leftTopics}>
           <TopicsTable />
         </TopicContext.Provider>
+        <AutofillField options={useContext(TopicContext).map((obj) => ({...obj, label:obj.name})) }
+        autocompleteProps={{
+          multiple: true,
+          label:'Add Subtopics',
+          onChange: (e, value) => setFieldState({...fieldState, add:value})
+        }}/>
+        <Button variant='contained'
+          onClick={(e)=>{
+            for (const topicToAdd of fieldState.add) {
+              fetch('/api/topic/'+topicId+'/topic/'+topicToAdd.id+'?primaryside=right', {method:'PUT'} )
+            }
+            window.location.reload(false)
+          }}
+        > Add </Button>
+        <AutofillField options={topicData.leftTopics.map((obj) => ({...obj, label:obj.name}))}
+        autocompleteProps={{
+          multiple: true,
+          label:'Remove Subtopics',
+          onChange: (e, value) => setFieldState({...fieldState, remove:value})
+        }}/>
+        <Button variant='contained'
+          onClick={(e)=>{
+            for (const topicToRemove of fieldState.remove) {
+              fetch('/api/topic/'+topicId+'/topic/'+topicToRemove.id+'?primaryside=right', {method:'DELETE'} )
+            }
+            window.location.reload(false)
+          }}
+        > Remove </Button>
       </AccordionDetails>
     </Accordion>
+
+
 
     <EditPanel parentType="topic" parentData={topicData}/>
     </>
