@@ -4,14 +4,11 @@ import React, {useState, useEffect} from 'react'
 import { useNavigate } from "react-router-dom";
 
 import { Accordion, AccordionSummary, AccordionDetails,
-        Autocomplete, TextField, Chip, Button} from '@mui/material';
+        Autocomplete, TextField, Chip, Button, Card, CardContent} from '@mui/material';
 
 
 
 function EditPanel ({parentType, parentData}){
-
-  // to do: trigger reload when the edit is submitted
-
   let formFieldNames = [""]
   let endpoint = ""
 
@@ -68,7 +65,6 @@ function EditPanel ({parentType, parentData}){
 
 
 function AutofillField( {options, autocompleteProps} ){
-
   return(
   <Autocomplete
     {...autocompleteProps}
@@ -90,7 +86,68 @@ function AutofillField( {options, autocompleteProps} ){
 
 
 
-export {EditPanel, AutofillField};
+function AddAndRemoveOptions( {label, addAutoComplete, removeAutocomplete, makeEndpointURL} ) {
+  const [fieldState, setFieldState] = useState( {add:[], remove:[]})
+
+  return <>
+    <AutofillField 
+      options={addAutoComplete}
+      autocompleteProps={{
+        multiple: true,
+        label:'Add ' + label ,
+        onChange: (e, value) => setFieldState({...fieldState, add:value})
+      }}
+    />
+    <Button 
+      variant='contained'
+      onClick={(e)=>{
+        for (const toAdd of fieldState.add) {
+          fetch( makeEndpointURL(toAdd.id), {method:'PUT'} )
+        }
+        window.location.reload(false) }}>
+      Add
+    </Button>
+    <AutofillField
+      options={removeAutocomplete}
+      autocompleteProps={{
+        multiple: true,
+        label:'Remove ' + label,
+        onChange: (e, value) => setFieldState({...fieldState, remove:value})
+      }}
+    />
+    <Button
+      variant='contained'
+      onClick={(e)=>{
+        for (const toRemove of fieldState.remove) {
+          fetch( makeEndpointURL(toRemove.id), {method:'DELETE'} )
+        }
+        window.location.reload(false)}}> 
+      Remove
+    </Button>
+  </>
+
+}
+
+
+function TopicCards( {topics, comments} ) {
+  const cardsToRender = topics.map( (topic) => 
+    <Card key={topic.id} sx={{ display: 'inline-block', mx: '2px', transform: 'scale(0.8)' }}> 
+      <CardContent> 
+        <h3> <a href={'/topic/' + topic.id}> {topic.name} </a> </h3>
+      </CardContent>
+    </Card>
+  )
+  return (<>
+    {cardsToRender}
+  </>)
+}
+
+
+
+
+
+
+export {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions};
 
 
 

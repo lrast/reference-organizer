@@ -6,7 +6,7 @@ import { Accordion, AccordionSummary, AccordionDetails, Button, TextField} from 
 import PagesTable from '../pagesTable'
 import TopicsTable from '../topicsTable'
 
-import {EditPanel, AutofillField} from '../myComponents';
+import {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions} from '../myComponents';
 
 import {TopicContext, PageContext} from '../DataContext'
 
@@ -56,7 +56,7 @@ function TopicView() {
   useEffect( () => {
     fetch('/api/comment/topic/' +topicId)
     .then( (resp) => resp.json() )
-    .then( (data) => setCommentText(data[0].commentdata) )
+    .then( (data) => {setCommentText(data[0].commentdata) } )
   }, [])
 
   const [fieldState, setFieldState] = useState( {add:'', remove:''})
@@ -81,6 +81,12 @@ function TopicView() {
           <PagesTable />
         </TopicContext.Provider>
         </PageContext.Provider>
+        <AddAndRemoveOptions
+            label={'Pages'}
+            addAutoComplete={useContext(PageContext).map((obj) => ({...obj, label:obj.name})) }
+            removeAutocomplete={topicData.pages.map((obj) => ({...obj, label:obj.name}))}
+            makeEndpointURL={(id) => '/api/topic/'+topicId+'/page/'+id }
+          />
       </AccordionDetails>
     </Accordion>
 
@@ -89,37 +95,29 @@ function TopicView() {
         <h2> Related Topics </h2>
       </AccordionSummary>
       <AccordionDetails>
-        <TopicContext.Provider value={topicData.leftTopics}>
-          <TopicsTable />
-        </TopicContext.Provider>
-        <AutofillField options={useContext(TopicContext).map((obj) => ({...obj, label:obj.name})) }
-        autocompleteProps={{
-          multiple: true,
-          label:'Add Subtopics',
-          onChange: (e, value) => setFieldState({...fieldState, add:value})
-        }}/>
-        <Button variant='contained'
-          onClick={(e)=>{
-            for (const topicToAdd of fieldState.add) {
-              fetch('/api/topic/'+topicId+'/topic/'+topicToAdd.id+'?primaryside=right', {method:'PUT'} )
-            }
-            window.location.reload(false)
-          }}
-        > Add </Button>
-        <AutofillField options={topicData.leftTopics.map((obj) => ({...obj, label:obj.name}))}
-        autocompleteProps={{
-          multiple: true,
-          label:'Remove Subtopics',
-          onChange: (e, value) => setFieldState({...fieldState, remove:value})
-        }}/>
-        <Button variant='contained'
-          onClick={(e)=>{
-            for (const topicToRemove of fieldState.remove) {
-              fetch('/api/topic/'+topicId+'/topic/'+topicToRemove.id+'?primaryside=right', {method:'DELETE'} )
-            }
-            window.location.reload(false)
-          }}
-        > Remove </Button>
+
+        <div> 
+          <h3> Subtopics </h3>
+          <TopicCards topics={topicData.leftTopics}/>
+          <AddAndRemoveOptions
+            label={'Subtopics'}
+            addAutoComplete={useContext(TopicContext).map((obj) => ({...obj, label:obj.name})) }
+            removeAutocomplete={topicData.leftTopics.map((obj) => ({...obj, label:obj.name}))}
+            makeEndpointURL={(id) => '/api/topic/'+topicId+'/topic/'+id+'?primaryside=right' }
+          />
+        </div>
+
+        <div> 
+          <h3> Supertopics </h3>
+          <TopicCards topics={topicData.rightTopics}/>
+          <AddAndRemoveOptions
+            label={'Supertopics'}
+            addAutoComplete={useContext(TopicContext).map((obj) => ({...obj, label:obj.name})) }
+            removeAutocomplete={topicData.rightTopics.map((obj) => ({...obj, label:obj.name}))}
+            makeEndpointURL={(id) => '/api/topic/'+topicId+'/topic/'+id+'?primaryside=left' }
+          />
+
+        </div>
       </AccordionDetails>
     </Accordion>
 

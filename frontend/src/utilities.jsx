@@ -12,7 +12,7 @@ function unpackGQL(data, model, unique=true) {
     // handle unique and sorting
     if (unique){}
 
-    return unpackedList.reduce( (acc, li) => [...acc, ...li] )
+    return unpackedList.reduce( (acc, li) => [...acc, ...li], [] )
 }
 
 export {unpackGQL};

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import { Accordion, AccordionSummary, AccordionDetails, Button, TextField} from '@mui/material';
 
-import {EditPanel, AutofillField} from '../myComponents';
+import {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions} from '../myComponents';
 
 import TopicsTable from '../topicsTable'
 import PagesTable from '../pagesTable'
@@ -24,7 +24,7 @@ function PageView() {
   useEffect( () => {
       fetch('/api/page/'+ pageId )
       .then( (response) => response.json() )
-      .then( (data) => {setData(data) })
+      .then( (data) => {setData(data); console.log(data)})
     }, [])
 
 
@@ -53,38 +53,17 @@ function PageView() {
         <h2> Topics </h2>
       </AccordionSummary>
       <AccordionDetails>
-        <TopicContext.Provider value={pageData.topics}>
-          <TopicsTable />
-        </TopicContext.Provider>
+        <TopicCards topics={pageData.topics}/>
 
-        <AutofillField options={useContext(TopicContext).map((obj) => ({...obj, label:obj.name})) }
-        autocompleteProps={{
-          multiple: true,
-          label:'Add Topics',
-          onChange: (e, value) => setFieldState({...fieldState, add:value})
-        }}/>
-        <Button variant='contained'
-          onClick={(e)=>{
-            for (const topicToAdd of fieldState.add) {
-              fetch('/api/page/'+pageId+'/topic/'+topicToAdd.id, {method:'PUT'} )
-            }
-            window.location.reload(false)
-          }}
-        > Add </Button>
-        <AutofillField options={pageData.topics.map((obj) => ({...obj, label:obj.name}))}
-        autocompleteProps={{
-          multiple: true,
-          label:'Remove Topics',
-          onChange: (e, value) => setFieldState({...fieldState, remove:value})
-        }}/>
-        <Button variant='contained'
-          onClick={(e)=>{
-            for (const topicToAdd of fieldState.remove) {
-              fetch('/api/page/'+pageId+'/topic/'+topicToAdd.id, {method:'DELETE'} )
-            }
-            window.location.reload(false)
-          }}
-        > Remove </Button>
+        <AddAndRemoveOptions
+          label={'Topics'}
+          addAutoComplete={useContext(TopicContext).map((obj) => ({...obj, label:obj.name})) }
+          removeAutocomplete={pageData.topics.map((obj) => ({...obj, label:obj.name}))}
+          makeEndpointURL={(id) => '/api/page/'+pageId+'/topic/'+ id }
+        />
+
+
+
       </AccordionDetails>
     </Accordion>
 

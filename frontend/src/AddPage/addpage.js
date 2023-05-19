@@ -27,10 +27,10 @@ function AddPage() {
       <h1> Add a new page </h1>
         <form
           onSubmit={(e)=> {
-              e.preventDefault();
+              e.preventDefault()
               fetch('/api/addentries', { method: 'POST', body: JSON.stringify( formFields )})
               setFormFields( formFieldsDefaults )
-              setUrlValue("")
+              window.location.reload(false)
           } }
         >
           <FormControl sx={inputStyling} >

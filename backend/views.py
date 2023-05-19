@@ -6,7 +6,7 @@ from flask import render_template, send_file, redirect, flash
 from flask import url_for
 
 from backend import app
-from backend.utilities import isURLWebOrLocal, sortbyname
+from backend.utilities import isURLWebOrLocal
 
 from database.oldInterface import get_db, addPageTopic
 

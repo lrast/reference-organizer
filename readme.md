@@ -23,8 +23,9 @@ The project is currently in development, so setup is a bit involved. Clone the r
 ```
 pip install -r requirements.txt
 ```
+2. make a sqlite database
 
-2. set environment variables:
+3. set environment variables:
 ```
 export FLASK_APP=run
 export FLASK_SERVER_NAME=127.0.0.1:5000
@@ -34,7 +35,7 @@ export FLASK_SECRET_KEY=[key]
 export FLASK_DATABASE_URL=[url]
 export FLASK_SQLALCHEMY_DATABASE_URI='sqlite:///[url]'
 ```
-3. ```flask run```
+4. ```flask run```
 
 
 ### Frontend:
@@ -69,6 +70,7 @@ Majory priorities:
 
 
 ### Short term:
+- install and startup scripts
 - table view for pages including title, authors, journal, year
     - migrate pages database
     - new author tables
@@ -76,11 +78,11 @@ Majory priorities:
 - clean up comments API and code.
     * do I want multiple comments? Or is one enough?
 - handle duplicates
-- on pageview, topicview, topics don't need to be in a table, don't need filter bar
 - debounce things that are slow moving
 - replace favicon
 - local files: opening jupyter notebooks
-- comments
+
+
 
 
 

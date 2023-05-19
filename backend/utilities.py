@@ -15,9 +15,3 @@ def isURLWebOrLocal(url):
         url = 'https://'+url
 
     return source, url
-
-
-def sortbyname(inlist):
-    inlist.sort(key=lambda x: x['name'].lower())
-    return inlist
-
