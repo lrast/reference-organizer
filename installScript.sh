@@ -3,7 +3,7 @@
 source envSetup.sh
 
 # make the database:
-python3.9 database/initializeDB
+python3.9 database/initializeDB.py
 
 
 # install backend dependencies
