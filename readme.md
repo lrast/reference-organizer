@@ -70,10 +70,10 @@ Majory priorities:
 
 
 ### Short term:
-- install and startup scripts
 - table view for pages including title, authors, journal, year
     - migrate pages database
     - new author tables
+- improve database migrations
 - move sorting into the table itself
 - clean up comments API and code.
     * do I want multiple comments? Or is one enough?
