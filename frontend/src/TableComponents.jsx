@@ -31,7 +31,6 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
     rows,
     prepareRow,
     setAllFilters,
-    state,
     setGlobalFilter
   } = useTable({ columns, data, defaultColumn, 
       initialState: {
@@ -145,7 +144,7 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
 
   return (
     <div className="table-sidebar">
-      <TextField type="text" name="test" label="Search" className="sidebar-filter-body"
+      <TextField type="text" name="test" label="Search"   className="search-filter"
         value={searchString}
         InputProps = {{
           onChange: (event) => {
@@ -153,9 +152,8 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
           }
         }}
        />
-      <ul style={{listStyle: "none"}}>
         {filterComponents}
-      </ul>
+      <div className="new-filter-button" >
       <Button variant="contained" onClick={() => {
         let thisKey = Math.max( ...filterComponents.map( (item) =>(item.key) ), 0 ) + 1 + ''
         setFilterComponents( [...filterComponents,
@@ -165,6 +163,7 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
           />
         ])
       }} > New Filter</Button>
+      </div>
     </div>
   )
 }
@@ -254,14 +253,15 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
 
 
   return (
-    <li className="sidebar-filter-item" key='test'>
-    <div className="sidebar-filter-body" key='test'>
-      <IconButton onClick={removeSelf} >
+    <div className="sidebar-filter-body">
+      <div className="sidebar-filter-exit">
+      <IconButton onClick={removeSelf}>
         <CloseIcon />
       </IconButton>
+      </div>
 
       <Grid component="label" container alignItems="center" spacing={0}>
-        <Grid item>Out</Grid>
+        <Grid item className=''>Out</Grid>
         <Grid item>
           <Switch
             onChange={ (e) => {
@@ -288,8 +288,8 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
             onChange: (e, value) => {setUiState({...uiState, filterQuery:value.map( (x) => x.id ) }) } 
         }}
       />
-    </div>
-    </li> )
+    </div> 
+  )
 }
 
 

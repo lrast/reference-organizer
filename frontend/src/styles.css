@@ -29,8 +29,8 @@ body {
 .table-body {
   /* border: 3px solid black; */
   padding: 2px;
-  width: 70%;
-
+  /* width: 70%; */
+  flex-grow: 1;
   text-align: center;
   display: flex;
   justify-content: space-between;
@@ -39,6 +39,8 @@ body {
 .reference-table{
   margin: auto;
   position: relative;
+  flex-grow: 1;
+  min-height: 100%;
 }
 
 
@@ -46,40 +48,42 @@ body {
 
 /* Sidebar styling */
 .table-sidebar {
-  padding: 2px;
-  width: 27%;
+  padding: 15px;
   height: 95vh;
   background-color: #F2F3F4;
   border-radius: 10px;
-
   position: -webkit-sticky;
   position: sticky;
   top: 0;
-
+  width: 27%;
   overflow: scroll;
   text-align: center;
 }
 
-.table-sidebar ul{
-  display: inline-block;
-  text-align: center;
-  padding: 0px;
-  width: 90%;
+.search-filter {
+  display: block;
+  text-align: left;
+  margin-bottom: 10px;
+  width: 100%;
 }
 
 .sidebar-filter-exit {
-  text-align: right;
+  display: flex;
+  justify-content: right;
+  width: 100%;
 }
 
 
 .sidebar-filter-body {
-  border-radius: 10px;
-  width: 100%;
+  border-radius: 5px;
   background-color: #E5E4E2;
-  margin-bottom: 10px;
-  display: inline-block;
+  margin: 10px 0;
+  padding: 10px;
   text-align: left;
+}
 
+.new-filter-button {
+  margin-top: 10px;
 }
 
 
@@ -104,6 +108,7 @@ body {
   height:100%;
   overflow: scroll;
 }
+
 
 
 
