@@ -16,36 +16,17 @@ The frontend runs on a node server, and uses Reactjs.
 
 ## Installation and setup
 
-The project is currently in development, so setup is a bit involved. Clone the repository and then perform the following steps:
-
-### Backend:
-1. install requirements
+Clone the repository and then run
 ```
-pip install -r requirements.txt
-```
-2. make a sqlite database
-
-3. set environment variables:
-```
-export FLASK_APP=run
-export FLASK_SERVER_NAME=127.0.0.1:5000
-export FLASK_ENV=development
-export FLASK_DEBUG=True
-export FLASK_SECRET_KEY=[key]
-export FLASK_DATABASE_URL=[url]
-export FLASK_SQLALCHEMY_DATABASE_URI='sqlite:///[url]'
-```
-4. ```flask run```
-
-
-### Frontend:
-1. install requirements
-```
-cd frontend
-npm install package.json
+./installScript.sh
 ```
 
-2. ```npm start```
+To run the organizer,
+```
+./runOrganizer.sh
+```
+
+
 
 
 <br />
@@ -70,13 +51,14 @@ Majory priorities:
 
 
 ### Short term:
-- install and startup scripts
 - table view for pages including title, authors, journal, year
     - migrate pages database
     - new author tables
+- improve database migrations
 - move sorting into the table itself
 - clean up comments API and code.
     * do I want multiple comments? Or is one enough?
+- clean up unpackGQL
 - handle duplicates
 - debounce things that are slow moving
 - replace favicon

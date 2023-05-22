@@ -198,7 +198,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
 
       let dataList = data[ model[0] ]
       let unpackedList = dataList.map( (obj) => unpackGQL( obj, model.slice(1) ) )
-      return unpackedList.reduce( (acc, li) => [...acc, ...li] )
+      return unpackedList.reduce( (acc, li) => [...acc, ...li], [])
     }
 
     // begin

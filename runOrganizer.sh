@@ -1,7 +1,7 @@
 # Script for running organizer
 
-source ./envSetup.sh
-source ./env/bin/activate
+source envSetup.sh
+source env/bin/activate
 
 flask run &
 cd frontend 

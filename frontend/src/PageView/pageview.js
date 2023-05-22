@@ -24,7 +24,7 @@ function PageView() {
   useEffect( () => {
       fetch('/api/page/'+ pageId )
       .then( (response) => response.json() )
-      .then( (data) => {setData(data); console.log(data)})
+      .then( (data) => {setData(data)})
     }, [])
 
 
@@ -33,7 +33,7 @@ function PageView() {
   useEffect( () => {
     fetch('/api/comment/page/' +pageId)
     .then( (resp) => resp.json() )
-    .then( (data) => setCommentText(data[0].commentdata) )
+    .then( (data) => {if(data.length>0){setCommentText(data[0].commentdata) } } )
   }, [])
 
   const [fieldState, setFieldState] = useState( {add:'', remove:''})

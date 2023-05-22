@@ -4,5 +4,5 @@ __pycache__/*
 backend/api/__pycache__/*
 static/node_modules/*
 static/*.json
-database/pages.db
+database/contents.db
 readme.html

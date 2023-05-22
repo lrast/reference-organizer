@@ -56,7 +56,7 @@ function TopicView() {
   useEffect( () => {
     fetch('/api/comment/topic/' +topicId)
     .then( (resp) => resp.json() )
-    .then( (data) => {setCommentText(data[0].commentdata) } )
+    .then( (data) => {if(data.length>0){setCommentText(data[0].commentdata) } } )
   }, [])
 
   const [fieldState, setFieldState] = useState( {add:'', remove:''})
