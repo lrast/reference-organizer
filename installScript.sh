@@ -15,4 +15,4 @@ pip install -r requirements.txt
 # install frontend dependencies
 cd frontend
 npm install package.json
-
+cd ..
