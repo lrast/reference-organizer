@@ -58,6 +58,7 @@ Majory priorities:
 - move sorting into the table itself
 - clean up comments API and code.
     * do I want multiple comments? Or is one enough?
+- clean up unpackGQL
 - handle duplicates
 - debounce things that are slow moving
 - replace favicon
