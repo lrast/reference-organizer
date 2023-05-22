@@ -64,12 +64,17 @@ function TopicView() {
   return (
     <>
     <center> <h1> {topicData.name} </h1> </center>
-
-    <TextField multiline value={commentText}
-      InputProps = {{ onChange: (event) => setCommentText( event.target.value )}}
-      onBlur={() => fetch('/api/comment/topic/' +topicId +'?commentid=0', 
-        {method:'PUT', body: JSON.stringify( {commentdata: commentText } ) })}
-    />
+    <div className='page-center'>
+      <TextField 
+        className='comment-field'
+        multiline
+        value={commentText}
+        InputProps = {{ onChange: (event) => setCommentText( event.target.value )}}
+        onBlur={() => fetch('/api/comment/topic/' +topicId +'?commentid=0', 
+          {method:'PUT', body: JSON.stringify( {commentdata: commentText } ) })}
+        minRows={4}
+      />
+    </div>
 
     <Accordion defaultExpanded={true}>
       <AccordionSummary>
@@ -109,7 +114,7 @@ function TopicView() {
 
         <div> 
           <h3> Supertopics </h3>
-          <TopicCards topics={topicData.rightTopics}/>
+          <TopicCards topics={topicData.rightTopics} className="topic-cards"/>
           <AddAndRemoveOptions
             label={'Supertopics'}
             addAutoComplete={useContext(TopicContext).map((obj) => ({...obj, label:obj.name})) }

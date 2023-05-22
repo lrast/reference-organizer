@@ -31,7 +31,6 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
     rows,
     prepareRow,
     setAllFilters,
-    state,
     setGlobalFilter
   } = useTable({ columns, data, defaultColumn, 
       initialState: {
@@ -58,7 +57,6 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
 
 
     return (
-      <div className="table-body">
         <table {...getTableProps()} className="reference-table">
          <thead>
            {headerGroups.map(headerGroup => (
@@ -70,7 +68,7 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
              </tr>
            ))}
          </thead>
-         <tbody {...getTableBodyProps()}>
+         <tbody {...getTableBodyProps()} className='table-body'>
            {rows.map(row => {
              prepareRow(row)
              return (
@@ -87,7 +85,6 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
            })}
          </tbody>
         </table>
-      </div>
    )
 }
 
@@ -145,7 +142,7 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
 
   return (
     <div className="table-sidebar">
-      <TextField type="text" name="test" label="Search" className="sidebar-filter-body"
+      <TextField type="text" name="test" label="Search"   className="search-filter"
         value={searchString}
         InputProps = {{
           onChange: (event) => {
@@ -153,9 +150,8 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
           }
         }}
        />
-      <ul style={{listStyle: "none"}}>
         {filterComponents}
-      </ul>
+      <div className="new-filter-button" >
       <Button variant="contained" onClick={() => {
         let thisKey = Math.max( ...filterComponents.map( (item) =>(item.key) ), 0 ) + 1 + ''
         setFilterComponents( [...filterComponents,
@@ -165,6 +161,7 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
           />
         ])
       }} > New Filter</Button>
+      </div>
     </div>
   )
 }
@@ -195,7 +192,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
 
     function unpackGQL(data, model) {
       // unpack graphql results
-      if (model.length ==0) {
+      if (model.length === 0) {
         return [data.id]
       }
 
@@ -205,9 +202,9 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
     }
 
     // begin
-    if (form.filterQuery.length == 0) { setLoadedData(null); return }
+    if (form.filterQuery.length === 0) { setLoadedData(null); return }
 
-    if (form.filterOn == tableType) {
+    if (form.filterOn === tableType) {
       // same table type
       if (form.subtopics) {
         // fetch subtopic data
@@ -254,11 +251,12 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
 
 
   return (
-    <li className="sidebar-filter-item" key='test'>
-    <div className="sidebar-filter-body" key='test'>
-      <IconButton onClick={removeSelf} >
+    <div className="sidebar-filter-body">
+      <div className="sidebar-filter-exit">
+      <IconButton onClick={removeSelf}>
         <CloseIcon />
       </IconButton>
+      </div>
 
       <Grid component="label" container alignItems="center" spacing={0}>
         <Grid item>Out</Grid>
@@ -288,8 +286,8 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
             onChange: (e, value) => {setUiState({...uiState, filterQuery:value.map( (x) => x.id ) }) } 
         }}
       />
-    </div>
-    </li> )
+    </div> 
+  )
 }
 
 

@@ -12,6 +12,7 @@ import PageView from './PageView/pageview'
 import TopicView from './TopicView/topicview'
 import AddPage from './AddPage/addpage'
 
+import { Tabs, Tab, Box } from '@mui/material'
 import {TopicContext, PageContext, AllTopics, AllPages} from './DataContext'
 
 function App() {
@@ -35,12 +36,14 @@ function App() {
 
   return (
     <>
-      <nav className="navheader">
-        <li className="navheader"> <Link to="/home">Home</Link> </li>
-        <li className="navheader"> <Link to="/page">Pages</Link> </li>
-        <li className="navheader"> <Link to="/topic">Topics</Link> </li>
-        <li className="navheader"> <Link to="/relationship">Relationships</Link> </li>
-      </nav>
+      <Tabs>
+      <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
+        <Tab label='Home' to="/home" component={Link}> <Link to="/home">Home</Link> </Tab>
+        <Tab label='Pages' to="/page" component={Link}> <Link to="/page">Pages</Link> </Tab >
+        <Tab label='Topics' to="/topic" component={Link}> <Link to="/topic">Topics</Link> </Tab >
+        <Tab label='Relationships' to="/relationship" component={Link}> <Link to="/relationship">Relationships</Link> </Tab>
+      </Box>
+      </Tabs>
 
       <AllTopics.Provider value={topicsData}>
       <AllPages.Provider value={pagesData}>
