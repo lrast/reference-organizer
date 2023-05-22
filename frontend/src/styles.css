@@ -128,16 +128,6 @@ body {
   text-align: left;
 }
 
-.navheader ol {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-.navheader li {
-    display: inline-block;
-    width: 24%;
-}
-
 
 h1 {
   font-size: 2em;
