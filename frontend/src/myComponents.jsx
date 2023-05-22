@@ -67,6 +67,7 @@ function EditPanel ({parentType, parentData}){
 function AutofillField( {options, autocompleteProps} ){
   return(
   <Autocomplete
+    className='autocomplete'
     {...autocompleteProps}
     isOptionEqualToValue={(option, value) => option.id === value.id} // hack!
     options={options}
@@ -131,11 +132,12 @@ function AddAndRemoveOptions( {label, addAutoComplete, removeAutocomplete, makeE
 
 function TopicCards( {topics, comments} ) {
   const cardsToRender = topics.map( (topic) => 
-    <Card key={topic.id} sx={{ display: 'inline-block', mx: '2px', transform: 'scale(0.8)' }}> 
-      <CardContent> 
-        <h3> <a href={'/topic/' + topic.id}> {topic.name} </a> </h3>
-      </CardContent>
-    </Card>
+    <Chip 
+    className='topic-chips'
+    key={topic.id} 
+    label={topic.name} 
+    href={'/topic/' + topic.id}>
+    </Chip>
   )
   return (<>
     {cardsToRender}

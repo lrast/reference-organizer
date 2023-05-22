@@ -57,7 +57,6 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
 
 
     return (
-      <div className="table-body">
         <table {...getTableProps()} className="reference-table">
          <thead>
            {headerGroups.map(headerGroup => (
@@ -69,7 +68,7 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
              </tr>
            ))}
          </thead>
-         <tbody {...getTableBodyProps()}>
+         <tbody {...getTableBodyProps()} className='table-body'>
            {rows.map(row => {
              prepareRow(row)
              return (
@@ -86,7 +85,6 @@ function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) 
            })}
          </tbody>
         </table>
-      </div>
    )
 }
 
@@ -194,7 +192,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
 
     function unpackGQL(data, model) {
       // unpack graphql results
-      if (model.length ==0) {
+      if (model.length === 0) {
         return [data.id]
       }
 
@@ -204,9 +202,9 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
     }
 
     // begin
-    if (form.filterQuery.length == 0) { setLoadedData(null); return }
+    if (form.filterQuery.length === 0) { setLoadedData(null); return }
 
-    if (form.filterOn == tableType) {
+    if (form.filterOn === tableType) {
       // same table type
       if (form.subtopics) {
         // fetch subtopic data
@@ -261,7 +259,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
       </div>
 
       <Grid component="label" container alignItems="center" spacing={0}>
-        <Grid item className=''>Out</Grid>
+        <Grid item>Out</Grid>
         <Grid item>
           <Switch
             onChange={ (e) => {
