@@ -187,7 +187,7 @@ input {
 
 
 .comment-field {
-  width: 50%;
+  width: 75%;
 }
 
 .page-center {
@@ -197,7 +197,7 @@ input {
 }
 
 .topic-chips {
-  margin: 5px;
+  margin: 5px !important;
 }
 
 

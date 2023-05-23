@@ -158,10 +158,14 @@ function CommentsPanel({commentURL}) {
 
   return (
     <div className='page-center'>
-      <TextField multiline value={commentText}
+      <TextField 
+          multiline 
+          value={commentText}
           InputProps = {{ onChange: (event) => setCommentText( event.target.value )}}
           onBlur={ () => fetch(commentURL +'?commentid=0', 
             {method:'PUT', body: JSON.stringify( {commentdata: commentText } ) }) }
+          className='comment-field'
+          rows={4}
         />
     </div>
     )
