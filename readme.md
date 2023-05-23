@@ -7,7 +7,7 @@ The organizational structure is simple: references are tagged with one or more t
 
 ## Technologies
 
-The organizer has two key features that determine the design decisions: 1) expressive UI, and 2) use for any stage of a research project, regardless how preliminary. Thus, the organizer works like a jupyter notebook, running a local web-server, and connecting through the browser for a UI.
+The organizer has two key features that determine the design decisions: 1) expressive UI, and 2) use for any stage of a research project, regardless how preliminary. Thus, the organizer works like a jupyter notebook, running a local web server, and connecting through the browser for a UI.
 
 The backend uses a sqlite database and Flask web framework, and provides an HTTP API, with support for Graph QL queries on GET requests.
 
@@ -25,8 +25,6 @@ To run the organizer,
 ```
 ./runOrganizer.sh
 ```
-
-
 
 
 <br />
@@ -56,8 +54,6 @@ Majory priorities:
     - new author tables
 - improve database migrations
 - move sorting into the table itself
-- clean up comments API and code.
-    * do I want multiple comments? Or is one enough?
 - clean up unpackGQL
 - handle duplicates
 - debounce things that are slow moving
@@ -87,6 +83,7 @@ Majory priorities:
 ### bugs:
 - infinite query recursion when there are subtopic loops
     * replace all recursive queries by sqlalchemy common table expressions
+- check 'and' condition for filters
 
 
 ### minor improvements:

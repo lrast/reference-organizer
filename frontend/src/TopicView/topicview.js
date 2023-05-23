@@ -6,7 +6,7 @@ import { Accordion, AccordionSummary, AccordionDetails, Button, TextField} from 
 import PagesTable from '../pagesTable'
 import TopicsTable from '../topicsTable'
 
-import {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions} from '../myComponents';
+import {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions, CommentsPanel} from '../myComponents';
 
 import {TopicContext, PageContext} from '../DataContext'
 
@@ -51,31 +51,10 @@ function TopicView() {
   }, [] )
 
 
-  const [commentText, setCommentText] = useState('')
-
-  useEffect( () => {
-    fetch('/api/comment/topic/' +topicId)
-    .then( (resp) => resp.json() )
-    .then( (data) => {if(data.length>0){setCommentText(data[0].commentdata) } } )
-  }, [])
-
-  const [fieldState, setFieldState] = useState( {add:'', remove:''})
-
   return (
     <>
     <center> <h1> {topicData.name} </h1> </center>
-    <div className='page-center'>
-      <TextField 
-        className='comment-field'
-        multiline
-        value={commentText}
-        InputProps = {{ onChange: (event) => setCommentText( event.target.value )}}
-        onBlur={() => fetch('/api/comment/topic/' +topicId +'?commentid=0', 
-          {method:'PUT', body: JSON.stringify( {commentdata: commentText } ) })}
-        minRows={4}
-      />
-    </div>
-
+    <CommentsPanel commentURL={'/api/comment/topic/' + topicId} />
     <Accordion defaultExpanded={true}>
       <AccordionSummary>
         <h2> Pages </h2>

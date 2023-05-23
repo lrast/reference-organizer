@@ -86,7 +86,6 @@ function AutofillField( {options, autocompleteProps} ){
 
 
 
-
 function AddAndRemoveOptions( {label, addAutoComplete, removeAutocomplete, makeEndpointURL} ) {
   const [fieldState, setFieldState] = useState( {add:[], remove:[]})
 
@@ -130,6 +129,7 @@ function AddAndRemoveOptions( {label, addAutoComplete, removeAutocomplete, makeE
 }
 
 
+
 function TopicCards( {topics, comments} ) {
   const cardsToRender = topics.map( (topic) => 
     <Chip 
@@ -145,11 +145,34 @@ function TopicCards( {topics, comments} ) {
 }
 
 
+function CommentsPanel({commentURL}) {
+  const [commentText, setCommentText] = useState('')
+
+  useEffect( () => {
+    fetch(commentURL)
+    .then( (resp) => resp.json() )
+    .then( (data) => {if(data.length>0){setCommentText(data[0].commentdata) } } )
+  }, [])
+
+  return (
+    <div className='page-center'>
+      <TextField multiline value={commentText}
+          InputProps = {{ onChange: (event) => setCommentText( event.target.value )}}
+          onBlur={ () => fetch(commentURL +'?commentid=0', 
+            {method:'PUT', body: JSON.stringify( {commentdata: commentText } ) }) }
+        />
+    </div>
+    )
+}
 
 
 
 
-export {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions};
+
+
+
+
+export {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions, CommentsPanel};
 
 
 

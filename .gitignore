@@ -7,3 +7,4 @@ static/*.json
 database/contents.db
 readme.html
 env/*
+.DS_Store

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 
 import { Accordion, AccordionSummary, AccordionDetails, Button, TextField} from '@mui/material';
 
-import {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions} from '../myComponents';
+import {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions, CommentsPanel} from '../myComponents';
 
 import TopicsTable from '../topicsTable'
 import PagesTable from '../pagesTable'
@@ -28,25 +28,10 @@ function PageView() {
     }, [])
 
 
-  const [commentText, setCommentText] = useState('')
-
-  useEffect( () => {
-    fetch('/api/comment/page/' +pageId)
-    .then( (resp) => resp.json() )
-    .then( (data) => {if(data.length>0){setCommentText(data[0].commentdata) } } )
-  }, [])
-
-  const [fieldState, setFieldState] = useState( {add:'', remove:''})
-
-
   return (
     <>
     <center> <h1> <Link to={backendURL+ '/openpage/' + pageId }> {pageData.name } </Link> </h1> </center>
-    <TextField multiline value={commentText}
-      InputProps = {{ onChange: (event) => setCommentText( event.target.value )}}
-      onBlur={() => fetch('/api/comment/page/' +pageId +'?commentid=0', 
-        {method:'PUT', body: JSON.stringify( {commentdata: commentText } ) })}
-    />
+    <CommentsPanel commentURL={'/api/comment/page/' + pageId} />
 
     <Accordion defaultExpanded={true}>
       <AccordionSummary>
