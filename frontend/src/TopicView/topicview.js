@@ -48,7 +48,7 @@ function TopicView() {
         leftTopics: data.leftTopics, rightTopics: data.rightTopics
       })
     })
-  }, [] )
+  }, [topicId] )
 
 
   return (

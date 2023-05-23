@@ -2,9 +2,7 @@
 
 import React, {useState, useEffect} from 'react'
 import { useNavigate } from "react-router-dom";
-
-import { Accordion, AccordionSummary, AccordionDetails,
-        Autocomplete, TextField, Chip, Button, Card, CardContent} from '@mui/material';
+import { Accordion, AccordionSummary, AccordionDetails, Autocomplete, TextField, Chip, Button} from '@mui/material';
 
 
 
@@ -131,17 +129,21 @@ function AddAndRemoveOptions( {label, addAutoComplete, removeAutocomplete, makeE
 
 
 function TopicCards( {topics, comments} ) {
-  const cardsToRender = topics.map( (topic) => 
-    <Chip 
-    className='topic-chips'
-    key={topic.id} 
-    label={topic.name} 
-    href={'/topic/' + topic.id}>
-    </Chip>
+  const navigate = useNavigate()
+  return (
+  <>
+    {topics.map( (topic) => 
+        <Chip 
+        clickable
+        className='topic-chips'
+        key={topic.id} 
+        label={topic.name} 
+        onClick={() => navigate(`../topic/${topic.id}`)}
+        >
+      </Chip>
+    )}
+  </>
   )
-  return (<>
-    {cardsToRender}
-  </>)
 }
 
 
@@ -156,10 +158,14 @@ function CommentsPanel({commentURL}) {
 
   return (
     <div className='page-center'>
-      <TextField multiline value={commentText}
+      <TextField 
+          multiline 
+          value={commentText}
           InputProps = {{ onChange: (event) => setCommentText( event.target.value )}}
           onBlur={ () => fetch(commentURL +'?commentid=0', 
             {method:'PUT', body: JSON.stringify( {commentdata: commentText } ) }) }
+          className='comment-field'
+          rows={4}
         />
     </div>
     )
