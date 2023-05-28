@@ -8,7 +8,7 @@ import {useTable, useFilters, useGlobalFilter} from 'react-table'
 import {matchSorter} from 'match-sorter'
 
 import {TopicContext, PageContext, TableType} from './DataContext'
-
+import {unpackGQL} from './utilities'
 
 // table component
 function TableBody({data, columns, allFilters, searchString, hiddenColumns=[]}) {
@@ -190,51 +190,57 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
     let outputKey = 'out'
     if (form.filterIn) {outputKey='in'}
 
-    function unpackGQL(data, model) {
-      // unpack graphql results
-      if (model.length === 0) {
-        return [data.id]
-      }
+    function unpackData(data, model){
+      let idsByTopic = data["topics"].map( (res) => unpackGQL(res, model) )
+      idsByTopic = idsByTopic.map( (objList) => objList.map( obj=> obj.id ) )
 
-      let dataList = data[ model[0] ]
-      let unpackedList = dataList.map( (obj) => unpackGQL( obj, model.slice(1) ) )
-      return unpackedList.reduce( (acc, li) => [...acc, ...li], [])
+      console.log(idsByTopic)
+
+      if (idsByTopic.length === 1){
+       return idsByTopic[0]
+     }
+      else {
+        return idsByTopic.slice(1).reduce( 
+          (acc, i) => acc.filter( x => i.includes(x) ), 
+          idsByTopic[0]
+        )
+      }
     }
 
-    // begin
+    function getFilterData(query, model) {
+      if (query === ''){ setLoadedData( {[outputKey]: form.filterQuery} ) }
+      else {
+        fetch('/api/gql?' + query )
+        .then( resp => resp.json() )
+        .then( (data) => unpackData(data, model) )
+        .then( (ids) => setLoadedData( {[outputKey]: ids} ) )
+      }
+    }
+
+
     if (form.filterQuery.length === 0) { setLoadedData(null); return }
-
-    if (form.filterOn === tableType) {
-      // same table type
-      if (form.subtopics) {
-        // fetch subtopic data
-        fetch('/api/gql?' + new URLSearchParams(
-          {query: `{ ${form.filterOn} (ids: [${form.filterQuery}] ) { allSubTopics { id, name }} }` }) )
-        .then( (resp) => resp.json())
-        .then( (data) => unpackGQL(data, [form.filterOn, 'allSubTopics']) )
-        .then( (ids) => setLoadedData( {[outputKey]: ids} ) )
-      }
-      else {
-        setLoadedData( {[outputKey]: form.filterQuery} )
-      }
-    }
     else {
-      // opposite table type
-      if (form.subtopics) {
-        // fetch subtopic data
-        fetch('/api/gql?' + new URLSearchParams(
-          {query: `{ ${form.filterOn} (ids: [${form.filterQuery}] ) { allSubTopics { ${tableType} { id} }} }` }) )
-        .then( (resp) => resp.json())
-        .then( (data) => unpackGQL(data, [form.filterOn, 'allSubTopics', tableType]) )
-        .then( (ids) => setLoadedData( {[outputKey]: ids} ) )
+      let query = ''
+      let model = []
+
+      if ((tableType === "topics") && form.subtopics ) {
+        query = new URLSearchParams( {query: 
+          `{ topics (ids: [${form.filterQuery}] ) { allSubTopics { id }} }` })
+        model = ['allSubTopics']
       }
-      else {
-        fetch('/api/gql?' + new URLSearchParams(
-          {query: `{ ${form.filterOn} (ids: [${form.filterQuery}] ) { ${tableType} { id} }}` }) )
-        .then( (resp) => resp.json())
-        .then( (data) => unpackGQL(data, [form.filterOn, tableType]) )
-        .then( (ids) => setLoadedData( {[outputKey]: ids} ) )
+      else if (tableType === "topics" && !form.subtopics ) {}
+      else if (tableType === "pages" && form.subtopics ){
+        query = new URLSearchParams( {query: 
+          `{ topics (ids: [${form.filterQuery}] ) { allSubTopics { pages { id} }} }` })
+        model = ['allSubTopics', 'pages']
       }
+      else if ( tableType === "pages" && !form.subtopics ){
+        query = new URLSearchParams({query:
+          `{ topics (ids: [${form.filterQuery}] ) { pages { id} }}` })
+        model =  ['pages']
+      }
+
+      getFilterData(query, model)
     }
   }
 

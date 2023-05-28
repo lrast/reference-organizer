@@ -54,13 +54,9 @@ Majory priorities:
     - new author tables
 - improve database migrations
 - move sorting into the table itself
-- clean up unpackGQL
-- handle duplicates
 - debounce things that are slow moving
 - replace favicon
 - local files: opening jupyter notebooks
-
-
 
 
 
@@ -83,8 +79,6 @@ Majory priorities:
 ### bugs:
 - infinite query recursion when there are subtopic loops
     * replace all recursive queries by sqlalchemy common table expressions
-- check 'and' condition for filters
-
 
 ### minor improvements:
 - improve URL origin testing
