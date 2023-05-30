@@ -12,6 +12,58 @@ import sqlite3 as db
 
 dbURL = os.environ['FLASK_DATABASE_URL']
 
+
+def makeAuthorTable():
+    """
+    Make a table of authors and an Author Page join table
+    """
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS Author (
+            id INTEGER PRIMARY KEY,
+            first TEXT,
+            last TEXT,
+            middle TEXT);
+        """ )
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS PageAuthor (
+            id INTEGER PRIMARY KEY,
+            pageid INTEGER,
+            authorid INTEGER,
+            FOREIGN KEY( pageid ) REFERENCES Page(id),
+            FOREIGN KEY( authorid ) REFERENCES Author(id)
+            );
+        """ )
+    conn.commit()
+    conn.close()
+
+
+def remakePageTable():
+    """Remove the requirements for the url in the Page table,
+        add journal and date fields 
+    """
+    conn = db.connect(dbURL)
+    cur = conn.cursor()
+    cur.execute("""ALTER TABLE Page RENAME TO Page_temp;""")
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS Page(
+            id INTEGER PRIMARY KEY,
+            url TEXT UNIQUE,
+            name TEXT,
+            date TEXT,
+            publishedin TEXT,
+            dateadded TEXT
+        );
+        """)
+    cur.execute("""
+        INSERT INTO Page(id, url, name, dateadded) SELECT id, url, name, dateadded FROM Page_temp;
+        """)
+    cur.execute("""DROP TABLE Page_temp;""")
+    conn.commit()
+    conn.close()
+
+
 def addRelationshipReversename():
     """recreates the Page Topic table to have unique (rel, left, right) triples"""
     conn = db.connect(dbURL)

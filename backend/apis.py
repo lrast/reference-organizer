@@ -54,7 +54,7 @@ def addEntries():
 
     pageAdded = False
 
-    if formData['url'] != '':
+    if (formData['url'] != '' or formData['name'] != ''):
         response = requests.post(
             url_for('api.page.all_pages', _external=True), 
             {'url': formData['url'], 'name': formData['name']}

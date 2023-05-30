@@ -50,8 +50,10 @@ Majory priorities:
 
 ### Short term:
 - table view for pages including title, authors, journal, year
-    - migrate pages database
-    - new author tables
+    - update backend data models
+    - update links to reflect the absence of a url
+
+
 - improve database migrations
 - move sorting into the table itself
 - debounce things that are slow moving

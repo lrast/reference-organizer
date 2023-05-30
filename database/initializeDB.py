@@ -17,6 +17,8 @@ makeTopicComments()
 makeRelationshipComments()
 addPageDateAddedField()
 addRelationshipReversename()
+remakePageTable()
+makeAuthorTable()
 
 # add some default enries
 conn = db.connect(dbURL)

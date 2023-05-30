@@ -1,14 +1,11 @@
 import requests
-import json
 
-from flask import request, g
-from flask import render_template, send_file, redirect, flash
-from flask import url_for
+from flask import request, Response, send_file, redirect, url_for
 
 from backend import app
 from backend.utilities import isURLWebOrLocal
 
-from database.oldInterface import get_db, addPageTopic
+from database.oldInterface import get_db
 
 
 
@@ -17,6 +14,10 @@ def servePage(pageid):
     """Redirect to the URL of the requested page""" 
     db = get_db()
     url = db.execute("SELECT url FROM Page WHERE id=(?)", (pageid,)).fetchone()['url']
+
+    # handle empty url
+    if url == '':
+        return Response('', status=404)
 
     URLsource, formattedURL = isURLWebOrLocal(url)
     if URLsource == 'web':

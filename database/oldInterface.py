@@ -49,26 +49,3 @@ def packageRows(*args, **kwargs):
         return jsonify( outputs )
 
 
-
-##### functions for adding data #####
-def addPageTopic(conn, pageURL, topicName):
-    """page-topic relations by url and name"""
-    conn.execute("""
-        INSERT INTO PageTopic (pageid, topicid)
-        SELECT Page.id, Topic.id FROM Page JOIN Topic WHERE (Page.url, Topic.name)=(?,?);
-        """,
-         (pageURL, topicName))
-    conn.commit()
-
-
-def addTopicTopicRelation(conn, leftTopic, rightTopic, relationshipName):
-    """relationships between topics"""
-    conn.execute("""
-        INSERT INTO TopicTopicRelationship (relationshipid, lefttopicid, righttopicid)
-        SELECT Relationship.id, LeftTopic.id, RightTopic.id FROM 
-        Relationship JOIN Topic as LeftTopic JOIN Topic as RightTopic
-        WHERE (Relationship.name, LeftTopic.name, RightTopic.name)=(?,?,?);
-        """, (relationshipName, leftTopic, rightTopic))
-    conn.commit()
-
-
