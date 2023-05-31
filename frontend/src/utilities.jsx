@@ -1,10 +1,12 @@
 // utility functions
 
+import {backendURL} from './config'
+
 function unpackGQL(data, model, uniqueIds=true) {
   // unpack graphql results
 
   function unpackHelper(data, model){
-    if (model.length == 1) {
+    if (model.length === 1) {
       return data[model[0]]
     }
 
@@ -20,12 +22,24 @@ function unpackGQL(data, model, uniqueIds=true) {
   if (uniqueIds){
     let allIds = unpackedItems.map( x=>x.id )
     unpackedItems = unpackedItems.filter( 
-      (item, pos) => ( allIds.indexOf( item.id ) == pos)
+      (item, pos) => ( allIds.indexOf( item.id ) === pos)
     )
   }
 
   return unpackedItems
+}
+
+function OpenPageLink({page}){
+  if (page.url === ''){
+    return <> {page.name} </>
+  }
+  else {
+    return  <a href={backendURL +'/openpage/' + page.id}> {page.name} </a>
+  }
 
 }
 
-export {unpackGQL};
+
+
+
+export {unpackGQL, OpenPageLink};

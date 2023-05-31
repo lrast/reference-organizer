@@ -6,26 +6,21 @@ import {PageContext, TableType} from './DataContext'
 
 import {backendURL} from './config'
 
+import {OpenPageLink} from './utilities'
+
 function PagesTable() {
   // table columns and data
   const tableData = useContext(PageContext)
 
   const tableColumns = [
-    { Header: 'Pages', 
-      accessor: 'link',
-      Cell: ({row: {original: {id, name } } }) => <a href={backendURL +'/openpage/' + id}> {name} </a>
-    },
     {
-      id: 'info',
-      Cell: ({row: {original: {id, name } } }) => <a href={'/page/' + id}> info </a>
-    },
-    {
-      Header: 'name',
+      Header: 'Pages',
       id: 'name',
+      Cell: ({row: {original} }) => <OpenPageLink page={original} />
     },
     {
-      Header: 'id',
       id: 'id',
+      Cell: ({row: {original: {id, name } } }) => <a href={'/page/' + id}> info </a>,
       Filter: () => {},
       filter: React.useCallback( (rows, id, filterValue) => {
         //console.log('in filter', filterValue )
@@ -40,7 +35,7 @@ function PagesTable() {
       }, [])
     } 
   ]
-  const hiddenColumns = ['name', 'id']
+  const hiddenColumns = []
 
 
   // Table filters

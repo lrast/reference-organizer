@@ -11,9 +11,7 @@ import PagesTable from '../pagesTable'
 
 import {TopicContext, PageContext} from '../DataContext'
 
-import { Link } from "react-router-dom";
-
-import {backendURL} from '../config'
+import {OpenPageLink} from '../utilities'
 
 
 function PageView() {
@@ -44,7 +42,7 @@ function PageView() {
 
   return (
     <>
-    <center> <h1> <Link to={backendURL+ '/openpage/' + pageId }> {pageData.name } </Link> </h1> </center>
+    <center> <h1> <OpenPageLink page={pageData} /> </h1> </center>
     <CommentsPanel commentURL={'/api/comment/page/' + pageId} />
 
     <Accordion defaultExpanded={true}>

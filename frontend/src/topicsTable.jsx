@@ -9,14 +9,11 @@ function TopicsTable() {
   const tableData = useContext(TopicContext)
 
   const tableColumns = [
-    { Header: 'Topics', 
-      accessor: 'link',
-      Cell: ({row: {original: {id, name } } }) => <a href={'/topic/' + id}> {name} </a>,
-    },
     {
-      Header: 'name',
+      Header: 'Topics',
       accessor: 'name',
       id: 'name',
+      Cell: ({row: {original: {id, name } } }) => <a href={'/topic/' + id}> {name} </a>
     },
     {
       Header: 'id',
@@ -35,7 +32,7 @@ function TopicsTable() {
       }, [])
     }
   ]
-  const hiddenColumns = ['name', 'id']
+  const hiddenColumns = ['id']
 
 
   // Table filters
