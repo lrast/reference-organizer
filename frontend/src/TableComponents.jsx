@@ -210,7 +210,7 @@ function FilterComponentBody({myKey, removeSelf, updateFilter}) {
     function getFilterData(query, model) {
       if (query === ''){ setLoadedData( {[outputKey]: form.filterQuery} ) }
       else {
-        fetch('/api/gql?' + query )
+        fetch('/api/gql/?' + query )
         .then( resp => resp.json() )
         .then( (data) => unpackData(data, model) )
         .then( (ids) => setLoadedData( {[outputKey]: ids} ) )

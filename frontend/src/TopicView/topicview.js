@@ -20,7 +20,7 @@ function TopicView() {
   )
 
   useEffect( () => {
-    fetch( '/api/gql?' + new URLSearchParams(
+    fetch( '/api/gql/?' + new URLSearchParams(
       {query:`{ topics(id: ${topicId})
         {id, name, 
         pages{id, name}, 

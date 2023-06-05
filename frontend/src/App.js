@@ -37,10 +37,10 @@ function App() {
   return (
     <>
         <Box sx={{ borderBottom: 2, borderColor: 'divider' }}>
-          <Tab label='Home' to="/home" component={Link}> <Link to="/home">Home</Link> </Tab>
-          <Tab label='Pages' to="/page" component={Link}> <Link to="/page">Pages</Link> </Tab >
-          <Tab label='Topics' to="/topic" component={Link}> <Link to="/topic">Topics</Link> </Tab >
-          <Tab label='Relationships' to="/relationship" component={Link}> <Link to="/relationship">Relationships</Link> </Tab>
+          <Tab label='Home' to="/home" component={Link}/> 
+          <Tab label='Pages' to="/page" component={Link}/>
+          <Tab label='Topics' to="/topic" component={Link}/>
+          <Tab label='Relationships' to="/relationship" component={Link}/>
         </Box>
 
       <AllTopics.Provider value={topicsData}>
