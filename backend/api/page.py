@@ -1,5 +1,4 @@
 # Page api
-import json
 import sqlite3
 
 from datetime import datetime
@@ -19,8 +18,8 @@ def all_pages():
     db = get_db()
     if request.method == 'GET':
         subquery = request.args.get('query', '{id, name, url, dateadded}')
-        gql_query = '{pages'  + subquery + '}'
-        return execute_gql_query(gql_query, lambda x:x['pages'])
+        gql_query = f'{{pages {subquery} }}'
+        return execute_gql_query(gql_query, lambda x: x['pages'])
 
     if request.method == 'POST':
         # add a new page
@@ -37,15 +36,18 @@ def all_pages():
             return response
 
         except sqlite3.IntegrityError:
-            existing = db.execute("""SELECT id FROM Page WHERE url=(?)""", (url,))
+            existing = db.execute("""SELECT id FROM Page WHERE url=(?)""",
+                                  (url,))
             response = packageRows(existing.fetchone())
             return response, 303
 
 
-
 @page.route('/<int:pageid>', methods=['GET', 'PUT', 'DELETE'])
 def info(pageid):
-    """Page API: info on a specific page, including topics and topics related to them"""
+    """
+    Page API: info on a specific page, 
+    including topics and topics related to them
+    """
     db = get_db()
     if request.method == 'GET':
         # info on a specific page
@@ -57,17 +59,20 @@ def info(pageid):
                     }"""
 
         subquery = request.args.get('query', default_subquery)
-        gql_query = '{pages (id: %s)'%pageid + subquery + '}'
-        return execute_gql_query(gql_query, lambda x:x['pages'][0])
+        gql_query = f'{{pages (id: {pageid}) {subquery} }}'
+
+        return execute_gql_query(gql_query, lambda x: x['pages'][0])
 
     if request.method == 'PUT':
         # over write the contents of the entry
         receivedData = getPOSTData(request)
 
         if 'name' in receivedData.keys():
-            db.execute("UPDATE Page SET name=(?) WHERE id=(?);", (receivedData['name'], pageid) )
+            db.execute("UPDATE Page SET name=(?) WHERE id=(?);",
+                       (receivedData['name'], pageid))
         if 'url' in receivedData.keys():
-            db.execute("UPDATE Page SET url=(?) WHERE id=(?);", (receivedData['url'], pageid) )
+            db.execute("UPDATE Page SET url=(?) WHERE id=(?);",
+                       (receivedData['url'], pageid))
 
         db.commit()
         return Response(status=200)
@@ -75,11 +80,11 @@ def info(pageid):
     if request.method == 'DELETE':
         db.execute("DELETE FROM Page WHERE id=(?);", (pageid,))
         db.execute("DELETE FROM PageTopic WHERE pageid=(?);", (pageid,))
-        db.execute("DELETE FROM PagePageRelationship WHERE leftpageid=(?) OR rightpageid=(?);", 
-            (pageid, pageid))
+        db.execute("""DELETE FROM PagePageRelationship 
+                      WHERE leftpageid=(?) OR rightpageid=(?);""", 
+                   (pageid, pageid))
         db.commit()
         return Response(status=200)
-
 
 
 @page.route('/<int:pageid>/topic', methods=['GET', 'POST'])
@@ -88,33 +93,35 @@ def related_topics(pageid):
     db = get_db()
     if request.method == 'GET':
         subquery = request.args.get('query', '{ id, name }')
-        gql_query = '{ pages (id: %s) { topics'%pageid + subquery + '} }'
-        return execute_gql_query(gql_query, lambda x:x['pages'][0]['topics'])
+        gql_query = f'{{ pages (id: {pageid}) {{ topics {subquery} }} }}'
+
+        return execute_gql_query(gql_query, lambda x: x['pages'][0]['topics'])
 
     if request.method == 'POST':
         topicid = getPOSTData(request)['topicid']
 
-        inserted = db.execute("""INSERT INTO PageTopic(pageid, topicid) VALUES (?,?) RETURNING id;""", 
-            (pageid, topicid))
+        inserted = db.execute("""INSERT INTO PageTopic(pageid, topicid) 
+                                VALUES (?,?) RETURNING id;""", 
+                              (pageid, topicid))
         response = packageRows(inserted.fetchone())
         db.commit()
         return response
 
 
-
-@page.route('/<int:pageid>/topic/<int:relatedtopicid>', methods=['PUT', 'DELETE'])
+@page.route('/<int:pageid>/topic/<int:relatedtopicid>',
+            methods=['PUT', 'DELETE'])
 def related_topics_id(pageid, relatedtopicid):
     """Page Topic Association"""
     db = get_db()
     if request.method == 'PUT':
         db.execute("INSERT INTO PageTopic(pageid, topicid) VALUES (?,?);",
-            (pageid, relatedtopicid))
+                   (pageid, relatedtopicid))
     elif request.method == 'DELETE':
-        db.execute("DELETE FROM PageTopic WHERE pageid=(?) AND topicid=(?);", (pageid, relatedtopicid))
+        db.execute("DELETE FROM PageTopic WHERE pageid=(?) AND topicid=(?);",
+                   (pageid, relatedtopicid))
 
     db.commit()
     return Response(status=200)
-
 
 
 @page.route('/<int:pageid>/page', methods=['GET', 'POST'])
@@ -124,12 +131,10 @@ def related_pages(pageid):
     if request.method == 'GET':
 
         subquery = request.args.get('query', '{id, name}')
-        gql_query = ('{ pages (id: %s) { leftPages '%pageid + 
-            subquery + 
-            ', rightPages' + 
-            subquery +
-            '} }' )
-        return execute_gql_query(gql_query, lambda x:x['pages'][0])
+        gql_query = f"""{{ pages (id: {pageid}) {{ 
+                leftPages {subquery}, rightPages {subquery} }} }}"""
+
+        return execute_gql_query(gql_query, lambda x: x['pages'][0])
 
     if request.method == 'POST':
         receivedData = getPOSTData(request)
@@ -153,9 +158,8 @@ def related_pages(pageid):
                 VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
 
 
-
-
-@page.route('/<int:pageid>/page/<int:relatedpageid>', methods=['PUT', 'DELETE'])
+@page.route('/<int:pageid>/page/<int:relatedpageid>',
+            methods=['PUT', 'DELETE'])
 def related_pages_id(pageid, relatedpageid):
     """Page Page Association"""
     db = get_db()
@@ -175,12 +179,14 @@ def related_pages_id(pageid, relatedpageid):
         return resp
 
     if request.method == 'PUT':
-        entryData = db.execute("""
-            INSERT INTO PagePageRelationship(relationshipid, leftpageid, rightpageid)
+        entryData = db.execute(
+            """ INSERT INTO 
+            PagePageRelationship(relationshipid, leftpageid, rightpageid)
             VALUES (?,?,?);""",
-            (relationshipid, leftpageid, rightpageid) ).fetchone()
+            (relationshipid, leftpageid, rightpageid)).fetchone()
         db.commit()
-        return Response('{"id":%s, "message":"added"}' % entryData['id'], status=200)
+        return Response('{"id":%s, "message":"added"}' % entryData['id'],
+                        status=200)
 
     elif request.method == 'DELETE':
         db.execute(
@@ -189,6 +195,3 @@ def related_pages_id(pageid, relatedpageid):
             (relationshipid, leftpageid, rightpageid))
         db.commit()
         return Response(status=200)
-
-
-

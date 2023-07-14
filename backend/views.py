@@ -1,19 +1,20 @@
-import requests
-
-from flask import request, Response, send_file, redirect, url_for
+from flask import Response, send_file, redirect
 
 from backend import app
 from backend.utilities import isURLWebOrLocal
 
 from database.oldInterface import get_db
 
+from backend.api.graphQL import schema
+from flask_graphql import GraphQLView
 
 
 @app.route('/openpage/<int:pageid>', methods=['GET'])
 def servePage(pageid):
     """Redirect to the URL of the requested page""" 
     db = get_db()
-    url = db.execute("SELECT url FROM Page WHERE id=(?)", (pageid,)).fetchone()['url']
+    url = db.execute("""SELECT url FROM Page WHERE id=(?)""", (pageid,)
+                     ).fetchone()['url']
 
     # handle empty url
     if url == '':
@@ -27,8 +28,6 @@ def servePage(pageid):
 
 
 # graph ql fiddle
-from backend.api.graphQL import schema
-from flask_graphql import GraphQLView
 app.add_url_rule(
     '/graphiql',
     view_func=GraphQLView.as_view(
@@ -37,4 +36,3 @@ app.add_url_rule(
         graphiql=True
     )
 )
-

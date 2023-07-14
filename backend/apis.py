@@ -3,7 +3,6 @@ import requests
 
 from flask import request, Response, Blueprint, url_for
 
-from database.oldInterface import get_db, packageRows
 from backend.utilities import isURLWebOrLocal
 
 from backend.api.comment import comment
@@ -39,7 +38,7 @@ def getWebpageTitle():
         if resp.status_code != 200:
             return Response('', status=200)
 
-        workingTitle = ( resp.content.split(b'title>')[1][:-2] ).decode()
+        workingTitle = (resp.content.split(b'title>')[1][:-2]).decode()
 
         return Response(workingTitle, status=200)
 
@@ -50,7 +49,7 @@ def getWebpageTitle():
 @api.route('/addentries', methods=['POST'])
 def addEntries():
     """Form handling for add page form"""
-    formData = json.loads( request.data )
+    formData = json.loads(request.data)
 
     pageAdded = False
 
@@ -63,7 +62,7 @@ def addEntries():
         pageid = json.loads(response.content)['id']
         pageAdded = True
 
-    if len( formData['topics'] ) > 0:
+    if len(formData['topics']) > 0:
         for topic in formData['topics']:
             if type(topic) is str: # treat it as a new topic
                 response = requests.post( url_for('api.topic.all_topics', _external=True), {'name': topic})

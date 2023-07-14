@@ -12,16 +12,21 @@ comment = Blueprint('comment', __name__)
 def page(pageid):
     return processCommentRequest('PageComments', 'pageid', pageid, request)
 
-@comment.route('/topic/<int:topicid>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+
+@comment.route('/topic/<int:topicid>',
+               methods=['GET', 'POST', 'PUT', 'DELETE'])
 def topic(topicid):
     return processCommentRequest('TopicComments', 'topicid', topicid, request)
 
-@comment.route('/relationship/<int:relationshipid>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+
+@comment.route('/relationship/<int:relationshipid>',
+               methods=['GET', 'POST', 'PUT', 'DELETE'])
 def relationship(relationshipid):
-    return processCommentRequest('RelationshipComments', 'relationshipid', relationshipid, request)
+    return processCommentRequest('RelationshipComments', 'relationshipid', 
+                                 relationshipid, request)
 
 
-def processCommentRequest( tableName, colName, elementid, request):
+def processCommentRequest(tableName, colName, elementid, request):
     """Generic utility for processing comment requests"""
     db = get_db()
     if request.method == 'POST' or request.method == 'PUT':
@@ -29,8 +34,9 @@ def processCommentRequest( tableName, colName, elementid, request):
 
     if request.method == 'GET':
         comments = db.execute(
-            "SELECT * FROM {tableName} WHERE {colName}=(?);".format(tableName=tableName, colName=colName),
-             (elementid,)).fetchall()
+                f"SELECT * FROM {tableName} WHERE {colName}=(?);",
+                (elementid,)
+            ).fetchall()
         return packageRows(comments)
 
     if request.method == 'POST':
@@ -51,9 +57,8 @@ def processCommentRequest( tableName, colName, elementid, request):
     if request.method == 'DELETE':
         commentid = request.args['commentid']
         db.execute(
-            "DELETE FROM {tableName} WHERE id=(?);".format(tableName=tableName, colName=colName),
+            "DELETE FROM {tableName} WHERE id=(?);".format(tableName=tableName),
             (commentid,))
 
     db.commit()
     return Response(status=200)
-
