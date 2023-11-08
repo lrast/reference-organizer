@@ -6,7 +6,8 @@ app = Flask(__name__,
             static_folder='../frontend/static'
             )
 app.config.from_prefixed_env()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.root_path[:-7] + app.config['DATABASE_URL']
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + app.root_path[:-7] + \
+                                            app.config['DATABASE_URL']
 
 
 import backend.views

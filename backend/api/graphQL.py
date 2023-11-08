@@ -23,26 +23,40 @@ class PageType(SQLAlchemyObjectType):
     class Meta:
         model = Page
 
-    rightEdges = graphene.List( PagePageEdgeType, relationshipid=graphene.Int(), remoteid=graphene.Int())
-    leftEdges = graphene.List( PagePageEdgeType, relationshipid=graphene.Int(), remoteid=graphene.Int())
+    rightEdges = graphene.List(PagePageEdgeType,
+                               relationshipid=graphene.Int(),
+                               remoteid=graphene.Int()
+                               )
+    leftEdges = graphene.List(PagePageEdgeType,
+                              relationshipid=graphene.Int(),
+                              remoteid=graphene.Int()
+                              )
 
     def resolve_rightEdges(self, info, relationshipid=None, remoteid=None):
-        query = PagePageEdgeType.get_query(info).filter(PagePageAssociation.leftpageid == self.id)
+        query = PagePageEdgeType\
+                            .get_query(info)\
+                            .filter(PagePageAssociation.leftpageid == self.id)
 
         if relationshipid is not None:
-            query = query.filter( PagePageAssociation.relationshipid == relationshipid)
+            query = query.filter(
+                        PagePageAssociation.relationshipid == relationshipid)
         if remoteid is not None:
-            query = query.filter( PagePageAssociation.rightpageid == remoteid)
+            query = query.filter(
+                        PagePageAssociation.rightpageid == remoteid)
 
         return query.all()
 
     def resolve_leftEdges(self, info, relationshipid=None, remoteid=None):
-        query = PagePageEdgeType.get_query(info).filter(PagePageAssociation.rightpageid == self.id)
+        query = PagePageEdgeType.get_query(info).filter(
+                                     PagePageAssociation.rightpageid == self.id
+                                    )
 
         if relationshipid is not None:
-            query = query.filter( PagePageAssociation.relationshipid == relationshipid)
+            query = query.filter(
+                        PagePageAssociation.relationshipid == relationshipid)
         if remoteid is not None:
-            query = query.filter( PagePageAssociation.leftpageid == remoteid)
+            query = query.filter(
+                        PagePageAssociation.leftpageid == remoteid)
 
         return query.all()
 
@@ -80,26 +94,35 @@ class TopicType(SQLAlchemyObjectType):
 
         subtopicIds = map(lambda x: x[0], db.session.query(subtopicsQuery).all())
 
-        grapheneQuery = TopicType.get_query(info).filter(Topic.id.in_(subtopicIds))
+        grapheneQuery = TopicType.get_query(info)\
+                                 .filter(Topic.id.in_(subtopicIds))
 
         return grapheneQuery.all()
 
     def resolve_rightEdges(self, info, relationshipid=None, remoteid=None):
-        query = TopicTopicEdgeType.get_query(info).filter(TopicTopicAssociation.lefttopicid == self.id)
+        query = TopicTopicEdgeType\
+                        .get_query(info)\
+                        .filter(TopicTopicAssociation.lefttopicid == self.id)
 
         if relationshipid is not None:
-            query = query.filter(TopicTopicAssociation.relationshipid == relationshipid)
+            query = query.filter(
+                        TopicTopicAssociation.relationshipid == relationshipid
+                        )
         if remoteid is not None:
-            query = query.filter(TopicTopicAssociation.righttopicid == remoteid)
+            query = query.filter(
+                        TopicTopicAssociation.righttopicid == remoteid
+                        )
 
         return query.all()
 
     def resolve_leftEdges(self, info, relationshipid=None, remoteid=None):
-        query = TopicTopicEdgeType.get_query(info)\
+        query = TopicTopicEdgeType\
+                        .get_query(info)\
                         .filter(TopicTopicAssociation.righttopicid == self.id)
 
         if relationshipid is not None:
-            query = query.filter(TopicTopicAssociation.relationshipid == relationshipid)
+            query = query.filter(
+                        TopicTopicAssociation.relationshipid == relationshipid)
         if remoteid is not None:
             query = query.filter(TopicTopicAssociation.lefttopicid == remoteid)
 
@@ -112,10 +135,12 @@ class RelationshipType(SQLAlchemyObjectType):
 
 
 class Query(graphene.ObjectType):
-    topics = graphene.List(TopicType, id=graphene.Int(),
+    topics = graphene.List(TopicType,
+                           id=graphene.Int(),
                            name=graphene.String(),
                            ids=graphene.List(graphene.Int))
-    pages = graphene.List(PageType, id=graphene.Int(),
+    pages = graphene.List(PageType,
+                          aid=graphene.Int(),
                           name=graphene.String(),
                           ids=graphene.List(graphene.Int))
     relationships = graphene.List(RelationshipType)
@@ -146,9 +171,7 @@ class Query(graphene.ObjectType):
         return query.all()
 
 
-########################################### Utilities ###########################################
-
-
+# Utilities
 schema = graphene.Schema(query=Query)
 
 

@@ -149,13 +149,15 @@ def related_pages(pageid):
 
         if side == 'left':
             db.execute("""
-                INSERT INTO PagePageRelationship(relationshipid, lefttopicid, righttopicid)
-                VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
+                INSERT INTO PagePageRelationship(
+                    relationshipid, lefttopicid, righttopicid)
+                VALUES (?,?,?);""", (relationshipid, relatedpageid, pageid))
 
         if side == 'right':
             db.execute("""
-                INSERT INTO PagePageRelationship(relationshipid, righttopicid, lefttopicid)
-                VALUES (?,?,?);""", (relationshipid, relatedtopicid, topicid) )
+                INSERT INTO PagePageRelationship(
+                    relationshipid, righttopicid, lefttopicid)
+                VALUES (?,?,?);""", (relationshipid, relatedpageid, pageid))
 
 
 @page.route('/<int:pageid>/page/<int:relatedpageid>',

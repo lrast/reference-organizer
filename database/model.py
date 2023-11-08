@@ -15,6 +15,13 @@ class PageTopicAssociation(db.Model):
     topicid = sa.Column(sa.Integer, sa.ForeignKey('Topic.id'))
 
 
+class PageAuthorAssociation(db.Model):
+    __tablename__ = 'PageAuthor'
+    id = sa.Column(sa.Integer, primary_key=True)
+    pageid = sa.Column(sa.Integer, sa.ForeignKey('Page.id'))
+    authorid = sa.Column(sa.Integer, sa.ForeignKey('Author.id'))
+
+
 class TopicTopicAssociation(db.Model):
     __tablename__ = 'TopicTopicRelationship'
     id = sa.Column(sa.Integer, primary_key=True)
@@ -22,8 +29,10 @@ class TopicTopicAssociation(db.Model):
     lefttopicid = sa.Column(sa.Integer, sa.ForeignKey('Topic.id'))
     righttopicid = sa.Column(sa.Integer, sa.ForeignKey('Topic.id'))
 
-    righttopic = orm.relationship('Topic', foreign_keys=[righttopicid], viewonly=True)
-    lefttopic = orm.relationship('Topic', foreign_keys=[lefttopicid], viewonly=True)
+    righttopic = orm.relationship('Topic', foreign_keys=[righttopicid],
+                                  viewonly=True)
+    lefttopic = orm.relationship('Topic', foreign_keys=[lefttopicid],
+                                 viewonly=True)
 
 
 class PagePageAssociation(db.Model):
@@ -33,9 +42,10 @@ class PagePageAssociation(db.Model):
     leftpageid = sa.Column(sa.Integer, sa.ForeignKey('Page.id'))
     rightpageid = sa.Column(sa.Integer, sa.ForeignKey('Page.id'))
 
-    rightpage = orm.relationship('Page', foreign_keys=[rightpageid], viewonly=True)
-    leftpage = orm.relationship('Page', foreign_keys=[leftpageid], viewonly=True)
-
+    rightpage = orm.relationship('Page', foreign_keys=[rightpageid],
+                                 viewonly=True)
+    leftpage = orm.relationship('Page', foreign_keys=[leftpageid],
+                                viewonly=True)
 
 
 # Nodes
@@ -43,18 +53,28 @@ class Page(db.Model):
     __tablename__ = 'Page'
 
     id = sa.Column(sa.Integer, primary_key=True)
-    url = sa.Column( sa.String, unique=True, nullable=False)
-    name = sa.Column( sa.String )
-    dateadded = sa.Column( sa.Date )
+    url = sa.Column(sa.String, unique=True, nullable=False)
+    name = sa.Column(sa.String)
+    date = sa.Column(sa.Date)
+    publishedin = sa.Column(sa.String)
+    dateadded = sa.Column(sa.Date)
 
-    topics = orm.relationship('Topic', secondary=PageTopicAssociation.__table__, back_populates='pages')
+    topics = orm.relationship('Topic',
+                              secondary=PageTopicAssociation.__table__,
+                              back_populates='pages')
     comments = orm.relationship('PageComments', back_populates='page')
+    authors = orm.relationship('Author',
+                               secondary=PageAuthorAssociation.__table__,
+                               back_populates='pages')
 
-    rightPages = orm.relationship('Page', secondary=PagePageAssociation.__table__,
+    rightPages = orm.relationship(
+        'Page',
+        secondary=PagePageAssociation.__table__,
         primaryjoin=(PagePageAssociation.leftpageid == id),
         secondaryjoin=(PagePageAssociation.rightpageid == id),
-        backref = 'leftPages',
+        backref='leftPages',
         )
+
 
 class Topic(db.Model):
     __tablename__ = 'Topic'
@@ -62,14 +82,19 @@ class Topic(db.Model):
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String, unique=True, nullable=False)
 
-    pages = orm.relationship('Page', secondary=PageTopicAssociation.__table__, back_populates='topics')
+    pages = orm.relationship('Page',
+                             secondary=PageTopicAssociation.__table__,
+                             back_populates='topics')
     comments = orm.relationship('TopicComments', back_populates='topic')
 
-    rightTopics = orm.relationship('Topic', secondary=TopicTopicAssociation.__table__,
+    rightTopics = orm.relationship(
+        'Topic',
+        secondary=TopicTopicAssociation.__table__,
         primaryjoin=(TopicTopicAssociation.lefttopicid == id),
         secondaryjoin=(TopicTopicAssociation.righttopicid == id),
-        backref = 'leftTopics',
+        backref='leftTopics',
         )
+
 
 class Relationship(db.Model):
     __tablename__ = 'Relationship'
@@ -79,9 +104,21 @@ class Relationship(db.Model):
     nodetype = sa.Column(sa.String, nullable=False)
     reversename = sa.Column(sa.String, nullable=False)
 
-    comments = orm.relationship('RelationshipComments', back_populates='relationship')
+    comments = orm.relationship('RelationshipComments',
+                                back_populates='relationship')
 
 
+class Author(db.Model):
+    __tablename__ = 'Author'
+
+    id = sa.Column(sa.Integer, primary_key=True)
+    first = sa.Column(sa.String, unique=True, nullable=False)
+    last = sa.Column(sa.String, unique=True, nullable=False)
+    middle = sa.Column(sa.String, unique=True, nullable=False)
+
+    pages = orm.relationship('Page',
+                             secondary=PageAuthorAssociation.__table__,
+                             back_populates='authors')
 
 
 # comments tables
@@ -116,4 +153,3 @@ class RelationshipComments(db.Model):
     commentdata = sa.Column(sa.LargeBinary)
 
     relationship = orm.relationship('Relationship', back_populates='comments')
-

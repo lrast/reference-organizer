@@ -1,9 +1,8 @@
 # database migrations. Handwritten for now.
 
-## keywords:
-## 1) topics - these are user defined tages
-## 2) pages - these are user entered resources
-
+# keywords:
+# 1) topics - these are user defined tages
+# 2) pages - these are user entered resources
 
 
 import os
@@ -25,7 +24,7 @@ def makeAuthorTable():
             first TEXT,
             last TEXT,
             middle TEXT);
-        """ )
+        """)
     cur.execute("""
         CREATE TABLE IF NOT EXISTS PageAuthor (
             id INTEGER PRIMARY KEY,
@@ -34,7 +33,7 @@ def makeAuthorTable():
             FOREIGN KEY( pageid ) REFERENCES Page(id),
             FOREIGN KEY( authorid ) REFERENCES Author(id)
             );
-        """ )
+        """)
     conn.commit()
     conn.close()
 
@@ -57,7 +56,8 @@ def remakePageTable():
         );
         """)
     cur.execute("""
-        INSERT INTO Page(id, url, name, dateadded) SELECT id, url, name, dateadded FROM Page_temp;
+        INSERT INTO Page(id, url, name, dateadded)
+        SELECT id, url, name, dateadded FROM Page_temp;
         """)
     cur.execute("""DROP TABLE Page_temp;""")
     conn.commit()
@@ -65,7 +65,9 @@ def remakePageTable():
 
 
 def addRelationshipReversename():
-    """recreates the Page Topic table to have unique (rel, left, right) triples"""
+    """
+    recreates the Page Topic table to have unique (rel, left, right) triples
+    """
     conn = db.connect(dbURL)
     cur = conn.cursor()
     cur.execute("""
@@ -79,8 +81,8 @@ def addPageDateAddedField():
     """I think its really required to have a date added field for the pages"""
     conn = db.connect(dbURL)
     cur = conn.cursor()
-    conn.execute("""ALTER TABLE Page ADD 'dateadded' TEXT;""")
-    conn.execute("""
+    cur.execute("""ALTER TABLE Page ADD 'dateadded' TEXT;""")
+    cur.execute("""
         UPDATE Page SET dateadded=(SELECT DATE())
         WHERE dateadded IS NULL;""")
     conn.commit()
@@ -155,7 +157,9 @@ def makePagePageRelationshipTable():
 
 
 def addRelationshipNodeType():
-    """recreates the Page Topic table to have unique (rel, left, right) triples"""
+    """
+    recreates the Page Topic table to have unique (rel, left, right) triples
+    """
     conn = db.connect(dbURL)
     cur = conn.cursor()
     cur.execute("""
@@ -166,7 +170,9 @@ def addRelationshipNodeType():
 
 
 def remakeTopicTopic():
-    """recreates the Page Topic table to have unique (rel, left, right) triples"""
+    """
+    recreates the Page Topic table to have unique (rel, left, right) triples
+    """
     conn = db.connect(dbURL)
     cur = conn.cursor()
     cur.execute("""
@@ -201,7 +207,6 @@ def remakePageTopic():
         """)
     conn.commit()
     conn.close()
-
 
 
 def addPageName():
@@ -244,7 +249,6 @@ def makeInitialTables():
         );
         """)
 
-
     # page to topics relationships
     cur.execute("""
         CREATE TABLE IF NOT EXISTS PageTopic(
@@ -270,14 +274,3 @@ def makeInitialTables():
 
     conn.commit()
     conn.close()
-
-
-
-
-
-
-
-
-
-
-
