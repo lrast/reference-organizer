@@ -1,8 +1,13 @@
 # Visual Reference Organizer
 
-A lightweight and flexible reference management tool focused on personal organization and curation of your reference library.
+A flexible and visual reference management tool, focused on personal organization and curation of your reference library.
 
-The organizational structure is simple: references are tagged with one or more topic labels. Organization is then done at the level of topics, which can be organized into multi-tree hierarchies. This can be thought of as capturing the ideas of 'tags' and 'directories' for the files, while allowing for additional flexibility.
+The aim of this project is to address the problem of the volume and noise level of information that is we are inundated with by providing tools to organize that information.
+Eventually, the goal is to have curated libraries be shareable.
+
+The organizational structure is simple: references can be related to each other, for example through citation, or tagged with one or more topic labels.
+The topic labels themselves can also be organized into multi-tree hierarchies.
+This topic based organization can capture the ideas of 'tags' and 'directories' for the files, while allowing for additional flexibility.
 
 
 ## Technologies
