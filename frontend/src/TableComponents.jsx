@@ -107,13 +107,13 @@ function Sidebar({searchString, setSearchString, setFilterValues} ) {
   filterBankRef.current = filterBank
 
   const removeFilterByKey = (key) => {
-    setFilterComponents( filterComponentsRef.current.filter( (item) => (item.key != key) ) )
-    setFilterBank( filterBankRef.current.filter( (i) => (i.filterId != key) ) )
+    setFilterComponents( filterComponentsRef.current.filter( (item) => (item.key !== key) ) )
+    setFilterBank( filterBankRef.current.filter( (i) => (i.filterId !== key) ) )
   }
 
   const updateFilterBank = (filterElement) => {
     setFilterBank( 
-      [...filterBankRef.current.filter( (i) => (i.filterId != filterElement.filterId) ), 
+      [...filterBankRef.current.filter( (i) => (i.filterId !== filterElement.filterId) ), 
         filterElement ] 
     )
   }

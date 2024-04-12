@@ -6,11 +6,8 @@ import { Accordion, AccordionSummary, AccordionDetails,
         ToggleButtonGroup, ToggleButton} from '@mui/material';
 
 import {EditPanel, AutofillField, TopicCards, AddAndRemoveOptions, CommentsPanel} from '../myComponents';
-
 import PagesTable from '../pagesTable'
-
 import {TopicContext, PageContext} from '../DataContext'
-
 import {OpenPageLink} from '../utilities'
 
 

@@ -53,7 +53,8 @@ def info(topicid):
                     }"""
 
         subquery = request.args.get('query', default_subquery)
-        gql_query = '{ topics (id: %s)' % topicid + subquery + '}'
+        gql_query = f'{{topics (id: {topicid}) {subquery} }}'
+
         return execute_gql_query(gql_query, lambda x: x['topics'][0])
 
     if request.method == 'PUT':

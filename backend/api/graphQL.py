@@ -140,7 +140,7 @@ class Query(graphene.ObjectType):
                            name=graphene.String(),
                            ids=graphene.List(graphene.Int))
     pages = graphene.List(PageType,
-                          aid=graphene.Int(),
+                          id=graphene.Int(),
                           name=graphene.String(),
                           ids=graphene.List(graphene.Int))
     relationships = graphene.List(RelationshipType)

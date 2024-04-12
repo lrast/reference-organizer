@@ -8,3 +8,4 @@ database/contents.db
 readme.html
 env/*
 .DS_Store
+*.db

@@ -4,8 +4,6 @@ import {Sidebar, TableBody} from './TableComponents'
 
 import {PageContext, TableType} from './DataContext'
 
-import {backendURL} from './config'
-
 import {OpenPageLink} from './utilities'
 
 function PagesTable() {
